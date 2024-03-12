@@ -18,6 +18,4 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-// Salut
-
 export default router;
