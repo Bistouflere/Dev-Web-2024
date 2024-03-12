@@ -1,7 +1,7 @@
 function Root() {
   return (
     <main>
-      <h1>Tournaments Home</h1>
+      <h1>HomePage</h1>
     </main>
   );
 }
