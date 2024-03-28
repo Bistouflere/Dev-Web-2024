@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Network } from "lucide-react";
-
+//export de la fonction MainNav
 export function MainNav() {
   const router = useRouterState();
 
