@@ -8,6 +8,8 @@ import { createRouter } from "@tanstack/react-router";
 import React from "react";
 import ReactDOM from "react-dom/client";
 
+// Hello je suis un commentaire :)
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
