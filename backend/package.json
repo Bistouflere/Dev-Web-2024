@@ -9,7 +9,8 @@
     "migrate": "npm run migration:generate && npm run migration:push",
     "migration:generate": "drizzle-kit generate:pg --schema=./src/db/schema.ts",
     "migration:push": "node -r esbuild-register src/db/migrate.ts",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "studio": "drizzle-kit studio"
   },
   "keywords": [],
   "author": "",
