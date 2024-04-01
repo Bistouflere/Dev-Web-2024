@@ -6,8 +6,8 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "./ui/pagination";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+} from "@/components/ui/pagination";
+import { useSearchParams } from "react-router-dom";
 
 export const DOTS = "...";
 
@@ -61,12 +61,9 @@ const generatePagination = (
 };
 
 export default function UrlPagination({ totalPages }: { totalPages: number }) {
-  const searchParams = useSearch({
-    strict: false,
-  }) as Record<string, string>;
-  const navigate = useNavigate({});
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentPage = Number(searchParams.get("page")) || 1;
 
-  const currentPage = Number(searchParams.page) || 1;
   const allPages = generatePagination(currentPage, totalPages);
 
   return (
@@ -76,27 +73,27 @@ export default function UrlPagination({ totalPages }: { totalPages: number }) {
           <PaginationPrevious
             className="cursor-pointer"
             onClick={() => {
-              navigate({
-                search: {
-                  page: Math.max(currentPage - 1, 1),
-                  query: searchParams.query,
-                },
-              });
+              searchParams.set("page", Math.max(currentPage - 1, 1).toString());
+              setSearchParams(searchParams);
             }}
           />
         </PaginationItem>
         {allPages!.map((page, index) => {
           if (page === DOTS) {
-            return <PaginationEllipsis key={index} />;
+            return (
+              <PaginationEllipsis key={index} className="hidden sm:flex" />
+            );
           }
 
           return (
-            <PaginationItem key={index} className="cursor-pointer">
+            <PaginationItem
+              key={index}
+              className="cursor-pointer hidden sm:flex"
+            >
               <PaginationLink
                 onClick={() => {
-                  navigate({
-                    search: { page: page, query: searchParams.query },
-                  });
+                  searchParams.set("page", page.toString());
+                  setSearchParams(searchParams);
                 }}
                 isActive={currentPage === page}
               >
@@ -108,14 +105,13 @@ export default function UrlPagination({ totalPages }: { totalPages: number }) {
         <PaginationItem>
           <PaginationNext
             className="cursor-pointer"
-            onClick={() =>
-              navigate({
-                search: {
-                  page: Math.min(currentPage + 1, totalPages),
-                  query: searchParams.query,
-                },
-              })
-            }
+            onClick={() => {
+              searchParams.set(
+                "page",
+                Math.min(currentPage + 1, totalPages).toString(),
+              );
+              setSearchParams(searchParams);
+            }}
           />
         </PaginationItem>
       </PaginationContent>

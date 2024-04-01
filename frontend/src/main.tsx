@@ -1,61 +1,53 @@
-import { InnerApp } from "./app";
 import "./index.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { routeTree } from "@/routeTree.gen";
-import { Auth0Provider } from "@auth0/auth0-react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createRouter } from "@tanstack/react-router";
+import DashboardLayout from "./layouts/dashboard-layout";
+import RootLayout from "./layouts/root-layout";
+import NotFoundPage from "./not-found";
+import IndexPage from "./routes";
+import DashboardPage from "./routes/dashboard/index";
+import TeamPage from "./routes/dashboard/teams";
+import SignInPage from "./routes/sign-in";
+import SignUpPage from "./routes/sign-up";
+import TeamsPage from "./routes/teams";
+import TeamProfile from "./routes/teams.teamId";
+import TournamentsPage from "./routes/tournaments";
+import TournamentProfile from "./routes/tournaments.tournamentId";
+import UsersPage from "./routes/users";
+import UserProfile from "./routes/users.userId";
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      staleTime: 1000 * 60 * 5,
-    },
+const router = createBrowserRouter([
+  {
+    element: <RootLayout />,
+    children: [
+      { path: "/", element: <IndexPage /> },
+      { path: "/teams", element: <TeamsPage /> },
+      { path: "/teams/:teamId", element: <TeamProfile /> },
+      { path: "/tournaments", element: <TournamentsPage /> },
+      { path: "/tournaments/:tournamentId", element: <TournamentProfile /> },
+      { path: "/users", element: <UsersPage /> },
+      { path: "/users/:userId", element: <UserProfile /> },
+      { path: "/sign-in", element: <SignInPage /> },
+      { path: "/sign-up", element: <SignUpPage /> },
+      {
+        element: <DashboardLayout />,
+        path: "dashboard",
+        children: [
+          { path: "/dashboard", element: <DashboardPage /> },
+          { path: "/dashboard/teams", element: <TeamPage /> },
+        ],
+      },
+      {
+        path: "*",
+        element: <NotFoundPage />,
+      },
+    ],
   },
-});
+]);
 
-const router = createRouter({
-  routeTree,
-  context: {
-    queryClient,
-    auth: undefined!,
-  },
-
-  defaultPreload: "intent",
-  defaultPreloadStaleTime: 0,
-});
-
-// Register the router instance for type safety
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
-  }
-}
-
-const rootElement = document.getElementById("root")!;
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
-  root.render(
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-          <Auth0Provider
-            domain={import.meta.env.VITE_AUTH0_DOMAIN!}
-            clientId={import.meta.env.VITE_AUTH0_CLIENT_ID!}
-            authorizationParams={{
-              redirect_uri: window.location.origin,
-              audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-            }}
-            useRefreshTokens={true}
-            cacheLocation="localstorage"
-          >
-            <InnerApp router={router} />
-          </Auth0Provider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </React.StrictMode>,
-  );
-}
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>,
+);

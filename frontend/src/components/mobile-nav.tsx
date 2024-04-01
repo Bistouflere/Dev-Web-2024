@@ -1,77 +1,92 @@
-import { Button } from "./ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { cn } from "@/lib/utils";
-import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { Link, useRouterState } from "@tanstack/react-router";
-import { MenuIcon, Network } from "lucide-react";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { navigationConfig } from "@/config";
+import { useAuth } from "@clerk/clerk-react";
+import { Menu, Network } from "lucide-react";
+import React, { useState } from "react";
+import { NavLink } from "react-router-dom";
 
 export function MobileNav() {
-  const router = useRouterState();
+  const { userId } = useAuth();
   const [open, setOpen] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
-        >
-          <MenuIcon />
-          <span className="sr-only">Toggle Menu</span>
+        <Button variant="outline" size="icon" className="shrink-0 md:hidden">
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Toggle navigation menu</span>
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="pr-0">
-        <Link
-          to="/"
-          className="flex items-center"
-          onClick={() => setOpen(false)}
-        >
-          <Network className="mr-2 h-4 w-4" />
-          <span className="font-bold">MadBracket</span>
-        </Link>
-        <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
-          <div className="flex flex-col space-y-3">
-            <Link
-              to="/about"
-              className={cn(
-                "transition-colors hover:text-foreground/80",
-                router.location.pathname?.startsWith("/about")
-                  ? "text-foreground"
-                  : "text-foreground/60",
+        <nav className="grid gap-6 text-lg font-medium">
+          <NavLink
+            to="/"
+            className="flex items-center gap-2 text-lg font-semibold"
+            onClick={() => setOpen(false)}
+          >
+            <Network className="h-6 w-6" />
+            <span className="inline-block font-bold">MadBracket</span>
+          </NavLink>
+          <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
+            <div className="flex flex-col space-y-3">
+              {navigationConfig.main?.map(
+                (item) =>
+                  item.path && (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      end
+                      onClick={() => setOpen(false)}
+                      className={({ isActive }) => {
+                        return isActive
+                          ? "hover:text-foreground"
+                          : "text-muted-foreground hover:text-foreground";
+                      }}
+                    >
+                      {item.title}
+                    </NavLink>
+                  ),
               )}
-              onClick={() => setOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              to="/users"
-              search={{ page: 1, query: "" }}
-              className={cn(
-                "transition-colors hover:text-foreground/80",
-                router.location.pathname?.startsWith("/users")
-                  ? "text-foreground"
-                  : "text-foreground/60",
-              )}
-              onClick={() => setOpen(false)}
-            >
-              Users
-            </Link>
-            <Link
-              to="/tournaments"
-              search={{ page: 1, query: "" }}
-              className={cn(
-                "transition-colors hover:text-foreground/80",
-                router.location.pathname?.startsWith("/tournaments")
-                  ? "text-foreground"
-                  : "text-foreground/60",
-              )}
-              onClick={() => setOpen(false)}
-            >
-              Tournaments
-            </Link>
-          </div>
-        </ScrollArea>
+            </div>
+            {userId && (
+              <div className="flex flex-col space-y-2">
+                {navigationConfig.side?.map((item, index) => (
+                  <div key={index} className="flex flex-col space-y-3 pt-6">
+                    <h4 className="font-medium">{item.title}</h4>
+                    {item?.items?.length &&
+                      item.items.map((item) => (
+                        <React.Fragment key={item.path}>
+                          {item.path ? (
+                            <NavLink
+                              to={item.path}
+                              onClick={() => setOpen(false)}
+                              end
+                              className={({ isActive }) => {
+                                return isActive
+                                  ? "hover:text-foreground"
+                                  : "text-muted-foreground hover:text-foreground";
+                              }}
+                            >
+                              {item.title}
+                              {item.label && (
+                                <span className="ml-2 rounded-md bg-[#adfa1d] px-1.5 py-0.5 text-xs leading-none text-[#000000] no-underline group-hover:no-underline">
+                                  {item.label}
+                                </span>
+                              )}
+                            </NavLink>
+                          ) : (
+                            item.title
+                          )}
+                        </React.Fragment>
+                      ))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </nav>
       </SheetContent>
     </Sheet>
   );

@@ -1,12 +1,21 @@
 {
+  "name": "madbracket",
+  "version": "1.0.0",
+  "description": "",
   "scripts": {
-    "all": "concurrently -n \"BACK,FRONT\" -c \"yellow,blue\" \"npm run start-backend\" \"npm run start-frontend\"",
-    "start-backend": "cd backend && npm run dev",
-    "start-frontend": "cd frontend && npm run dev",
+    "dev": "concurrently -n \"BACK,FRONT\" -c \"yellow,blue\" \"npm run dev-backend\" \"npm run dev-frontend\"",
+    "dev-backend": "cd backend && npm run dev",
+    "dev-frontend": "cd frontend && npm run dev",
+    "build": "concurrently -n \"BACK,FRONT\" -c \"yellow,blue\" \"npm run build-backend\" \"npm run build-frontend\"",
+    "build-backend": "cd backend && npm run build",
+    "build-frontend": "cd frontend && npm run build",
     "install-all": "npm i && concurrently -n \"BACK,FRONT\" -c \"yellow,blue\" \"npm run install-backend\" \"npm run install-frontend\"",
-    "install-backend": "cd backend && npm install && cd ..",
-    "install-frontend": "cd frontend && npm install && cd .."
+    "install-backend": "cd backend && npm install",
+    "install-frontend": "cd frontend && npm install"
   },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
   "devDependencies": {
     "concurrently": "^8.2.2"
   }

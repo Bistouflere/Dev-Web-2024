@@ -1,59 +1,17 @@
-// import { Button } from "@/components/ui/button";
-// import { useAuth0 } from "@auth0/auth0-react";
-import { createFileRoute } from "@tanstack/react-router";
+import Balancer from "react-wrap-balancer";
 
-// import axios, { AxiosError } from "axios";
-// import { useState } from "react";
-
-export const Route = createFileRoute("/")({
-  component: IndexComponent,
-});
-
-function IndexComponent() {
-  // const { getAccessTokenSilently, isLoading } = useAuth0();
-  // const [data, setData] = useState<string | null>(null);
-  // const [loading, setLoading] = useState(false);
-
-  // const fetchData = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const token = await getAccessTokenSilently().catch(() => null);
-  //     const response = await axios.get("/api/authorized", {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-
-  //     setData(response.data);
-  //   } catch (error) {
-  //     if (error instanceof AxiosError && error.response) {
-  //       setData("You are not authorized...");
-  //     } else {
-  //       console.error(error);
-  //     }
-  //   }
-  //   setLoading(false);
-  // };
-
+export default function IndexPage() {
   return (
-    <div className="container max-w-screen-2xl flex-1 py-4">
-      <div className="flex max-w-[980px] flex-col items-start gap-2">
-        <h1 className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
+    <div className="container relative">
+      <section className="mx-auto flex max-w-[980px] flex-col items-center gap-2 py-8 md:py-12 md:pb-8 lg:py-24 lg:pb-20">
+        <h1 className="text-center text-3xl font-bold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1]">
           Welcome to MadBracket
         </h1>
-        <p className="max-w-[700px] text-lg text-muted-foreground">
+        <Balancer className="max-w-[750px] text-center text-lg text-muted-foreground sm:text-xl">
           Your one-stop shop for all tournament needs. Create, manage, and join
           tournaments with ease.
-        </p>
-        {/* <div>
-          <Button onClick={fetchData} disabled={isLoading || loading}>
-            {loading ? "Loading..." : "Test Secure API Call"}
-          </Button>
-          <p>
-            <strong>Response:</strong> {data}
-          </p>
-        </div> */}
-      </div>
+        </Balancer>
+      </section>
     </div>
   );
 }
