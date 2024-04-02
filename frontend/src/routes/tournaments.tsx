@@ -3,7 +3,7 @@ import { Search } from "@/components/search";
 import { TableLoader } from "@/components/table-loader";
 import { TournamentList } from "@/components/tournaments/list";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Tournament } from "@/types/type";
+import { Tournament, TournamentsAPIResponse } from "@/types/type";
 import {
   keepPreviousData,
   queryOptions,
@@ -40,9 +40,11 @@ async function fetchCount(query: string): Promise<number> {
 async function fetchTournaments(
   query: string,
   page: number,
-): Promise<Tournament[]> {
+): Promise<TournamentsAPIResponse[]> {
   return axios
-    .get<Tournament[]>(`/api/tournaments?page=${page}&query=${query}`)
+    .get<
+      TournamentsAPIResponse[]
+    >(`/api/tournaments?page=${page}&query=${query}`)
     .then((res) => res.data);
 }
 
@@ -63,6 +65,7 @@ export default function TournamentsPage() {
     startTournamentIndex + TOURNAMENT_PER_PAGE - 1,
     countQuery.data || 0,
   );
+  console.log(tournamentsQuery.data);
   return (
     <div className="container relative">
       <div className="bg-[url('/blurry.svg')] bg-no-repeat bg-center bg-origin-content bg-cover">
@@ -86,7 +89,7 @@ export default function TournamentsPage() {
           tournamentsQuery.isFetching ? (
             <TableLoader count={TOURNAMENT_PER_PAGE} />
           ) : (
-            <TournamentList tournaments={tournamentsQuery.data || []} />
+            <TournamentList response={tournamentsQuery.data || []} />
           )}
         </CardContent>
         <CardFooter>

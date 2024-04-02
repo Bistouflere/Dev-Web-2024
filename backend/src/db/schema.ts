@@ -142,7 +142,7 @@ export const tournaments = pgTable("tournaments", {
   slots: integer("slots").default(16),
   cash_prize: decimal("cash_prize", { precision: 10, scale: 2 }),
   team_size: integer("team_size").default(1),
-  loser_bracket: boolean("loser_bracket").default(false),
+  looser_bracket: boolean("looser_bracket").default(false),
   start_date: timestamp("start_date"),
   end_date: timestamp("end_date"),
   created_at: timestamp("created_at").defaultNow(),
