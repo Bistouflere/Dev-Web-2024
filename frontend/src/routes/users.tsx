@@ -15,7 +15,7 @@ import Balancer from "react-wrap-balancer";
 
 function countOptions(query: string) {
   return queryOptions({
-    queryKey: ["users", query],
+    queryKey: ["count_users", query],
     queryFn: () => fetchCount(query),
     placeholderData: keepPreviousData,
   });

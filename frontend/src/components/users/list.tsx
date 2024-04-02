@@ -58,14 +58,12 @@ export function UserList({ response }: { response: UsersAPIResponse[] }) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuItem>
-                    <Link to={`/users/${response.users.username}`}>
-                      View Profile
-                    </Link>
+                    <Link to={`/users/${response.users.id}`}>View Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => {
-                      console.log(`Added Friend ${response.users.username}`);
+                      console.log(`Added Friend ${response.users.id}`);
                     }}
                   >
                     Add Friend
