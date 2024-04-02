@@ -81,7 +81,7 @@ export default function UsersPage() {
           usersQuery.isFetching ? (
             <TableLoader count={USERS_PER_PAGE} />
           ) : (
-            <UserList users={usersQuery.data || []} />
+            <UserList data={usersQuery.data || []} />
           )}
         </CardContent>
         <CardFooter>
