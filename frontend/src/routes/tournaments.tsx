@@ -3,7 +3,7 @@ import { Search } from "@/components/search";
 import { TableLoader } from "@/components/table-loader";
 import { TournamentList } from "@/components/tournaments/list";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Tournament, TournamentsAPIResponse } from "@/types/type";
+import { TournamentsAPIResponse } from "@/types/type";
 import {
   keepPreviousData,
   queryOptions,

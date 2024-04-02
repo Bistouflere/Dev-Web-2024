@@ -53,10 +53,10 @@ export const followers = pgTable(
   {
     user_id: integer("user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     follows_user_id: integer("follows_user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
   },
   (followers) => ({
     pk: primaryKey({ columns: [followers.user_id, followers.follows_user_id] }),
@@ -104,10 +104,10 @@ export const teamAdmins = pgTable(
   {
     team_id: integer("team_id")
       .notNull()
-      .references(() => teams.id),
+      .references(() => teams.id, { onDelete: "cascade" }),
     user_id: integer("user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
   },
   (teamAdmins) => ({
     pk: primaryKey({ columns: [teamAdmins.team_id, teamAdmins.user_id] }),
@@ -133,10 +133,10 @@ export const tournaments = pgTable("tournaments", {
   description: text("description"),
   image_url: text("image_url"),
   game_id: integer("game_id")
-    .references(() => games.id)
+    .references(() => games.id, { onDelete: "cascade" })
     .notNull(),
   format_id: integer("format_id")
-    .references(() => formats.id)
+    .references(() => formats.id, { onDelete: "cascade" })
     .notNull(),
   public: boolean("public").default(true),
   slots: integer("slots").default(16),
@@ -169,10 +169,10 @@ export const tournamentAdmins = pgTable(
   {
     tournament_id: integer("tournament_id")
       .notNull()
-      .references(() => tournaments.id),
+      .references(() => tournaments.id, { onDelete: "cascade" }),
     user_id: integer("user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
   },
   (tournamentAdmins) => ({
     pk: primaryKey({
