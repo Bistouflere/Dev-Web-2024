@@ -18,7 +18,9 @@ import { User } from "@/types/type";
 import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export function UserList({ users }: { users: User[] }) {
+export function UserList({ data }: { data: any[] }) {
+  console.log(data[0].users)
+
   return (
     <Table>
       <TableHeader>
@@ -34,17 +36,17 @@ export function UserList({ users }: { users: User[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {users.map((user) => (
-          <TableRow key={user.id}>
+        {data.map((data: any) => (
+          <TableRow key={data.users.id}>
             <TableCell className="hidden sm:table-cell">
               <img
                 className="aspect-square rounded-md object-cover"
-                src={user.image_url}
-                alt={user.username}
+                src={data.users.image_url}
+                alt={data.users.username}
               />
             </TableCell>
-            <TableCell className="font-medium">{user.username}</TableCell>
-            <TableCell>{user.email_address}</TableCell>
+            <TableCell className="font-medium">{data.users.username}</TableCell>
+            <TableCell>{data.users.email_address}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -56,12 +58,12 @@ export function UserList({ users }: { users: User[] }) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuItem>
-                    <Link to={`/users/${user.username}`}>View Profile</Link>
+                    <Link to={`/users/${data.users.username}`}>View Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => {
-                      console.log(`Added Friend ${user.username}`);
+                      console.log(`Added Friend ${data.users.username}`);
                     }}
                   >
                     Add Friend

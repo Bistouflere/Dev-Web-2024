@@ -51,27 +51,27 @@ export const userRelations = relations(users, ({ one, many }) => ({
 export const followers = pgTable(
   "followers",
   {
-    userId: integer("user_id")
+    user_id: integer("user_id")
       .notNull()
       .references(() => users.id),
-    followsUserId: integer("follows_user_id")
+    follows_user_id: integer("follows_user_id")
       .notNull()
       .references(() => users.id),
   },
   (followers) => ({
-    pk: primaryKey({ columns: [followers.userId, followers.followsUserId] }),
+    pk: primaryKey({ columns: [followers.user_id, followers.follows_user_id] }),
   }),
 );
 
 // Followers Relations
 export const followersRelations = relations(followers, ({ one }) => ({
   user: one(users, {
-    fields: [followers.userId],
+    fields: [followers.user_id],
     references: [users.id],
     relationName: "user_followers",
   }),
-  followsUser: one(users, {
-    fields: [followers.followsUserId],
+  follows_user: one(users, {
+    fields: [followers.follows_user_id],
     references: [users.id],
     relationName: "user_follows",
   }),
@@ -102,26 +102,26 @@ export const teamRelations = relations(teams, ({ one, many }) => ({
 export const teamAdmins = pgTable(
   "team_admins",
   {
-    teamId: integer("team_id")
+    team_id: integer("team_id")
       .notNull()
       .references(() => teams.id),
-    userId: integer("user_id")
+    user_id: integer("user_id")
       .notNull()
       .references(() => users.id),
   },
   (teamAdmins) => ({
-    pk: primaryKey({ columns: [teamAdmins.teamId, teamAdmins.userId] }),
+    pk: primaryKey({ columns: [teamAdmins.team_id, teamAdmins.user_id] }),
   }),
 );
 
 // TeamAdmins Relations
 export const teamAdminsRelations = relations(teamAdmins, ({ one }) => ({
   team: one(teams, {
-    fields: [teamAdmins.teamId],
+    fields: [teamAdmins.team_id],
     references: [teams.id],
   }),
   user: one(users, {
-    fields: [teamAdmins.userId],
+    fields: [teamAdmins.user_id],
     references: [users.id],
   }),
 }));
@@ -132,10 +132,15 @@ export const tournaments = pgTable("tournaments", {
   name: varchar("name").unique().notNull(),
   description: text("description"),
   image_url: text("image_url"),
-  game_id: integer("game_id").references(() => games.id),
-  format_id: integer("format_id").references(() => formats.id),
+  game_id: integer("game_id")
+    .references(() => games.id)
+    .notNull(),
+  format_id: integer("format_id")
+    .references(() => formats.id)
+    .notNull(),
   public: boolean("public").default(true),
   slots: integer("slots").default(16),
+  cash_prize: decimal("cash_prize", { precision: 10, scale: 2 }),
   team_size: integer("team_size").default(1),
   loser_bracket: boolean("loser_bracket").default(false),
   start_date: timestamp("start_date"),
@@ -162,16 +167,16 @@ export const tournamentRelations = relations(tournaments, ({ one, many }) => ({
 export const tournamentAdmins = pgTable(
   "tournament_admins",
   {
-    tournamentId: integer("tournament_id")
+    tournament_id: integer("tournament_id")
       .notNull()
       .references(() => tournaments.id),
-    userId: integer("user_id")
+    user_id: integer("user_id")
       .notNull()
       .references(() => users.id),
   },
   (tournamentAdmins) => ({
     pk: primaryKey({
-      columns: [tournamentAdmins.tournamentId, tournamentAdmins.userId],
+      columns: [tournamentAdmins.tournament_id, tournamentAdmins.user_id],
     }),
   }),
 );
@@ -181,11 +186,11 @@ export const tournamentAdminsRelations = relations(
   tournamentAdmins,
   ({ one }) => ({
     tournament: one(tournaments, {
-      fields: [tournamentAdmins.tournamentId],
+      fields: [tournamentAdmins.tournament_id],
       references: [tournaments.id],
     }),
     user: one(users, {
-      fields: [tournamentAdmins.userId],
+      fields: [tournamentAdmins.user_id],
       references: [users.id],
     }),
   }),

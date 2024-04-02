@@ -1,6 +1,7 @@
 import { db } from "../db/index";
-import { users } from "../db/schema";
+import { followers, teams, users } from "../db/schema";
 import { and, asc, count, eq, ilike, or, sql, sum } from "drizzle-orm";
+import { on } from "events";
 import express, { Request, Response, Router } from "express";
 
 const router: Router = express.Router();
@@ -41,7 +42,7 @@ router.get("/count", async (req: Request, res: Response) => {
 
 // http://localhost:3000/api/users?query=John&page=1
 // or
-// http://localhost:3000/api/users?id=user_123456
+// http://localhost:3000/api/users?id=1
 
 router.get("/", async (req: Request, res: Response) => {
   const { page, query, id } = req.query;
@@ -53,6 +54,8 @@ router.get("/", async (req: Request, res: Response) => {
       const result = await db
         .select()
         .from(users)
+        .leftJoin(followers, eq(users.id, followers.user_id))
+        .leftJoin(teams, eq(users.team_id, teams.id))
         .where(eq(users.id, Number(id)));
       return res.status(200).json(result[0]);
     } catch (error: any) {
@@ -67,6 +70,8 @@ router.get("/", async (req: Request, res: Response) => {
       const result = await db
         .select()
         .from(users)
+        .leftJoin(followers, eq(users.id, followers.user_id))
+        .leftJoin(teams, eq(users.team_id, teams.id))
         .orderBy(asc(users.username))
         .where(
           or(
@@ -83,6 +88,8 @@ router.get("/", async (req: Request, res: Response) => {
       const result = await db
         .select()
         .from(users)
+        .leftJoin(followers, eq(users.id, followers.user_id))
+        .leftJoin(teams, eq(users.team_id, teams.id))
         .orderBy(asc(users.username))
         .limit(NUMBER_OF_USERS_PER_PAGE)
         .offset(offset);

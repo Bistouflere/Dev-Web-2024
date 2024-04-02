@@ -1,5 +1,6 @@
 import protectedRouter from "./routes/protected";
 import testRouter from "./routes/test";
+import tournamentsRouter from "./routes/tournaments";
 import usersRouter from "./routes/users";
 import webhooksRouter from "./routes/webhooks";
 import { StrictAuthProp } from "@clerk/clerk-sdk-node";
@@ -19,6 +20,7 @@ app.use("/api/test", testRouter);
 app.use("/api/webhooks", webhooksRouter);
 app.use("/api/protected", protectedRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/tournaments", tournamentsRouter);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
   console.error(err.stack);
