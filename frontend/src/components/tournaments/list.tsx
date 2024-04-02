@@ -14,39 +14,43 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UsersAPIResponse } from "@/types/type";
+import { TournamentsAPIResponse } from "@/types/type";
 import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export function UserList({ response }: { response: UsersAPIResponse[] }) {
+export function TournamentList({
+  response,
+}: {
+  response: TournamentsAPIResponse[];
+}) {
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead className="hidden w-[100px] sm:table-cell">
-            <span className="sr-only">User Avatar</span>
+            <span className="sr-only">Tournament Avatar</span>
           </TableHead>
-          <TableHead>Username</TableHead>
-          <TableHead>Email Adresse</TableHead>
+          <TableHead>Name</TableHead>
+          <TableHead>Cashprize</TableHead>
           <TableHead>
             <span className="sr-only">Actions</span>
           </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {response.map((response: UsersAPIResponse) => (
-          <TableRow key={response.users.id}>
+        {response.map((response: TournamentsAPIResponse) => (
+          <TableRow key={response.tournaments.id}>
             <TableCell className="hidden sm:table-cell">
               <img
                 className="aspect-square rounded-md object-cover"
-                src={response.users.image_url}
-                alt={response.users.username}
+                src={response.tournaments.image_url}
+                alt={response.tournaments.name}
               />
             </TableCell>
             <TableCell className="font-medium">
-              {response.users.username}
+              {response.tournaments.name}
             </TableCell>
-            <TableCell>{response.users.email_address}</TableCell>
+            <TableCell>{response.tournaments.cash_prize}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -58,15 +62,19 @@ export function UserList({ response }: { response: UsersAPIResponse[] }) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuItem>
-                    <Link to={`/users/${response.users.id}`}>View Profile</Link>
+                    <Link to={`/tournaments/${response.tournaments.name}`}>
+                      View Tournament
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => {
-                      console.log(`Added Friend ${response.users.id}`);
+                      console.log(
+                        `Register for the tournament ${response.tournaments.name}`,
+                      );
                     }}
                   >
-                    Add Friend
+                    Register
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

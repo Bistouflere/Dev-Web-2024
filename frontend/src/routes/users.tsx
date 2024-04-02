@@ -3,7 +3,7 @@ import { Search } from "@/components/search";
 import { TableLoader } from "@/components/table-loader";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { UserList } from "@/components/users/list";
-import { User } from "@/types/type";
+import { UsersAPIResponse } from "@/types/type";
 import {
   keepPreviousData,
   queryOptions,
@@ -15,7 +15,7 @@ import Balancer from "react-wrap-balancer";
 
 function countOptions(query: string) {
   return queryOptions({
-    queryKey: ["users", query],
+    queryKey: ["count_users", query],
     queryFn: () => fetchCount(query),
     placeholderData: keepPreviousData,
   });
@@ -35,9 +35,12 @@ async function fetchCount(query: string): Promise<number> {
     .then((res) => res.data);
 }
 
-async function fetchUsers(query: string, page: number): Promise<User[]> {
+async function fetchUsers(
+  query: string,
+  page: number,
+): Promise<UsersAPIResponse[]> {
   return axios
-    .get<User[]>(`/api/users?page=${page}&query=${query}`)
+    .get<UsersAPIResponse[]>(`/api/users?page=${page}&query=${query}`)
     .then((res) => res.data);
 }
 
@@ -81,7 +84,7 @@ export default function UsersPage() {
           usersQuery.isFetching ? (
             <TableLoader count={USERS_PER_PAGE} />
           ) : (
-            <UserList data={usersQuery.data || []} />
+            <UserList response={usersQuery.data || []} />
           )}
         </CardContent>
         <CardFooter>
