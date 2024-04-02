@@ -45,7 +45,7 @@ export function UserList({ data }: { data: any[] }) {
                 alt={data.users.username}
               />
             </TableCell>
-            <TableCell className="font-medium">{data.users.username}</TableCell>
+                    <TableCell className="font-medium">{data.users.username}</TableCell>
             <TableCell>{data.users.email_address}</TableCell>
             <TableCell>
               <DropdownMenu>
