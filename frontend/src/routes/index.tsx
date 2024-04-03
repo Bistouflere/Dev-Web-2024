@@ -13,11 +13,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { TournamentsAPIResponse } from "@/types/type";
-import {
-  keepPreviousData,
-  queryOptions,
-  useQuery,
-} from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Balancer from "react-wrap-balancer";
 
@@ -49,24 +45,32 @@ export default function IndexPage() {
           tournaments with ease.
         </Balancer>
       </section>
-      <div className="flex items-center justify-center">
+      <div>
         {tournamentHomeQuery.data ? (
-          <section>
-            <Carousel>
-              <CarouselContent>
+          <section className="flex items-center justify-center">
+            <Carousel className="w-full max-w-sm">
+              <CarouselContent className="-ml-1">
                 {tournamentHomeQuery.data.map(
                   (response: TournamentsAPIResponse) => (
-                    <CarouselItem className="md:basis-1/2 lg:basis-1/3">
-                      <Card className="flex aspec-square items-center justify-center p-6">
-                        <CardHeader>
-                          <CardTitle className="w-full max-w-sm items-center justify-center">
-                            {response.tournaments.name}
-                          </CardTitle>
-                          <CardDescription>
-                            {response.tournaments.cash_prize}
-                          </CardDescription>
-                        </CardHeader>
-                      </Card>
+                    <CarouselItem
+                      key={response.tournaments.id}
+                      className="pl-1 md:basis-1/2 lg:basis-1/3"
+                    >
+                      <div className="p-1">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>{response.tournaments.name}</CardTitle>
+                            <CardDescription>
+                              {response.tournaments.cash_prize}$
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <span className="text-3xl font-semibold">
+                              {response.tournaments.description}
+                            </span>
+                          </CardContent>
+                        </Card>
+                      </div>
                     </CarouselItem>
                   ),
                 )}
