@@ -1,12 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UsersAPIResponse } from "@/types/type";
 import { useAuth } from "@clerk/clerk-react";
 import { queryOptions, useQuery } from "@tanstack/react-query";
@@ -19,20 +13,22 @@ import {
   Plus,
   Swords,
   UserPlus,
+  Users,
 } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 function userOptions(query: string) {
   return queryOptions({
-    queryKey: ["user", query],
+    queryKey: [`user_page_${query}`, query],
     queryFn: () => fetchUser(query),
   });
 }
 
 async function fetchUser(query: string): Promise<UsersAPIResponse> {
-  return axios
-    .get<UsersAPIResponse>(`/api/users?id=${query}`)
-    .then((res) => res.data);
+  return axios.get<UsersAPIResponse>(`/api/users?id=${query}`).then((res) => {
+    console.log(res.data);
+    return res.data;
+  });
 }
 
 export default function UserProfile() {
@@ -48,14 +44,11 @@ export default function UserProfile() {
           <div className="grid md:row-span-3 lg:row-span-3">
             <Card>
               <CardHeader>
-                <CardTitle>Main Information</CardTitle>
-                <CardDescription>
-                  {data.users.username}'s profile information
-                </CardDescription>
+                <CardTitle>{data.users.username}'s Profile</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col items-center space-y-2">
-                  <Avatar className="items-center">
+                  <Avatar className="items-center w-24 h-24">
                     <AvatarImage
                       src={data.users.image_url}
                       alt="Avatar"
@@ -89,28 +82,30 @@ export default function UserProfile() {
                 </div>
                 <div className="mt-4">
                   <div className="flex justify-between">
-                    <p className="text-sm font-medium leading-none">
+                    <small className="text-sm font-medium leading-none">
                       Followers
-                    </p>
-                    <p className="text-sm font-extrabold">0</p>
+                    </small>
+                    <small className="text-sm font-medium leading-none">
+                      0
+                    </small>
                   </div>
                   <div className="flex justify-between">
-                    <p className="text-sm font-medium leading-none">
+                    <small className="text-sm font-medium leading-none">
                       Member since
-                    </p>
-                    <p className="text-sm font-extrabold">
+                    </small>
+                    <small className="text-sm font-medium leading-none">
                       {new Date(data.users.created_at).getDate()}/
                       {new Date(data.users.created_at).getMonth()}/
                       {new Date(data.users.created_at).getFullYear()}
-                    </p>
+                    </small>
                   </div>
                   <div className="flex justify-between">
-                    <p className="text-sm font-medium leading-none">
+                    <small className="text-sm font-medium leading-none">
                       Last updated
-                    </p>
-                    <p className="text-sm font-extrabold">
+                    </small>
+                    <small className="text-sm font-medium leading-none">
                       {data.users.updated_at}
-                    </p>
+                    </small>
                   </div>
                 </div>
               </CardContent>
@@ -119,7 +114,7 @@ export default function UserProfile() {
           <div className="grid md:col-start-2 md:row-start-1 lg:col-span-2 lg:col-start-2 lg:row-start-1">
             <Card>
               <CardHeader>
-                <CardTitle>Statistics</CardTitle>
+                <CardTitle>{data.users.username}'s Statistics</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-3 grid-rows-2 gap-6 lg:grid-cols-5 lg:grid-rows-1">
                 <div className="flex items-center space-x-2">
@@ -169,23 +164,125 @@ export default function UserProfile() {
           <div className="grid md:col-start-1 md:row-start-4 lg:col-start-1 lg:row-start-4">
             <Card>
               <CardHeader>
-                <CardTitle>Team</CardTitle>
+                <CardTitle>{data.users.username}'s Team</CardTitle>
               </CardHeader>
-              <CardContent></CardContent>
+              <CardContent className="grid">
+                {data.teams ? (
+                  <div>
+                    <div className="flex items-center space-x-4">
+                      <div>
+                        <Link to={`/teams/${data.teams.id}`}>
+                          <Avatar className="items-center w-24 h-24 mb-2">
+                            <AvatarImage
+                              src={data.teams.image_url}
+                              alt="Avatar"
+                              className="rounded-full"
+                            />
+                            <AvatarFallback>{data.users.id}</AvatarFallback>
+                          </Avatar>
+                        </Link>
+                        <Link to={`/teams/${data.teams.id}`}>
+                          <Button variant="secondary">
+                            <Users className="mr-2 h-5 w-5" />
+                            View Team
+                          </Button>
+                        </Link>
+                      </div>
+                      <div>
+                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                          {data.teams.name}
+                        </h3>
+                        <p className="leading-7 [&:not(:first-child)]:mt-6">
+                          {data.teams.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center space-x-4">
+                      <div>
+                        <div className="items-center w-24 h-24 bg-muted rounded-full"></div>
+                      </div>
+                      <div>
+                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                          No Team
+                        </h3>
+                        <p className="leading-7 [&:not(:first-child)]:mt-6">
+                          {data.users.username} is not part of any team.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
             </Card>
           </div>
           <div className="grid md:col-start-2 md:row-start-2 lg:col-span-2 lg:col-start-2 lg:row-start-2">
             <Card>
               <CardHeader>
-                <CardTitle>Tournaments</CardTitle>
+                <CardTitle>{data.users.username}'s Tournament</CardTitle>
               </CardHeader>
-              <CardContent></CardContent>
+              <CardContent>
+                {data.tournaments ? (
+                  <div>
+                    <div className="flex items-center space-x-4">
+                      <div>
+                        <Link to={`/tournaments/${data.tournaments.id}`}>
+                          <Avatar className="items-center w-24 h-24 mb-2">
+                            <AvatarImage
+                              src={data.tournaments.image_url}
+                              alt="Avatar"
+                              className="rounded-full"
+                            />
+                            <AvatarFallback>{data.users.id}</AvatarFallback>
+                          </Avatar>
+                        </Link>
+                        <Link to={`/tournaments/${data.tournaments.id}`}>
+                          <Button variant="secondary">
+                            <Users className="mr-2 h-5 w-5" />
+                            View Tournament
+                          </Button>
+                        </Link>
+                      </div>
+                      <div>
+                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                          {data.tournaments.name}
+                        </h3>
+                        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+                          {data.games?.name}
+                        </h4>
+                        <p className="leading-7 [&:not(:first-child)]:mt-6">
+                          {data.tournaments.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center space-x-4">
+                      <div>
+                        <div className="items-center w-24 h-24 bg-muted rounded-full"></div>
+                      </div>
+                      <div>
+                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                          No Tournament
+                        </h3>
+                        <p className="leading-7 [&:not(:first-child)]:mt-6">
+                          {data.users.username} has not participated in any
+                          tournament.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
             </Card>
           </div>
           <div className="grid md:col-start-2 md:row-span-2 md:row-start-3 lg:col-span-2 lg:col-start-2 lg:row-span-2 lg:row-start-3">
             <Card>
               <CardHeader>
-                <CardTitle>Tournament Played</CardTitle>
+                <CardTitle>{data.users.username}'s Past Tournaments</CardTitle>
               </CardHeader>
               <CardContent></CardContent>
             </Card>

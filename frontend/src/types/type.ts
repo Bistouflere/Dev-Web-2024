@@ -12,10 +12,10 @@ export type User = {
   last_sign_in_at: string;
 };
 
-export type Follower = {
-  user_id: number;
-  follows_user_id: number;
-};
+// export type Follower = {
+//   user_id: number;
+//   follows_user_id: number;
+// };
 
 export type Team = {
   id: number;
@@ -74,8 +74,10 @@ export type Format = {
 
 export type UsersAPIResponse = {
   users: User;
-  followers?: Follower;
+  // followers?: Follower;
   teams?: Team;
+  tournaments?: Tournament;
+  games?: Game;
 };
 
 export type TeamsAPIResponse = {
@@ -88,7 +90,7 @@ export type TeamsAPIResponse = {
 export type TournamentsAPIResponse = {
   tournaments: Tournament;
   teams?: Team;
-  game?: Game;
+  games?: Game;
   format?: Format;
   admins?: TournamentAdmin;
 };

@@ -1,11 +1,4 @@
-import { ChevronRightIcon } from "lucide-react";
-import Balancer from "react-wrap-balancer";
-
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,11 +7,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ChevronRightIcon } from "lucide-react";
+import { useForm } from "react-hook-form";
+import Balancer from "react-wrap-balancer";
+import { z } from "zod";
 
 const profileFormSchema = z.object({
   username: z
@@ -28,23 +26,25 @@ const profileFormSchema = z.object({
     })
     .max(30, {
       message: "Username must not be longer than 30 characters.",
-    }), 
+    }),
   bio: z.string().max(160).min(4),
   picture: z.string().optional(),
-})
+});
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function CreateTeamPage() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     mode: "onChange",
-  })
+  });
 
   function onSubmit(data: ProfileFormValues) {
+    console.log(data);
+
     toast({
-      title: "Your team is created !"
-    })
+      title: "Your team is created !",
+    });
   }
 
   return (
@@ -75,11 +75,14 @@ export default function CreateTeamPage() {
                 <FormItem>
                   <FormLabel>Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Give a name at your team !" {...field} />
+                    <Input
+                      placeholder="Give a name at your team !"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
-                    This is your public display name. It can be your real name or a
-                    pseudonym. You can only change this once every 30 days.
+                    This is your public display name. It can be your real name
+                    or a pseudonym. You can only change this once every 30 days.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -99,8 +102,8 @@ export default function CreateTeamPage() {
                     />
                   </FormControl>
                   <FormDescription>
-                    You can <span>@mention</span> other users and organizations to
-                    link to them.
+                    You can <span>@mention</span> other users and organizations
+                    to link to them.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -115,5 +118,5 @@ export default function CreateTeamPage() {
         </Form>
       </div>
     </main>
-  )
+  );
 }

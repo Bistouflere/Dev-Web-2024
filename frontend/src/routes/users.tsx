@@ -15,7 +15,7 @@ import Balancer from "react-wrap-balancer";
 
 function countOptions(query: string) {
   return queryOptions({
-    queryKey: ["count_users", query],
+    queryKey: ["users_page_count", query],
     queryFn: () => fetchCount(query),
     placeholderData: keepPreviousData,
   });
@@ -23,7 +23,7 @@ function countOptions(query: string) {
 
 function usersOptions(query: string, page: number) {
   return queryOptions({
-    queryKey: ["users", query, page],
+    queryKey: ["users_page_users", query, page],
     queryFn: () => fetchUsers(query, page),
     placeholderData: keepPreviousData,
   });
@@ -64,18 +64,16 @@ export default function UsersPage() {
 
   return (
     <div className="container relative">
-      <div className="bg-[url('/blurry.svg')] bg-no-repeat bg-center bg-origin-content bg-cover">
-        <section className="mx-auto flex max-w-[980px] flex-col items-center gap-2 py-8 md:py-12 md:pb-8 lg:py-24 lg:pb-20">
-          <h1 className="text-center text-3xl font-bold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1]">
-            Find friends and adversaries
-          </h1>
-          <Balancer className="max-w-[750px] text-center text-lg text-muted-foreground sm:text-xl">
-            Browse through our users and find the perfect match for your team.
-            You can search for users by their username, email, or name.
-          </Balancer>
-        </section>
-        <Search placeholder="Search users..." />
-      </div>
+      <section className="mx-auto flex max-w-[980px] flex-col items-center gap-2 py-8 md:py-12 md:pb-8 lg:py-24 lg:pb-20">
+        <h1 className="text-center text-3xl font-bold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1]">
+          Find friends and adversaries
+        </h1>
+        <Balancer className="max-w-[750px] text-center text-lg text-muted-foreground sm:text-xl">
+          Browse through our users and find the perfect match for your team. You
+          can search for users by their username, email, or name.
+        </Balancer>
+      </section>
+      <Search placeholder="Search users..." />
       <Card>
         <CardContent>
           {countQuery.isLoading ||

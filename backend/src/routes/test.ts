@@ -9,8 +9,6 @@ router.get("/users", async (req: Request, res: Response) => {
   const result = await db.query.users.findMany({
     with: {
       team: true,
-      followers: true,
-      following: true,
     },
   });
 

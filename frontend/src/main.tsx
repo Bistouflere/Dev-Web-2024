@@ -3,7 +3,7 @@ import DashboardLayout from "./layouts/dashboard-layout";
 import RootLayout from "./layouts/root-layout";
 import NotFoundPage from "./not-found";
 import IndexPage from "./routes";
-import CreateTeamPage from "./routes/dashboard/createTeam";
+import CreateTeamPage from "./routes/dashboard/create-team";
 import DashboardPage from "./routes/dashboard/index";
 import TeamPage from "./routes/dashboard/teams";
 import SignInPage from "./routes/sign-in";

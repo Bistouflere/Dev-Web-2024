@@ -1,5 +1,5 @@
 import { db } from "../db/index";
-import { followers, teams, users } from "../db/schema";
+import { games, teams, tournaments, users } from "../db/schema";
 import { and, asc, count, eq, ilike, or, sql, sum } from "drizzle-orm";
 import { on } from "events";
 import express, { Request, Response, Router } from "express";
@@ -54,8 +54,9 @@ router.get("/", async (req: Request, res: Response) => {
       const result = await db
         .select()
         .from(users)
-        .leftJoin(followers, eq(users.id, followers.user_id))
         .leftJoin(teams, eq(users.team_id, teams.id))
+        .leftJoin(tournaments, eq(teams.tournament_id, tournaments.id))
+        .leftJoin(games, eq(tournaments.game_id, games.id))
         .where(eq(users.id, Number(id)));
       return res.status(200).json(result[0]);
     } catch (error: any) {
@@ -70,7 +71,6 @@ router.get("/", async (req: Request, res: Response) => {
       const result = await db
         .select()
         .from(users)
-        .leftJoin(followers, eq(users.id, followers.user_id))
         .leftJoin(teams, eq(users.team_id, teams.id))
         .orderBy(asc(users.username))
         .where(
@@ -88,7 +88,6 @@ router.get("/", async (req: Request, res: Response) => {
       const result = await db
         .select()
         .from(users)
-        .leftJoin(followers, eq(users.id, followers.user_id))
         .leftJoin(teams, eq(users.team_id, teams.id))
         .orderBy(asc(users.username))
         .limit(NUMBER_OF_USERS_PER_PAGE)
