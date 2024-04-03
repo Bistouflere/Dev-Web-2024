@@ -3,7 +3,7 @@ import { Search } from "@/components/search";
 import { TableLoader } from "@/components/table-loader";
 import { TournamentList } from "@/components/tournaments/list";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Tournament, TournamentsAPIResponse } from "@/types/type";
+import { TournamentsAPIResponse } from "@/types/type";
 import {
   keepPreviousData,
   queryOptions,
@@ -17,7 +17,7 @@ export class TournamentNotFoundError extends Error {}
 
 function countOptions(query: string) {
   return queryOptions({
-    queryKey: ["tournaments", query],
+    queryKey: ["tournaments_page_count", query],
     queryFn: () => fetchCount(query),
     placeholderData: keepPreviousData,
   });
@@ -25,7 +25,7 @@ function countOptions(query: string) {
 
 function tournamentsOptions(query: string, page: number) {
   return queryOptions({
-    queryKey: ["tournaments", query, page],
+    queryKey: ["tournaments_page_tournaments", query, page],
     queryFn: () => fetchTournaments(query, page),
     placeholderData: keepPreviousData,
   });
@@ -65,22 +65,19 @@ export default function TournamentsPage() {
     startTournamentIndex + TOURNAMENT_PER_PAGE - 1,
     countQuery.data || 0,
   );
-  console.log(tournamentsQuery.data);
+
   return (
     <div className="container relative">
-      <div className="bg-[url('/blurry.svg')] bg-no-repeat bg-center bg-origin-content bg-cover">
-        <section className="mx-auto flex max-w-[980px] flex-col items-center gap-2 py-8 md:py-12 md:pb-8 lg:py-24 lg:pb-20">
-          <h1 className="text-center text-3xl font-bold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1]">
-            Fight for glory in our tournaments
-          </h1>
-          <Balancer className="max-w-[750px] text-center text-lg text-muted-foreground sm:text-xl">
-            Browse through our tournaments and find the perfect one for your
-            team. You can search for tournaments by their name, game, or
-            organizer.
-          </Balancer>
-        </section>
-        <Search placeholder="Search tournaments..." />
-      </div>
+      <section className="mx-auto flex max-w-[980px] flex-col items-center gap-2 py-8 md:py-12 md:pb-8 lg:py-24 lg:pb-20">
+        <h1 className="text-center text-3xl font-bold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1]">
+          Fight for glory in our tournaments
+        </h1>
+        <Balancer className="max-w-[750px] text-center text-lg text-muted-foreground sm:text-xl">
+          Browse through our tournaments and find the perfect one for your team.
+          You can search for tournaments by their name, game, or organizer.
+        </Balancer>
+      </section>
+      <Search placeholder="Search tournaments..." />
       <Card>
         <CardContent>
           {countQuery.isLoading ||

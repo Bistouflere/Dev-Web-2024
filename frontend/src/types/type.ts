@@ -7,15 +7,15 @@ export type User = {
   email_address: string;
   image_url?: string;
   team_id?: number;
-  created_at: Date;
-  updated_at: Date;
-  last_sign_in_at: Date;
+  created_at: string;
+  updated_at: string;
+  last_sign_in_at: string;
 };
 
-export type Follower = {
-  user_id: number;
-  follows_user_id: number;
-};
+// export type Follower = {
+//   user_id: number;
+//   follows_user_id: number;
+// };
 
 export type Team = {
   id: number;
@@ -23,8 +23,8 @@ export type Team = {
   description?: string;
   image_url?: string;
   tournament_id?: number;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
 };
 
 export type TeamAdmin = {
@@ -44,10 +44,10 @@ export type Tournament = {
   cash_prize?: number;
   team_size?: number;
   looser_bracket?: boolean;
-  start_date?: Date;
-  end_date?: Date;
-  created_at: Date;
-  updated_at: Date;
+  start_date?: string;
+  end_date?: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export type TournamentAdmin = {
@@ -74,8 +74,10 @@ export type Format = {
 
 export type UsersAPIResponse = {
   users: User;
-  followers?: Follower;
+  // followers?: Follower;
   teams?: Team;
+  tournaments?: Tournament;
+  games?: Game;
 };
 
 export type TeamsAPIResponse = {
@@ -88,7 +90,7 @@ export type TeamsAPIResponse = {
 export type TournamentsAPIResponse = {
   tournaments: Tournament;
   teams?: Team;
-  game?: Game;
+  games?: Game;
   format?: Format;
   admins?: TournamentAdmin;
 };
