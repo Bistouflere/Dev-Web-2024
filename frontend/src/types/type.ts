@@ -1,96 +1,98 @@
-export type User = {
+export interface User {
   id: number;
   clerk_id: string;
-  first_name: string;
-  last_name: string;
+  first_name: string | null;
+  last_name: string | null;
   username: string;
   email_address: string;
-  image_url?: string;
-  team_id?: number;
+  image_url: string | null;
   created_at: string;
   updated_at: string;
-  last_sign_in_at: string;
-};
+  last_sign_in_at: string | null;
+}
 
-// export type Follower = {
-//   user_id: number;
-//   follows_user_id: number;
-// };
+export interface UserFollow {
+  follower_id: number;
+  followed_id: number;
+}
 
-export type Team = {
+export interface Game {
   id: number;
   name: string;
-  description?: string;
-  image_url?: string;
-  tournament_id?: number;
+  description: string | null;
+  image_url: string | null;
   created_at: string;
   updated_at: string;
-};
+}
 
-export type TeamAdmin = {
-  team_id: number;
-  user_id: number;
-};
-
-export type Tournament = {
+export interface Format {
   id: number;
   name: string;
-  description?: string;
-  image_url?: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Tournament {
+  id: number;
+  name: string;
+  description: string | null;
+  image_url: string | null;
   game_id: number;
   format_id: number;
-  public?: boolean;
-  slots?: number;
-  cash_prize?: number;
-  team_size?: number;
-  looser_bracket?: boolean;
-  start_date?: string;
-  end_date?: string;
+  public: boolean;
+  slots: number;
+  cash_prize: number;
+  team_size: number;
+  looser_bracket: boolean;
+  start_date: string | null;
+  end_date: string | null;
   created_at: string;
   updated_at: string;
-};
+}
 
-export type TournamentAdmin = {
+export interface TournamentAdmin {
   tournament_id: number;
   user_id: number;
-};
+  admin: boolean;
+}
 
-export type Game = {
+export interface Team {
   id: number;
+  owner_id: number;
   name: string;
-  description?: string;
-  image_url?: string;
-  created_at: Date;
-  updated_at: Date;
-};
+  description: string | null;
+  image_url: string | null;
+  current_tournament_id: number | null;
+  created_at: string;
+  updated_at: string;
+}
 
-export type Format = {
+export interface TeamTournament {
+  team_id: number;
+  tournament_id: number;
+}
+
+export interface TeamMember {
+  team_id: number;
+  user_id: number;
+  admin: boolean;
+}
+
+export interface Match {
   id: number;
-  name: string;
-  description?: string;
-  created_at: Date;
-  updated_at: Date;
-};
+  tournament_id: number;
+  team1_id: number;
+  team2_id: number;
+  match_date: string | null;
+  match_location: string | null;
+  winner_id: number | null;
+  created_at: string;
+  updated_at: string;
+}
 
-export type UsersAPIResponse = {
-  users: User;
-  // followers?: Follower;
-  teams?: Team;
-  tournaments?: Tournament;
-  games?: Game;
-};
-
-export type TeamsAPIResponse = {
-  teams: Team;
-  members?: User;
-  tournament?: Tournament;
-  admins?: TeamAdmin;
-};
-
-export type TournamentsAPIResponse = {
-  tournaments: Tournament;
-  teams?: Team;
-  games?: Game;
-  format?: Format;
-  admins?: TournamentAdmin;
-};
+export interface MatchScore {
+  match_id: number;
+  team_id: number;
+  score: number;
+}

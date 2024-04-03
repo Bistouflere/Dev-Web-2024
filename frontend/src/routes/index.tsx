@@ -12,7 +12,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { TournamentsAPIResponse } from "@/types/type";
+import { Tournament } from "@/types/type";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Balancer from "react-wrap-balancer";
@@ -24,15 +24,15 @@ function tournamentsOptions() {
   });
 }
 
-async function fetchHomeTournaments(): Promise<TournamentsAPIResponse[]> {
+async function fetchHomeTournaments(): Promise<Tournament[]> {
   return axios
-    .get<TournamentsAPIResponse[]>(`/api/tournaments/popular`)
+    .get<Tournament[]>(`/api/tournaments/most-teams`)
     .then((res) => res.data);
 }
 
 export default function IndexPage() {
-  const tournamentHomeQuery = useQuery(tournamentsOptions());
-  console.log(tournamentHomeQuery.data);
+  const { data: tournaments } = useQuery(tournamentsOptions());
+  console.log(tournaments);
 
   return (
     <div className="container relative">
@@ -46,34 +46,32 @@ export default function IndexPage() {
         </Balancer>
       </section>
       <div>
-        {tournamentHomeQuery.data ? (
+        {tournaments ? (
           <section className="flex items-center justify-center">
             <Carousel className="w-full max-w-sm">
               <CarouselContent className="-ml-1">
-                {tournamentHomeQuery.data.map(
-                  (response: TournamentsAPIResponse) => (
-                    <CarouselItem
-                      key={response.tournaments.id}
-                      className="pl-1 md:basis-1/2 lg:basis-1/3"
-                    >
-                      <div className="p-1">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>{response.tournaments.name}</CardTitle>
-                            <CardDescription>
-                              {response.tournaments.cash_prize}$
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <span className="text-3xl font-semibold">
-                              {response.tournaments.description}
-                            </span>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    </CarouselItem>
-                  ),
-                )}
+                {tournaments.map((response: Tournament) => (
+                  <CarouselItem
+                    key={response.id}
+                    className="pl-1 md:basis-1/2 lg:basis-1/3"
+                  >
+                    <div className="p-1">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>{response.name}</CardTitle>
+                          <CardDescription>
+                            {response.cash_prize}$
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <span className="text-3xl font-semibold">
+                            {response.description}
+                          </span>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
               </CarouselContent>
               <CarouselPrevious />
               <CarouselNext />

@@ -82,6 +82,75 @@ router.get("/:teamId/admins", async (req: Request, res: Response) => {
   }
 });
 
+// http://localhost:3000/api/teams/:teamId/current-tournament
+router.get(
+  "/:teamId/current-tournament",
+  async (req: Request, res: Response) => {
+    const teamId = req.params.teamId;
+
+    try {
+      const currentTournamentResult = await query(
+        `
+      SELECT t.*
+      FROM tournaments t
+      WHERE t.id = (SELECT current_tournament_id FROM teams WHERE id = $1);
+    `,
+        [teamId],
+      );
+
+      if (currentTournamentResult.rows.length === 0) {
+        return res.status(404).json({
+          error: "No current tournament found for the specified team",
+        });
+      }
+
+      const currentTournament = currentTournamentResult.rows[0];
+
+      return res.status(200).json(currentTournament);
+    } catch (error) {
+      console.error("Error executing query", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  },
+);
+
+// http://localhost:3000/api/teams/:teamId/old-tournaments
+router.get("/:teamId/old-tournaments", async (req: Request, res: Response) => {
+  const teamId = req.params.teamId;
+
+  try {
+    const oldTournamentsResult = await query(
+      `
+      SELECT t.*
+      FROM tournaments t
+      WHERE t.id IN (
+        SELECT tournament_id
+        FROM team_tournaments
+        WHERE team_id = $1
+      ) AND t.id != (
+        SELECT current_tournament_id
+        FROM teams
+        WHERE id = $1
+      );
+    `,
+      [teamId],
+    );
+
+    if (oldTournamentsResult.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "No old tournaments found for the specified team" });
+    }
+
+    const oldTournaments = oldTournamentsResult.rows;
+
+    return res.status(200).json(oldTournaments);
+  } catch (error) {
+    console.error("Error executing query", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // http://localhost:3000/api/teams/1
 router.get("/:teamId", async (req: Request, res: Response) => {
   const teamId = req.params.teamId;

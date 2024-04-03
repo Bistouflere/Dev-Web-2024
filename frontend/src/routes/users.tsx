@@ -3,7 +3,7 @@ import { Search } from "@/components/search";
 import { TableLoader } from "@/components/table-loader";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { UserList } from "@/components/users/list";
-import { UsersAPIResponse } from "@/types/type";
+import { User } from "@/types/type";
 import {
   keepPreviousData,
   queryOptions,
@@ -31,16 +31,13 @@ function usersOptions(query: string, page: number) {
 
 async function fetchCount(query: string): Promise<number> {
   return axios
-    .get<number>(`/api/users/count?query=${query}`)
-    .then((res) => res.data);
+    .get<Record<string, number>>(`/api/users/count?query=${query}`)
+    .then((res) => res.data.count);
 }
 
-async function fetchUsers(
-  query: string,
-  page: number,
-): Promise<UsersAPIResponse[]> {
+async function fetchUsers(query: string, page: number): Promise<User[]> {
   return axios
-    .get<UsersAPIResponse[]>(`/api/users?page=${page}&query=${query}`)
+    .get<User[]>(`/api/users?page=${page}&query=${query}`)
     .then((res) => res.data);
 }
 

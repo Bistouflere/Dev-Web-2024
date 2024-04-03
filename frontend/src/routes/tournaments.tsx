@@ -3,7 +3,7 @@ import { Search } from "@/components/search";
 import { TableLoader } from "@/components/table-loader";
 import { TournamentList } from "@/components/tournaments/list";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { TournamentsAPIResponse } from "@/types/type";
+import { Tournament } from "@/types/type";
 import {
   keepPreviousData,
   queryOptions,
@@ -33,18 +33,16 @@ function tournamentsOptions(query: string, page: number) {
 
 async function fetchCount(query: string): Promise<number> {
   return axios
-    .get<number>(`/api/tournaments/count?query=${query}`)
-    .then((res) => res.data);
+    .get<Record<string, number>>(`/api/tournaments/count?query=${query}`)
+    .then((res) => res.data.count);
 }
 
 async function fetchTournaments(
   query: string,
   page: number,
-): Promise<TournamentsAPIResponse[]> {
+): Promise<Tournament[]> {
   return axios
-    .get<
-      TournamentsAPIResponse[]
-    >(`/api/tournaments?page=${page}&query=${query}`)
+    .get<Tournament[]>(`/api/tournaments?page=${page}&query=${query}`)
     .then((res) => res.data);
 }
 

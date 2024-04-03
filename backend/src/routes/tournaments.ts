@@ -108,6 +108,30 @@ router.get("/:tournamentId/admins", async (req: Request, res: Response) => {
   }
 });
 
+// http://localhost:3000/api/tournaments/most-teams
+router.get("/most-teams", async (req: Request, res: Response) => {
+  try {
+    const result = await query(`
+      SELECT t.*, COUNT(tt.team_id) AS team_count
+      FROM tournaments t
+      LEFT JOIN team_tournaments tt ON t.id = tt.tournament_id
+      GROUP BY t.id
+      ORDER BY team_count DESC
+      LIMIT 10;
+    `);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "No tournaments found" });
+    }
+
+    const tournaments = result.rows;
+    return res.status(200).json(tournaments);
+  } catch (error) {
+    console.error("Error executing query", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // http://localhost:3000/api/tournaments/1
 router.get("/:tournamentId", async (req: Request, res: Response) => {
   const tournamentId = req.params.tournamentId;

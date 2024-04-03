@@ -14,15 +14,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TournamentsAPIResponse } from "@/types/type";
+import { Tournament } from "@/types/type";
 import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export function TournamentList({
-  response,
-}: {
-  response: TournamentsAPIResponse[];
-}) {
+export function TournamentList({ response }: { response: Tournament[] }) {
   return (
     <Table>
       <TableHeader>
@@ -38,19 +34,17 @@ export function TournamentList({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {response.map((response: TournamentsAPIResponse) => (
-          <TableRow key={response.tournaments.id}>
+        {response.map((response: Tournament) => (
+          <TableRow key={response.id}>
             <TableCell className="hidden sm:table-cell">
               <img
                 className="aspect-square rounded-md object-cover"
-                src={response.tournaments.image_url}
-                alt={response.tournaments.name}
+                src={response.image_url || undefined}
+                alt={response.name}
               />
             </TableCell>
-            <TableCell className="font-medium">
-              {response.tournaments.name}
-            </TableCell>
-            <TableCell>{response.tournaments.cash_prize}</TableCell>
+            <TableCell className="font-medium">{response.name}</TableCell>
+            <TableCell>{response.cash_prize}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -62,7 +56,7 @@ export function TournamentList({
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuItem>
-                    <Link to={`/tournaments/${response.tournaments.name}`}>
+                    <Link to={`/tournaments/${response.name}`}>
                       View Tournament
                     </Link>
                   </DropdownMenuItem>
@@ -70,7 +64,7 @@ export function TournamentList({
                     className="cursor-pointer"
                     onClick={() => {
                       console.log(
-                        `Register for the tournament ${response.tournaments.name}`,
+                        `Register for the tournament ${response.name}`,
                       );
                     }}
                   >

@@ -14,11 +14,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { UsersAPIResponse } from "@/types/type";
+import { User } from "@/types/type";
 import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export function UserList({ response }: { response: UsersAPIResponse[] }) {
+export function UserList({ response }: { response: User[] }) {
   console.log(response);
 
   return (
@@ -36,19 +36,17 @@ export function UserList({ response }: { response: UsersAPIResponse[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {response.map((response: UsersAPIResponse) => (
-          <TableRow key={response.users.id}>
+        {response.map((response: User) => (
+          <TableRow key={response.id}>
             <TableCell className="hidden sm:table-cell">
               <img
                 className="aspect-square rounded-md object-cover"
-                src={response.users.image_url}
-                alt={response.users.username}
+                src={response.image_url || undefined}
+                alt={response.username}
               />
             </TableCell>
-            <TableCell className="font-medium">
-              {response.users.username}
-            </TableCell>
-            <TableCell>{response.users.email_address}</TableCell>
+            <TableCell className="font-medium">{response.username}</TableCell>
+            <TableCell>{response.email_address}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -60,12 +58,12 @@ export function UserList({ response }: { response: UsersAPIResponse[] }) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuItem>
-                    <Link to={`/users/${response.users.id}`}>View Profile</Link>
+                    <Link to={`/users/${response.id}`}>View Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => {
-                      console.log(`Added Friend ${response.users.id}`);
+                      console.log(`Added Friend ${response.id}`);
                     }}
                   >
                     Add Friend
