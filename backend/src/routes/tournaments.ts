@@ -13,6 +13,27 @@ const router: Router = express.Router();
 
 const NUMBER_OF_TOURNAMENTS_PER_PAGE = 9;
 
+router.get("/popular", async (req: Request, res: Response) => {
+  await new Promise((r) => setTimeout(r, 500));
+
+  try {
+    const result = await db
+      .select()
+      .from(tournaments)
+      .leftJoin(teams, eq(tournaments.id, teams.tournament_id))
+      .leftJoin(games, eq(tournaments.game_id, games.id))
+      .leftJoin(formats, eq(tournaments.format_id, formats.id))
+      .leftJoin(
+        tournamentAdmins,
+        eq(tournaments.id, tournamentAdmins.tournament_id),
+      )
+      .limit(10);
+    return res.status(200).json(result);
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 // http://localhost:3000/api/tournaments/count?query=SuperTournois
 // or
 // http://localhost:3000/api/tournaments/count
