@@ -1,12 +1,11 @@
-import * as schema from "./schema";
-import "dotenv/config";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Client } from "pg";
+import { Pool, QueryConfig } from "pg";
 
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-});
+const pool = new Pool();
 
-client.connect();
-
-export const db = drizzle(client, { schema: schema });
+export const query = async (text: string | QueryConfig<any>, values?: any) => {
+  const start = Date.now();
+  const res = await pool.query(text, values);
+  const duration = Date.now() - start;
+  console.log("executed query", { text, duration, rows: res.rowCount });
+  return res;
+};

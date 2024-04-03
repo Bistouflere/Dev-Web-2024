@@ -1,8 +1,6 @@
-import { db } from "../db/index";
-import { users } from "../db/schema";
+import { query } from "../db/index";
 import { WebhookEvent } from "@clerk/clerk-sdk-node";
 import bodyParser from "body-parser";
-import { eq } from "drizzle-orm";
 import express, { Router } from "express";
 import { Webhook } from "svix";
 
@@ -12,36 +10,28 @@ router.post(
   "/",
   bodyParser.raw({ type: "application/json" }),
   async function (req, res) {
-    // Check if the 'Signing Secret' from the Clerk Dashboard was correctly provided
     const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
     if (!WEBHOOK_SECRET) {
       throw new Error("You need a WEBHOOK_SECRET in your .env");
     }
 
-    // Grab the headers and body
     const headers = req.headers;
     const payload = req.body;
 
-    // Get the Svix headers for verification
     const svix_id = headers["svix-id"] as string;
     const svix_timestamp = headers["svix-timestamp"] as string;
     const svix_signature = headers["svix-signature"] as string;
 
-    // If there are missing Svix headers, error out
     if (!svix_id || !svix_timestamp || !svix_signature) {
       return new Response("Error occured -- no svix headers", {
         status: 400,
       });
     }
 
-    // Initiate Svix
     const wh = new Webhook(WEBHOOK_SECRET);
 
     let evt: WebhookEvent;
 
-    // Attempt to verify the incoming webhook
-    // If successful, the payload will be available from 'evt'
-    // If the verification fails, error out and  return error code
     try {
       evt = wh.verify(payload, {
         "svix-id": svix_id,
@@ -49,7 +39,6 @@ router.post(
         "svix-signature": svix_signature,
       }) as WebhookEvent;
     } catch (err: any) {
-      // Console log and return error
       console.log("Webhook failed to verify. Error:", err.message);
       return res.status(400).json({
         success: false,
@@ -57,47 +46,84 @@ router.post(
       });
     }
 
-    // Grab the ID and TYPE of the Webhook
     const { id } = evt.data;
     const eventType = evt.type;
 
     console.log(`Webhook with an ID of ${id} and type of ${eventType}`);
-    // Console log the full payload to view
     console.log("Webhook body:", evt.data);
 
     if (eventType === "user.created") {
-      await db.insert(users).values({
-        clerk_id: evt.data.id,
-        first_name: evt.data.first_name,
-        last_name: evt.data.last_name,
-        username: evt.data.username!,
-        email_address: evt.data.email_addresses[0].email_address,
-        image_url: evt.data.image_url,
-        created_at: new Date(evt.data.created_at),
-        updated_at: new Date(evt.data.updated_at),
-        last_sign_in_at: evt.data.last_sign_in_at
-          ? new Date(evt.data.last_sign_in_at)
-          : null,
-      });
+      try {
+        const result = await query(
+          `
+          INSERT INTO users (clerk_id, first_name, last_name, username, email_address, image_url)
+          VALUES ($1, $2, $3, $4, $5, $6)
+          RETURNING *;
+          `,
+          [
+            evt.data.id,
+            evt.data.first_name,
+            evt.data.last_name,
+            evt.data.username,
+            evt.data.email_addresses[0].email_address,
+            evt.data.image_url,
+          ],
+        );
+
+        return res.status(201).json(result.rows[0]);
+      } catch (error) {
+        console.error("Error executing query", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
     } else if (eventType === "user.updated") {
-      await db
-        .update(users)
-        .set({
-          clerk_id: evt.data.id,
-          first_name: evt.data.first_name,
-          last_name: evt.data.last_name,
-          username: evt.data.username!,
-          email_address: evt.data.email_addresses[0].email_address,
-          image_url: evt.data.image_url,
-          created_at: new Date(evt.data.created_at),
-          updated_at: new Date(evt.data.updated_at),
-          last_sign_in_at: evt.data.last_sign_in_at
-            ? new Date(evt.data.last_sign_in_at)
-            : null,
-        })
-        .where(eq(users.clerk_id, evt.data.id));
+      try {
+        const result = await query(
+          `
+          UPDATE users
+          SET clerk_id = $1, first_name = $2, last_name = $3, username = $4, email_address = $5, image_url = $6, last_sign_in_at = $7
+          WHERE clerk_id = $1
+          RETURNING *;
+          `,
+          [
+            evt.data.id,
+            evt.data.first_name,
+            evt.data.last_name,
+            evt.data.username,
+            evt.data.email_addresses[0].email_address,
+            evt.data.image_url,
+            evt.data.last_sign_in_at,
+          ],
+        );
+
+        if (result.rows.length === 0) {
+          return res.status(404).json({ error: "User not found" });
+        }
+
+        return res.status(200).json(result.rows[0]);
+      } catch (error) {
+        console.error("Error executing query", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
     } else if (eventType === "user.deleted") {
-      await db.delete(users).where(eq(users.clerk_id, evt.data.id!));
+      try {
+        const result = await query(
+          `
+          DELETE FROM users
+          WHERE clerk_id = $1
+          RETURNING *;
+          `,
+          [evt.data.id],
+        );
+
+        if (result.rows.length === 0) {
+          return res.status(404).json({ error: "User not found" });
+        }
+
+        return res.status(204).send();
+      } catch (error) {
+        console.error("Error executing query", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
     }
 
     return res.status(200).json({
