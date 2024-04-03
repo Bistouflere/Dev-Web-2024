@@ -18,8 +18,12 @@ export function TableLoader({ count }: { count: number }) {
           <TableHead className="hidden w-[100px] sm:table-cell">
             <span className="sr-only">User Avatar</span>
           </TableHead>
-          <TableHead>Username</TableHead>
-          <TableHead>Email Adresse</TableHead>
+          <TableHead>
+            <Skeleton className="h-3 w-[50px]" />
+          </TableHead>
+          <TableHead>
+            <Skeleton className="h-3 w-[50px]" />
+          </TableHead>
           <TableHead>
             <span className="sr-only">Actions</span>
           </TableHead>
