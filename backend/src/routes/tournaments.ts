@@ -42,12 +42,6 @@ router.get("/:tournamentId/teams", async (req: Request, res: Response) => {
 
     const result = await query(sql, [tournamentId]);
 
-    if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No teams found for the specified tournament" });
-    }
-
     return res.status(200).json(result.rows);
   } catch (error) {
     console.error("Error executing query", error);
@@ -67,12 +61,6 @@ router.get("/:tournamentId/matches", async (req: Request, res: Response) => {
     `;
 
     const result = await query(sql, [tournamentId]);
-
-    if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No matches found for the specified tournament" });
-    }
 
     return res.status(200).json(result.rows);
   } catch (error) {
@@ -95,12 +83,6 @@ router.get("/:tournamentId/admins", async (req: Request, res: Response) => {
 
     const result = await query(sql, [tournamentId]);
 
-    if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No admins found for the specified tournament" });
-    }
-
     return res.status(200).json(result.rows);
   } catch (error) {
     console.error("Error executing query", error);
@@ -120,10 +102,6 @@ router.get("/popular", async (req: Request, res: Response) => {
       LIMIT 10;
     `);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "No tournaments found" });
-    }
-
     const tournaments = result.rows;
     return res.status(200).json(tournaments);
   } catch (error) {
@@ -140,10 +118,6 @@ router.get("/:tournamentId", async (req: Request, res: Response) => {
     const result = await query("SELECT * FROM tournaments WHERE id = $1", [
       tournamentId,
     ]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Tournament not found" });
-    }
 
     return res.status(200).json(result.rows[0]);
   } catch (error) {
