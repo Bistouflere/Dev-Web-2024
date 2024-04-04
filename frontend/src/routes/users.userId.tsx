@@ -152,21 +152,21 @@ export default function UserProfile() {
                 <CardTitle>{data.user.username}'s Team</CardTitle>
               </CardHeader>
               <CardContent className="grid">
-                {data.teams ? (
+                {data.ownedTeam ? (
                   <div>
                     <div className="flex items-center space-x-4">
                       <div>
-                        <Link to={`/teams/${data.teams[0].id}`}>
+                        <Link to={`/teams/${data.ownedTeam.id}`}>
                           <Avatar className="items-center w-24 h-24 mb-2">
                             <AvatarImage
-                              src={data.teams[0].image_url || undefined}
+                              src={data.ownedTeam.image_url || undefined}
                               alt="Avatar"
                               className="rounded-full"
                             />
-                            <AvatarFallback>{data.teams[0].id}</AvatarFallback>
+                            <AvatarFallback>{data.ownedTeam.id}</AvatarFallback>
                           </Avatar>
                         </Link>
-                        <Link to={`/teams/${data.teams[0].id}`}>
+                        <Link to={`/teams/${data.ownedTeam.id}`}>
                           <Button variant="secondary">
                             <Users className="mr-2 h-5 w-5" />
                             View Team
@@ -175,10 +175,10 @@ export default function UserProfile() {
                       </div>
                       <div>
                         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-                          {data.teams[0].name}
+                          {data.ownedTeam.name}
                         </h3>
                         <p className="leading-7 [&:not(:first-child)]:mt-6">
-                          {data.teams[0].description}
+                          {data.ownedTeam.description}
                         </p>
                       </div>
                     </div>
