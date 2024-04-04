@@ -1,10 +1,21 @@
+import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { SearchIcon } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
+import { Plus, SearchIcon } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useDebouncedCallback } from "use-debounce";
 
-export function Search({ placeholder }: { placeholder: string }) {
+export function Search({
+  placeholder,
+  button_placeholder,
+  button_path,
+}: {
+  placeholder: string;
+  button_placeholder?: string;
+  button_path?: string;
+}) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { userId } = useAuth();
 
   const handleSearch = useDebouncedCallback((query) => {
     console.log(`Searching... ${query}`);
@@ -22,20 +33,30 @@ export function Search({ placeholder }: { placeholder: string }) {
   }, 300);
 
   return (
-    <div className="relative py-4">
-      <span className="sr-only">Search Bar</span>
-      <Input
-        name="search"
-        id="search"
-        type="text"
-        className="peer pl-10"
-        placeholder={placeholder}
-        onChange={(e) => {
-          handleSearch(e.target.value);
-        }}
-        defaultValue={searchParams.get("query")?.toString()}
-      />
-      <SearchIcon className="absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground peer-focus:text-gray-900" />
+    <div className="flex items-center pb-4 space-x-4 justify-end">
+      <div className="relative flex items-center w-full max-w-[400px]">
+        <span className="sr-only">Search Bar</span>
+        <Input
+          name="search"
+          id="search"
+          type="text"
+          className="peer pl-10"
+          placeholder={placeholder}
+          onChange={(e) => {
+            handleSearch(e.target.value);
+          }}
+          defaultValue={searchParams.get("query")?.toString()}
+        />
+        <SearchIcon className="absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-muted-foreground peer-focus:text-gray-900" />
+      </div>
+      {button_placeholder && button_path && (
+        <Link to={userId ? button_path : "/sign-in"} className="ml-4">
+          <Button>
+            <Plus className="mr-2 h-5 w-5" />
+            {button_placeholder}
+          </Button>
+        </Link>
+      )}
     </div>
   );
 }

@@ -40,7 +40,11 @@ export default function TournamentsPage() {
           You can search for tournaments by their name, game, or organizer.
         </Balancer>
       </section>
-      <Search placeholder="Search tournaments..." />
+      <Search
+        placeholder="Search tournaments..."
+        button_placeholder="Create Tournament"
+        button_path="/dashboard/tournaments/create"
+      />
       <Card>
         <CardContent>
           {countQuery.isLoading ||

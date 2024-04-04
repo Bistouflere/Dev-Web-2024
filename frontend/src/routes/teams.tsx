@@ -13,7 +13,11 @@ export default function TeamsPage() {
           search for teams by their name, game, or organizer.
         </Balancer>
       </section>
-      <Search placeholder="Search teams..." />
+      <Search
+        placeholder="Search teams..."
+        button_placeholder="Create Team"
+        button_path="/dashboard/teams/create"
+      />
     </div>
   );
 }

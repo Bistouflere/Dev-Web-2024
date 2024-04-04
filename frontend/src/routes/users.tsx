@@ -37,7 +37,11 @@ export default function UsersPage() {
           can search for users by their username, email, or name.
         </Balancer>
       </section>
-      <Search placeholder="Search users..." />
+      <Search
+        placeholder="Search users..."
+        button_placeholder="Create Account"
+        button_path="/dashboard"
+      />
       <Card>
         <CardContent>
           {countQuery.isLoading ||
