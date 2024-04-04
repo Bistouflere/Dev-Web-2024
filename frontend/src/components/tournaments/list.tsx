@@ -27,7 +27,7 @@ export function TournamentList({ response }: { response: Tournament[] }) {
             <span className="sr-only">Tournament Avatar</span>
           </TableHead>
           <TableHead>Name</TableHead>
-          <TableHead>Cashprize</TableHead>
+          <TableHead>Cash Prize</TableHead>
           <TableHead>
             <span className="sr-only">Actions</span>
           </TableHead>
@@ -37,14 +37,18 @@ export function TournamentList({ response }: { response: Tournament[] }) {
         {response.map((response: Tournament) => (
           <TableRow key={response.id}>
             <TableCell className="hidden sm:table-cell">
-              <img
-                className="aspect-square rounded-md object-cover"
-                src={response.image_url || undefined}
-                alt={response.name}
-              />
+              <Link to={`/tournaments/${response.id}`}>
+                <img
+                  className="aspect-square rounded-md object-cover"
+                  src={response.image_url || undefined}
+                  alt={response.name}
+                />
+              </Link>
             </TableCell>
-            <TableCell className="font-medium">{response.name}</TableCell>
-            <TableCell>{response.cash_prize}</TableCell>
+            <TableCell className="font-medium">
+              <Link to={`/tournaments/${response.id}`}>{response.name} </Link>
+            </TableCell>
+            <TableCell>${response.cash_prize}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

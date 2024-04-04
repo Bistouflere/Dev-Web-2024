@@ -37,13 +37,17 @@ export function UserList({ response }: { response: User[] }) {
         {response.map((response: User) => (
           <TableRow key={response.id}>
             <TableCell className="hidden sm:table-cell">
-              <img
-                className="aspect-square rounded-md object-cover"
-                src={response.image_url || undefined}
-                alt={response.username}
-              />
+              <Link to={`/users/${response.id}`}>
+                <img
+                  className="aspect-square rounded-md object-cover"
+                  src={response.image_url || undefined}
+                  alt={response.username}
+                />
+              </Link>
             </TableCell>
-            <TableCell className="font-medium">{response.username}</TableCell>
+            <TableCell className="font-medium">
+              <Link to={`/users/${response.id}`}>{response.username}</Link>
+            </TableCell>
             <TableCell>{response.email_address}</TableCell>
             <TableCell>
               <DropdownMenu>
@@ -64,7 +68,7 @@ export function UserList({ response }: { response: User[] }) {
                       console.log(`Added Friend ${response.id}`);
                     }}
                   >
-                    Add Friend
+                    Follow User
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
