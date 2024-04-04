@@ -109,7 +109,7 @@ router.get("/:tournamentId/admins", async (req: Request, res: Response) => {
 });
 
 // http://localhost:3000/api/tournaments/most-teams
-router.get("/most-teams", async (req: Request, res: Response) => {
+router.get("/popular", async (req: Request, res: Response) => {
   try {
     const result = await query(`
       SELECT t.*, COUNT(tt.team_id) AS team_count

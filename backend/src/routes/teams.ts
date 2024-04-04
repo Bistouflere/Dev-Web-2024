@@ -28,7 +28,7 @@ router.get("/count", async (req: Request, res: Response) => {
   }
 });
 
-// http://localhost:3000/api/teams/1/users
+// http://localhost:3000/api/teams/:teamId/users
 router.get("/:teamId/users", async (req: Request, res: Response) => {
   const teamId = req.params.teamId;
 
@@ -42,12 +42,6 @@ router.get("/:teamId/users", async (req: Request, res: Response) => {
 
     const result = await query(sql, [teamId]);
 
-    if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No users found for the specified team" });
-    }
-
     return res.status(200).json(result.rows);
   } catch (error) {
     console.error("Error executing query", error);
@@ -55,7 +49,7 @@ router.get("/:teamId/users", async (req: Request, res: Response) => {
   }
 });
 
-// http://localhost:3000/api/teams/1/admins
+// http://localhost:3000/api/teams/:teamId/admins
 router.get("/:teamId/admins", async (req: Request, res: Response) => {
   const teamId = req.params.teamId;
 
@@ -69,12 +63,6 @@ router.get("/:teamId/admins", async (req: Request, res: Response) => {
 
     const result = await query(sql, [teamId]);
 
-    if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No admins found for the specified team" });
-    }
-
     return res.status(200).json(result.rows);
   } catch (error) {
     console.error("Error executing query", error);
@@ -82,40 +70,31 @@ router.get("/:teamId/admins", async (req: Request, res: Response) => {
   }
 });
 
-// http://localhost:3000/api/teams/:teamId/current-tournament
-router.get(
-  "/:teamId/current-tournament",
-  async (req: Request, res: Response) => {
-    const teamId = req.params.teamId;
+// http://localhost:3000/api/teams/:teamId/tournaments
+router.get("/:teamId/tournaments", async (req: Request, res: Response) => {
+  const teamId = req.params.teamId;
 
-    try {
-      const currentTournamentResult = await query(
-        `
+  try {
+    const currentTournamentResult = await query(
+      `
       SELECT t.*
       FROM tournaments t
       WHERE t.id = (SELECT current_tournament_id FROM teams WHERE id = $1);
     `,
-        [teamId],
-      );
+      [teamId],
+    );
 
-      if (currentTournamentResult.rows.length === 0) {
-        return res.status(404).json({
-          error: "No current tournament found for the specified team",
-        });
-      }
+    const currentTournament = currentTournamentResult.rows[0];
 
-      const currentTournament = currentTournamentResult.rows[0];
+    return res.status(200).json(currentTournament);
+  } catch (error) {
+    console.error("Error executing query", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
-      return res.status(200).json(currentTournament);
-    } catch (error) {
-      console.error("Error executing query", error);
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-  },
-);
-
-// http://localhost:3000/api/teams/:teamId/old-tournaments
-router.get("/:teamId/old-tournaments", async (req: Request, res: Response) => {
+// http://localhost:3000/api/teams/:teamId/past-tournaments
+router.get("/:teamId/past-tournaments", async (req: Request, res: Response) => {
   const teamId = req.params.teamId;
 
   try {
@@ -136,12 +115,6 @@ router.get("/:teamId/old-tournaments", async (req: Request, res: Response) => {
       [teamId],
     );
 
-    if (oldTournamentsResult.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No old tournaments found for the specified team" });
-    }
-
     const oldTournaments = oldTournamentsResult.rows;
 
     return res.status(200).json(oldTournaments);
@@ -151,16 +124,12 @@ router.get("/:teamId/old-tournaments", async (req: Request, res: Response) => {
   }
 });
 
-// http://localhost:3000/api/teams/1
+// http://localhost:3000/api/teams/:teamId
 router.get("/:teamId", async (req: Request, res: Response) => {
   const teamId = req.params.teamId;
 
   try {
     const result = await query("SELECT * FROM teams WHERE id = $1", [teamId]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Team not found" });
-    }
 
     return res.status(200).json(result.rows[0]);
   } catch (error) {

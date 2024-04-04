@@ -28,7 +28,7 @@ router.get("/count", async (req: Request, res: Response) => {
   }
 });
 
-// http://localhost:3000/api/users/1/followers
+// http://localhost:3000/api/users/:userId/followers
 router.get("/:userId/followers", async (req: Request, res: Response) => {
   const userId = req.params.userId;
 
@@ -41,39 +41,6 @@ router.get("/:userId/followers", async (req: Request, res: Response) => {
     `;
 
     const result = await query(sql, [userId]);
-
-    if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No followers found for the specified user" });
-    }
-
-    return res.status(200).json(result.rows);
-  } catch (error) {
-    console.error("Error executing query", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// http://localhost:3000/api/users/1/following
-router.get("/:userId/following", async (req: Request, res: Response) => {
-  const userId = req.params.userId;
-
-  try {
-    const sql = `
-      SELECT u.*
-      FROM users u
-      INNER JOIN user_follows uf ON u.id = uf.followed_id
-      WHERE uf.follower_id = $1;
-    `;
-
-    const result = await query(sql, [userId]);
-
-    if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No following found for the specified user" });
-    }
 
     return res.status(200).json(result.rows);
   } catch (error) {
@@ -104,6 +71,27 @@ router.get("/:userId/followers/count", async (req: Request, res: Response) => {
   }
 });
 
+// http://localhost:3000/api/users/1/following
+router.get("/:userId/following", async (req: Request, res: Response) => {
+  const userId = req.params.userId;
+
+  try {
+    const sql = `
+      SELECT u.*
+      FROM users u
+      INNER JOIN user_follows uf ON u.id = uf.followed_id
+      WHERE uf.follower_id = $1;
+    `;
+
+    const result = await query(sql, [userId]);
+
+    return res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Error executing query", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // http://localhost:3000/api/users/1/following/count
 router.get("/:userId/following/count", async (req: Request, res: Response) => {
   const userId = req.params.userId;
@@ -126,8 +114,8 @@ router.get("/:userId/following/count", async (req: Request, res: Response) => {
   }
 });
 
-// http://localhost:3000/api/users/1/team
-router.get("/:userId/team", async (req: Request, res: Response) => {
+// http://localhost:3000/api/users/:userId/teams
+router.get("/:userId/teams", async (req: Request, res: Response) => {
   const userId = req.params.userId;
 
   try {
@@ -140,11 +128,21 @@ router.get("/:userId/team", async (req: Request, res: Response) => {
 
     const result = await query(sql, [userId]);
 
-    if (result.rows.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "User is not a member of any team" });
-    }
+    return res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Error executing query", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// http://localhost:3000/api/users/:userId/team/owned
+router.get("/:userId/teams/owned", async (req: Request, res: Response) => {
+  const userId = req.params.userId;
+
+  try {
+    const sql = "SELECT * FROM teams WHERE owner_id = $1";
+
+    const result = await query(sql, [userId]);
 
     return res.status(200).json(result.rows[0]);
   } catch (error) {
@@ -153,16 +151,57 @@ router.get("/:userId/team", async (req: Request, res: Response) => {
   }
 });
 
-// http://localhost:3000/api/users/1
+// http://localhost:3000/api/users/:userId/tournaments
+router.get("/:userId/tournaments", async (req: Request, res: Response) => {
+  const userId = req.params.userId;
+
+  try {
+    const sql = `
+      SELECT t.*
+      FROM tournaments t
+      INNER JOIN teams tm ON t.id = tm.current_tournament_id
+      INNER JOIN team_members tmembers ON tm.id = tmembers.team_id
+      WHERE tmembers.user_id = $1;
+    `;
+
+    const result = await query(sql, [userId]);
+
+    return res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error executing query", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// http://localhost:3000/api/users/:userId/tournaments/past
+router.get("/:userId/tournaments/past", async (req: Request, res: Response) => {
+  const userId = req.params.userId;
+
+  try {
+    const sql = `
+      SELECT t.*
+      FROM tournaments t
+      INNER JOIN teams tm ON t.id = tm.current_tournament_id
+      INNER JOIN team_members tmembers ON tm.id = tmembers.team_id
+      WHERE tmembers.user_id = $1
+      AND t.end_date < NOW();
+    `;
+
+    const result = await query(sql, [userId]);
+
+    return res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Error executing query", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// http://localhost:3000/api/users/:userId
 router.get("/:userId", async (req: Request, res: Response) => {
   const userId = req.params.userId;
 
   try {
     const result = await query("SELECT * FROM users WHERE id = $1", [userId]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "User not found" });
-    }
 
     return res.status(200).json(result.rows[0]);
   } catch (error) {

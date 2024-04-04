@@ -11,6 +11,16 @@ export interface User {
   last_sign_in_at: string | null;
 }
 
+export interface FullUser {
+  user: User;
+  followers: User[];
+  following: User[];
+  ownedTeam: Team;
+  teams: Team[];
+  tournament: Tournament;
+  past_tournaments: Tournament[];
+}
+
 export interface UserFollow {
   follower_id: number;
   followed_id: number;

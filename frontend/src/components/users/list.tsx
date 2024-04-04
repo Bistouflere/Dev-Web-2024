@@ -19,8 +19,6 @@ import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function UserList({ response }: { response: User[] }) {
-  console.log(response);
-
   return (
     <Table>
       <TableHeader>

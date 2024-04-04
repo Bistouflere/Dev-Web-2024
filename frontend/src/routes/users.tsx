@@ -1,47 +1,14 @@
+import { usersCountQueryOptions, usersQueryOptions } from "@/api/users";
 import UrlPagination from "@/components/pagination";
 import { Search } from "@/components/search";
 import { TableLoader } from "@/components/table-loader";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { UserList } from "@/components/users/list";
-import { User } from "@/types/type";
-import {
-  keepPreviousData,
-  queryOptions,
-  useQuery,
-} from "@tanstack/react-query";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import Balancer from "react-wrap-balancer";
 
-function countOptions(query: string) {
-  return queryOptions({
-    queryKey: ["users_page_count", query],
-    queryFn: () => fetchCount(query),
-    placeholderData: keepPreviousData,
-  });
-}
-
-function usersOptions(query: string, page: number) {
-  return queryOptions({
-    queryKey: ["users_page_users", query, page],
-    queryFn: () => fetchUsers(query, page),
-    placeholderData: keepPreviousData,
-  });
-}
-
-async function fetchCount(query: string): Promise<number> {
-  return axios
-    .get<Record<string, number>>(`/api/users/count?query=${query}`)
-    .then((res) => res.data.count);
-}
-
-async function fetchUsers(query: string, page: number): Promise<User[]> {
-  return axios
-    .get<User[]>(`/api/users?page=${page}&query=${query}`)
-    .then((res) => res.data);
-}
-
-const USERS_PER_PAGE = 9;
+const USERS_PER_PAGE = 10;
 
 export default function UsersPage() {
   const [searchParams] = useSearchParams();
@@ -49,8 +16,8 @@ export default function UsersPage() {
   const query = searchParams.get("query") || "";
   const page = Number(searchParams.get("page")) || 1;
 
-  const countQuery = useQuery(countOptions(query));
-  const usersQuery = useQuery(usersOptions(query, page));
+  const countQuery = useQuery(usersCountQueryOptions(query));
+  const usersQuery = useQuery(usersQueryOptions(query, page));
   const pageCount = Math.ceil(countQuery.data! / USERS_PER_PAGE);
 
   const startUserIndex = (page - 1) * USERS_PER_PAGE + 1;

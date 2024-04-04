@@ -1,3 +1,4 @@
+import { tournamentPopularQueryOptions } from "@/api/tournaments";
 import {
   Card,
   CardContent,
@@ -13,26 +14,11 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Tournament } from "@/types/type";
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 import Balancer from "react-wrap-balancer";
 
-function tournamentsOptions() {
-  return queryOptions({
-    queryKey: ["tournaments_home"],
-    queryFn: () => fetchHomeTournaments(),
-  });
-}
-
-async function fetchHomeTournaments(): Promise<Tournament[]> {
-  return axios
-    .get<Tournament[]>(`/api/tournaments/most-teams`)
-    .then((res) => res.data);
-}
-
 export default function IndexPage() {
-  const { data: tournaments } = useQuery(tournamentsOptions());
-  console.log(tournaments);
+  const { data: tournaments } = useQuery(tournamentPopularQueryOptions());
 
   return (
     <div className="container relative">

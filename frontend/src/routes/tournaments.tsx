@@ -1,52 +1,17 @@
+import {
+  tournamentsCountQueryOptions,
+  tournamentsQueryOptions,
+} from "@/api/tournaments";
 import UrlPagination from "@/components/pagination";
 import { Search } from "@/components/search";
 import { TableLoader } from "@/components/table-loader";
 import { TournamentList } from "@/components/tournaments/list";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Tournament } from "@/types/type";
-import {
-  keepPreviousData,
-  queryOptions,
-  useQuery,
-} from "@tanstack/react-query";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import Balancer from "react-wrap-balancer";
 
-export class TournamentNotFoundError extends Error {}
-
-function countOptions(query: string) {
-  return queryOptions({
-    queryKey: ["tournaments_page_count", query],
-    queryFn: () => fetchCount(query),
-    placeholderData: keepPreviousData,
-  });
-}
-
-function tournamentsOptions(query: string, page: number) {
-  return queryOptions({
-    queryKey: ["tournaments_page_tournaments", query, page],
-    queryFn: () => fetchTournaments(query, page),
-    placeholderData: keepPreviousData,
-  });
-}
-
-async function fetchCount(query: string): Promise<number> {
-  return axios
-    .get<Record<string, number>>(`/api/tournaments/count?query=${query}`)
-    .then((res) => res.data.count);
-}
-
-async function fetchTournaments(
-  query: string,
-  page: number,
-): Promise<Tournament[]> {
-  return axios
-    .get<Tournament[]>(`/api/tournaments?page=${page}&query=${query}`)
-    .then((res) => res.data);
-}
-
-const TOURNAMENT_PER_PAGE = 9;
+const TOURNAMENT_PER_PAGE = 10;
 
 export default function TournamentsPage() {
   const [searchParams] = useSearchParams();
@@ -54,8 +19,8 @@ export default function TournamentsPage() {
   const query = searchParams.get("query") || "";
   const page = Number(searchParams.get("page")) || 1;
 
-  const countQuery = useQuery(countOptions(query));
-  const tournamentsQuery = useQuery(tournamentsOptions(query, page));
+  const countQuery = useQuery(tournamentsCountQueryOptions(query));
+  const tournamentsQuery = useQuery(tournamentsQueryOptions(query, page));
   const pageCount = Math.ceil(countQuery.data! / TOURNAMENT_PER_PAGE);
 
   const startTournamentIndex = (page - 1) * TOURNAMENT_PER_PAGE + 1;

@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT valid_email CHECK (email_address ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$')
 );
 
-CREATE TABLE user_follows (
+CREATE TABLE IF NOT EXISTS user_follows (
     follower_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     followed_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     PRIMARY KEY (follower_id, followed_id)
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS formats (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE tournaments (
+CREATE TABLE IF NOT EXISTS tournaments (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
@@ -55,7 +55,7 @@ CREATE TABLE tournaments (
     CONSTRAINT positive_cash_prize CHECK (cash_prize >= 0)
 );
 
-CREATE TABLE tournament_admins (
+CREATE TABLE IF NOT EXISTS tournament_admins (
     tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     admin BOOLEAN DEFAULT FALSE,
@@ -73,10 +73,17 @@ CREATE TABLE IF NOT EXISTS teams (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE team_tournaments (
+CREATE TABLE IF NOT EXISTS team_tournaments (
     team_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
     tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
     PRIMARY KEY (team_id, tournament_id)
+);
+
+CREATE TABLE IF NOT EXISTS users_tournaments (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
+    -- add more info about the user in the tournament
+    PRIMARY KEY (user_id, tournament_id)
 );
 
 CREATE TABLE IF NOT EXISTS team_members (
@@ -86,7 +93,7 @@ CREATE TABLE IF NOT EXISTS team_members (
     PRIMARY KEY (team_id, user_id)
 );
 
-CREATE TABLE matches (
+CREATE TABLE IF NOT EXISTS matches (
     id SERIAL PRIMARY KEY,
     tournament_id INTEGER REFERENCES tournaments(id) ON DELETE CASCADE,
     team1_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
@@ -98,7 +105,7 @@ CREATE TABLE matches (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE match_scores (
+CREATE TABLE IF NOT EXISTS match_scores (
     match_id INTEGER REFERENCES matches(id) ON DELETE CASCADE,
     team_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
     score INTEGER,
