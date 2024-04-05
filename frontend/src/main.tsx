@@ -4,6 +4,7 @@ import RootLayout from "./layouts/root-layout";
 import NotFoundPage from "./not-found";
 import IndexPage from "./routes";
 import CreateTeamPage from "./routes/dashboard/create-team";
+import CreateTournamentPage from "./routes/dashboard/create-tournament";
 import DashboardPage from "./routes/dashboard/index";
 import TeamPage from "./routes/dashboard/teams";
 import SignInPage from "./routes/sign-in";
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
           { path: "/dashboard", element: <DashboardPage /> },
           { path: "/dashboard/teams", element: <TeamPage /> },
           { path: "/dashboard/teams/create", element: <CreateTeamPage /> },
+          { path: "/dashboard/tournaments/create", element: <CreateTournamentPage /> },
         ],
       },
       {
