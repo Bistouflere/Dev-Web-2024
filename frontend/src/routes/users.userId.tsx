@@ -2,6 +2,15 @@ import { userQueryOptions } from "@/api/users";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -25,8 +34,8 @@ export default function UserProfile() {
   return (
     <div className="container max-w-screen-2xl flex-1 py-4">
       {data ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <div className="grid md:row-span-3 lg:row-span-3">
+        <div className="grid gap-4 lg:grid-cols-4 lg:grid-rows-4 ">
+          <div className="grid lg:row-span-4">
             <Card>
               <CardHeader>
                 <CardTitle>{data.user.username}'s Profile</CardTitle>
@@ -96,7 +105,7 @@ export default function UserProfile() {
               </CardContent>
             </Card>
           </div>
-          <div className="grid md:col-start-2 md:row-start-1 lg:col-span-2 lg:col-start-2 lg:row-start-1">
+          <div className="grid lg:col-span-3">
             <Card>
               <CardHeader>
                 <CardTitle>{data.user.username}'s Statistics</CardTitle>
@@ -146,127 +155,145 @@ export default function UserProfile() {
               </CardContent>
             </Card>
           </div>
-          <div className="grid md:col-start-1 md:row-start-4 lg:col-start-1 lg:row-start-4">
+          <div className="grid lg:col-span-3 lg:col-start-2 lg:row-start-2">
             <Card>
               <CardHeader>
-                <CardTitle>{data.user.username}'s Team</CardTitle>
+                <CardTitle>{data.user.username}'s Teams</CardTitle>
               </CardHeader>
               <CardContent className="grid">
-                {data.ownedTeam ? (
-                  <div>
-                    <div className="flex items-center space-x-4">
-                      <div>
-                        <Link to={`/teams/${data.ownedTeam.id}`}>
-                          <Avatar className="items-center w-24 h-24 mb-2">
-                            <AvatarImage
-                              src={data.ownedTeam.image_url || undefined}
-                              alt="Avatar"
-                              className="rounded-full"
-                            />
-                            <AvatarFallback>{data.ownedTeam.id}</AvatarFallback>
-                          </Avatar>
-                        </Link>
-                        <Link to={`/teams/${data.ownedTeam.id}`}>
-                          <Button variant="secondary">
-                            <Users className="mr-2 h-5 w-5" />
-                            View Team
-                          </Button>
-                        </Link>
-                      </div>
-                      <div>
-                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-                          {data.ownedTeam.name}
-                        </h3>
-                        <p className="leading-7 [&:not(:first-child)]:mt-6">
-                          {data.ownedTeam.description}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex items-center space-x-4">
-                      <div>
-                        <div className="items-center w-24 h-24 bg-muted rounded-full"></div>
-                      </div>
-                      <div>
-                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-                          No Team
-                        </h3>
-                        <p className="leading-7 [&:not(:first-child)]:mt-6">
-                          {data.user.username} is not part of any team.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <ScrollArea>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[100px]">
+                          <span className="sr-only">Team Avatar</span>
+                        </TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className="text-right">Owner ID</TableHead>
+                        <TableHead className="text-right">
+                          Tournament ID
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {data.teams
+                        ? data.teams.map((team) => (
+                            <TableRow key={team.id}>
+                              <TableCell className="w-[100px]">
+                                <Link to={`/teams/${team.id}`}>
+                                  <Avatar className="items-center w-10 h-10">
+                                    <AvatarImage
+                                      src={team.image_url || undefined}
+                                      alt="Avatar"
+                                      className="rounded-full"
+                                    />
+                                    <AvatarFallback>{team.id}</AvatarFallback>
+                                  </Avatar>
+                                </Link>
+                              </TableCell>
+                              <TableCell className="font-medium">
+                                <Link to={`/teams/${team.id}`}>
+                                  {team.name}
+                                </Link>
+                              </TableCell>
+                              <TableCell>{team.description}</TableCell>
+                              <TableCell className="text-right">
+                                <Link to={`/users/${team.owner_id}`}>
+                                  {team.owner_id}
+                                </Link>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Link
+                                  to={`/tournaments/${team.current_tournament_id}`}
+                                >
+                                  {team.current_tournament_id}
+                                </Link>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        : null}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
               </CardContent>
             </Card>
           </div>
-          <div className="grid md:col-start-2 md:row-start-2 lg:col-span-2 lg:col-start-2 lg:row-start-2">
+          <div className="grid lg:col-span-3 lg:col-start-2 lg:row-start-3">
             <Card>
               <CardHeader>
-                <CardTitle>{data.user.username}'s Tournament</CardTitle>
+                <CardTitle>{data.user.username}'s Tournaments</CardTitle>
               </CardHeader>
               <CardContent>
-                {data.tournament ? (
-                  <div>
-                    <div className="flex items-center space-x-4">
-                      <div>
-                        <Link to={`/tournaments/${data.tournament.id}`}>
-                          <Avatar className="items-center w-24 h-24 mb-2">
-                            <AvatarImage
-                              src={data.tournament.image_url || undefined}
-                              alt="Avatar"
-                              className="rounded-full"
-                            />
-                            <AvatarFallback>
-                              {data.tournament.id}
-                            </AvatarFallback>
-                          </Avatar>
-                        </Link>
-                        <Link to={`/tournaments/${data.tournament.id}`}>
-                          <Button variant="secondary">
-                            <Users className="mr-2 h-5 w-5" />
-                            View Tournament
-                          </Button>
-                        </Link>
-                      </div>
-                      <div>
-                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-                          {data.tournament.name}
-                        </h3>
-                        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
-                          {data.tournament.game_id}
-                        </h4>
-                        <p className="leading-7 [&:not(:first-child)]:mt-6">
-                          {data.tournament.description}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex items-center space-x-4">
-                      <div>
-                        <div className="items-center w-24 h-24 bg-muted rounded-full"></div>
-                      </div>
-                      <div>
-                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-                          No Tournament
-                        </h3>
-                        <p className="leading-7 [&:not(:first-child)]:mt-6">
-                          {data.user.username} has not participated in any
-                          tournament.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <ScrollArea>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[100px]">
+                          <span className="sr-only">Tournament Avatar</span>
+                        </TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Game</TableHead>
+                        <TableHead>Format</TableHead>
+                        <TableHead>Public</TableHead>
+                        <TableHead>Slots</TableHead>
+                        <TableHead className="text-right">Cash Prize</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {data.tournaments
+                        ? data.tournaments.map((tournament) => (
+                            <TableRow key={tournament.id}>
+                              <TableCell className="w-[100px]">
+                                <Link to={`/tournaments/${tournament.id}`}>
+                                  <Avatar className="items-center w-10 h-10">
+                                    <AvatarImage
+                                      src={tournament.image_url || undefined}
+                                      alt="Avatar"
+                                      className="rounded-full"
+                                    />
+                                    <AvatarFallback>
+                                      {tournament.id}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                </Link>
+                              </TableCell>
+                              <TableCell className="font-medium">
+                                <Link to={`/tournaments/${tournament.id}`}>
+                                  {tournament.name}
+                                </Link>
+                              </TableCell>
+                              <TableCell>
+                                <Link to={`/games/${tournament.game_id}`}>
+                                  {tournament.game_id}
+                                </Link>
+                              </TableCell>
+                              <TableCell>
+                                <Link to={`/formats/${tournament.format_id}`}>
+                                  {tournament.format_id}
+                                </Link>
+                              </TableCell>
+                              <TableCell>
+                                {tournament.public ? (
+                                  <Users className="h-5 w-5 text-green-500" />
+                                ) : (
+                                  <Users className="h-5 w-5 text-red-500" />
+                                )}
+                              </TableCell>
+                              <TableCell>{tournament.slots}</TableCell>
+                              <TableCell className="text-right">
+                                ${tournament.cash_prize}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        : null}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
               </CardContent>
             </Card>
           </div>
-          <div className="grid md:col-start-2 md:row-span-2 md:row-start-3 lg:col-span-2 lg:col-start-2 lg:row-span-2 lg:row-start-3">
+          <div className="grid lg:col-span-3 lg:col-start-2 lg:row-start-4">
             <Card>
               <CardHeader>
                 <CardTitle>{data.user.username}'s Past Tournaments</CardTitle>
