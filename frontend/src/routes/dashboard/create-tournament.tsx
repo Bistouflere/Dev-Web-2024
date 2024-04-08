@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import {
     Form,
@@ -18,8 +19,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, ChevronRightIcon, ChevronsUpDown } from "lucide-react";
-import { useState } from "react";
+import { Calendar as CalendarIcon, Check, ChevronRightIcon, ChevronsUpDown } from "lucide-react";
+import { DateRange } from "react-day-picker";
+import { addDays, format } from "date-fns";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Balancer from "react-wrap-balancer";
 import { z } from "zod";
@@ -34,31 +37,53 @@ const games = [
     { label: "Fifa 24", value: "fifa" },
     { label: "Overwatch", value: "overwatch" },
     { label: "Brawl Stars", value: "brawlStars" },
-] as const
-
-const format = [
-    { label: "BO1", value: "bo1" },
-    { label: "BO3", value: "bo3" },
-    { label: "BO5", value: "bo5" },
-] as const
+] as const;
 
 const profileFormSchema = z.object({
     username: z
-        .string()
+        .string({
+            required_error: "Please give a name.",
+        })
         .min(2, {
             message: "Username must be at least 2 characters.",
         })
         .max(30, {
             message: "Username must not be longer than 30 characters.",
         }),
-    bio: z.string().max(160).min(4),
+    bio: z.string().max(160).min(4).optional(),
+    picture: z.string().optional(),
     game: z.string({
         required_error: "Please select a game.",
     }),
-    format: z.string({
-        required_error: "Please select a format.",
-    }),
-    picture: z.string().optional(),
+    format: z
+        .string({
+            required_error: "Please select a format.",
+        }),
+    cash_prize: z.string().optional(),
+    max_teams: z
+        .string({
+            required_error: "Please specify the number max for teams.",
+        })
+        .min(5, {
+            message: "Number of players must be at least 5. (5 players for a 5v5 game)",
+        })
+        .max(7, {
+            message: "Number of players must not exceed 7. (5 players + 2 subs for a 5v5 game)",
+        }),
+    team_size: z
+        .string({
+            required_error: "Please specify the number max of teams.",
+        })
+        .min(1, {
+            message: "Number of slots must be at least 1.",
+        })
+        .max(16, {
+            message: "Number of slots must not exceed 16.",
+        }),
+    dates: z
+        .string({
+            required_error: "Please give the dates.",
+        }),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -79,6 +104,22 @@ export default function CreateTournamentPage() {
 
     const [hoveredGameIndex, setHoveredGameIndex] = useState<number | null>(null);
 
+    const [date, setDate] = useState<DateRange | undefined>({
+        from: new Date(),
+        to: addDays(new Date(), 7),
+    });
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setDate(prevDate => ({
+                from: prevDate?.from,
+                to: addDays(new Date(), 7),
+            }));
+        }, 24 * 60 * 60 * 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <main className="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_300px]">
             <div className="mx-auto w-full min-w-0">
@@ -97,9 +138,13 @@ export default function CreateTournamentPage() {
                         <Balancer>This is the protected tournament creation page.</Balancer>
                     </p>
                 </div>
-
+                <br />
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                        <FormDescription>
+                            Fields marked with * are required.
+                        </FormDescription>
+
                         <FormField
                             control={form.control}
                             name="username"
@@ -119,12 +164,13 @@ export default function CreateTournamentPage() {
                                 </FormItem>
                             )}
                         />
+
                         <FormField
                             control={form.control}
                             name="bio"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Description *</FormLabel>
+                                    <FormLabel>Description</FormLabel>
                                     <FormControl>
                                         <Textarea
                                             placeholder="Tell us a little bit about your tournament..."
@@ -136,12 +182,24 @@ export default function CreateTournamentPage() {
                                 </FormItem>
                             )}
                         />
+
+                        <FormField
+                            control={form.control}
+                            name="picture"
+                            render={({ field }) => (
+                                <FormItem className="grid w-full max-w-sm items-center gap-1.5">
+                                    <FormLabel htmlFor="picture">Picture</FormLabel>
+                                    <Input id="picture" type="file" {...field} />
+                                </FormItem>
+                            )}
+                        />
+
                         <FormField
                             control={form.control}
                             name="game"
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
-                                    <FormLabel>Game</FormLabel>
+                                    <FormLabel>Game *</FormLabel>
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <FormControl>
@@ -205,33 +263,147 @@ export default function CreateTournamentPage() {
                             )}
                         />
 
-                        <FormItem>
-                            <FormLabel>Format</FormLabel>
-                            <Select>
-                                <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Select a format" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="bo1">BO1</SelectItem>
-                                    <SelectItem value="bo3">BO3</SelectItem>
-                                    <SelectItem value="bo5">BO5</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </FormItem>
+                        <FormField
+                            control={form.control}
+                            name="format"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Format *</FormLabel>
+                                    <Select>
+                                        <SelectTrigger className="w-[180px]">
+                                            <SelectValue placeholder="Select a format" {...field} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="single_elimination">Single Elimination</SelectItem>
+                                            <SelectItem value="double_elimination">Double Elimination</SelectItem>
+                                            <SelectItem value="round_robin">Round Robin</SelectItem>
+                                            <SelectItem value="swiss">Swiss</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormItem>
+                            )}
+                        />
 
-                        <FormItem>
-                            <FormLabel>Public</FormLabel>
-                            <div className="flex items-center space-x-2">
-                                <Label htmlFor="true">Yes</Label>
-                                <Switch id="airplane-mode" />
-                                <Label htmlFor="false">No</Label>
-                            </div>
-                        </FormItem>
+                        <FormField
+                            control={form.control}
+                            name="format"
+                            render={() => (
+                                <FormItem>
+                                    <FormLabel>Public *</FormLabel>
+                                    <div className="flex items-center space-x-2">
+                                        <Label htmlFor="true">Yes</Label>
+                                        <Switch />
+                                        <Label htmlFor="false">No</Label>
+                                    </div>
+                                </FormItem>
+                            )}
+                        />
 
-                        <div className="grid w-full max-w-sm items-center gap-1.5">
-                            <Label htmlFor="picture">Picture</Label>
-                            <Input id="picture" type="file" />
-                        </div>
+                        <FormField
+                            control={form.control}
+                            name="cash_prize"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Cash Prize (En €)</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            placeholder="Enter the cash prize for the tournament."
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="max_teams"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Max Teams *</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            step="1"
+                                            placeholder="Enter the max of teams for the tournament."
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="team_size"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Team Size *</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            step="1"
+                                            placeholder="Enter the team size for the tournament."
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="dates"
+                            render={() => (
+                                <FormItem>
+                                    <FormLabel>Dates *</FormLabel>
+                                    <div className={cn("grid gap-2")}>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    id="date"
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-[300px] justify-start text-left font-normal",
+                                                        !date && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {date?.from ? (
+                                                        date.to ? (
+                                                            <>
+                                                                {format(date.from, "LLL dd, y")} -{" "}
+                                                                {format(date.to, "LLL dd, y")}
+                                                            </>
+                                                        ) : (
+                                                            format(date.from, "LLL dd, y")
+                                                        )
+                                                    ) : (
+                                                        <span>Pick a date</span>
+                                                    )}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar
+                                                    initialFocus
+                                                    mode="range"
+                                                    defaultMonth={date?.from}
+                                                    selected={date}
+                                                    onSelect={setDate}
+                                                    numberOfMonths={2}
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                </FormItem>
+                            )}
+                        />
+
                         <Button type="submit">Create My Team</Button>
                     </form>
                 </Form>
