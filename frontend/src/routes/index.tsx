@@ -13,7 +13,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Tournament } from "@/types/type";
 import { useQuery } from "@tanstack/react-query";
 import Balancer from "react-wrap-balancer";
 
@@ -36,22 +35,22 @@ export default function IndexPage() {
           <section className="flex items-center justify-center">
             <Carousel className="w-full max-w-sm">
               <CarouselContent className="-ml-1">
-                {tournaments.map((response: Tournament) => (
+                {tournaments.map((response) => (
                   <CarouselItem
-                    key={response.id}
+                    key={response.tournament_id}
                     className="pl-1 md:basis-1/2 lg:basis-1/3"
                   >
                     <div className="p-1">
                       <Card>
                         <CardHeader>
-                          <CardTitle>{response.name}</CardTitle>
+                          <CardTitle>{response.tournament_name}</CardTitle>
                           <CardDescription>
-                            {response.cash_prize}$
+                            ${response.cash_prize || 0}
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
                           <span className="text-3xl font-semibold">
-                            {response.description}
+                            {response.tournament_description}
                           </span>
                         </CardContent>
                       </Card>

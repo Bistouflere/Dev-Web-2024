@@ -1,175 +1,153 @@
 import { query } from "../db/index";
-import express, { Request, Response, Router } from "express";
+import express, { Request, Response } from "express";
 
-const router: Router = express.Router();
+const router = express.Router();
 
-// http://localhost:3000/api/teams/count
+const sendErrorResponse = (res: Response, error: any) => {
+  console.error(error);
+  res.status(500).json({ error: "Internal Server Error" });
+};
+
 router.get("/count", async (req: Request, res: Response) => {
-  const { query: searchQuery } = req.query;
+  const searchQuery = req.query.query as string;
 
   try {
-    let sql = "SELECT COUNT(*) FROM teams";
+    const sql = searchQuery
+      ? `SELECT COUNT(*) FROM teams WHERE name ILIKE $1;`
+      : `SELECT COUNT(*) FROM teams;`;
+    const params = searchQuery ? [`%${searchQuery}%`] : [];
+    const result = await query(sql, params);
 
-    const values = [];
-
-    if (searchQuery) {
-      sql += ` WHERE name ILIKE $1`;
-      values.push(`%${searchQuery}%`);
-    }
-
-    const result = await query(sql, values);
-
-    const count = parseInt(result.rows[0].count);
-
-    return res.status(200).json({ count });
+    const count = parseInt(result.rows[0].count, 10);
+    res.status(200).json({ count });
   } catch (error) {
-    console.error("Error executing query", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    sendErrorResponse(res, error);
   }
 });
 
-// http://localhost:3000/api/teams/:teamId/users
-router.get("/:teamId/users", async (req: Request, res: Response) => {
-  const teamId = req.params.teamId;
-
-  try {
-    const sql = `
-      SELECT u.*
-      FROM users u
-      INNER JOIN team_members tm ON u.id = tm.user_id
-      WHERE tm.team_id = $1;
-    `;
-
-    const result = await query(sql, [teamId]);
-
-    return res.status(200).json(result.rows);
-  } catch (error) {
-    console.error("Error executing query", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// http://localhost:3000/api/teams/:teamId/admins
-router.get("/:teamId/admins", async (req: Request, res: Response) => {
-  const teamId = req.params.teamId;
-
-  try {
-    const sql = `
-      SELECT u.*
-      FROM users u
-      INNER JOIN team_members tm ON u.id = tm.user_id
-      WHERE tm.team_id = $1 AND tm.admin = true;
-    `;
-
-    const result = await query(sql, [teamId]);
-
-    return res.status(200).json(result.rows);
-  } catch (error) {
-    console.error("Error executing query", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// http://localhost:3000/api/teams/:teamId/tournaments
-router.get("/:teamId/tournaments", async (req: Request, res: Response) => {
-  const teamId = req.params.teamId;
-
-  try {
-    const currentTournamentResult = await query(
-      `
-      SELECT t.*
-      FROM tournaments t
-      WHERE t.id = (SELECT current_tournament_id FROM teams WHERE id = $1);
-    `,
-      [teamId],
-    );
-
-    const currentTournament = currentTournamentResult.rows[0];
-
-    return res.status(200).json(currentTournament);
-  } catch (error) {
-    console.error("Error executing query", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// http://localhost:3000/api/teams/:teamId/past-tournaments
-router.get("/:teamId/past-tournaments", async (req: Request, res: Response) => {
-  const teamId = req.params.teamId;
-
-  try {
-    const oldTournamentsResult = await query(
-      `
-      SELECT t.*
-      FROM tournaments t
-      WHERE t.id IN (
-        SELECT tournament_id
-        FROM team_tournaments
-        WHERE team_id = $1
-      ) AND t.id != (
-        SELECT current_tournament_id
-        FROM teams
-        WHERE id = $1
-      );
-    `,
-      [teamId],
-    );
-
-    const oldTournaments = oldTournamentsResult.rows;
-
-    return res.status(200).json(oldTournaments);
-  } catch (error) {
-    console.error("Error executing query", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// http://localhost:3000/api/teams/:teamId
 router.get("/:teamId", async (req: Request, res: Response) => {
-  const teamId = req.params.teamId;
+  const { teamId } = req.params;
 
   try {
-    const result = await query("SELECT * FROM teams WHERE id = $1", [teamId]);
+    const sql = `
+      SELECT
+        t.id AS team_id,
+        t.name AS team_name,
+        t.description AS team_description,
+        t.image_url AS team_image_url,
+        json_agg(DISTINCT jsonb_build_object(
+          'user_id', u.id,
+          'username', u.username,
+          'first_name', u.first_name,
+          'last_name', u.last_name,
+          'email_address', u.email_address,
+          'image_url', u.image_url,
+          'role', tu.role
+        )) FILTER (WHERE u.id IS NOT NULL) AS team_members,
+        json_agg(DISTINCT jsonb_build_object(
+          'tournament_id', tor.id,
+          'tournament_name', tor.name,
+          'tournament_description', tor.description,
+          'tournament_image_url', tor.image_url,
+          'tournament_format', tor.format,
+          'tournament_visibility', tor.visibility,
+          'tournament_cash_prize', tor.cash_prize,
+          'tournament_status', tor.status,
+          'tournament_start_date', tor.start_date,
+          'tournament_end_date', tor.end_date,
+          'game', jsonb_build_object(
+            'game_id', g.id,
+            'game_name', g.name,
+            'game_description', g.description,
+            'game_image_url', g.image_url
+          )
+        )) FILTER (WHERE tor.id IS NOT NULL) AS participating_tournaments,
+        json_agg(DISTINCT jsonb_build_object(
+          'follower_id', uf.follower_id,
+          'follower_username', fu.username,
+          'follower_email', fu.email_address,
+          'follower_image_url', fu.image_url
+        )) FILTER (WHERE uf.follower_id IS NOT NULL) AS team_followers
+      FROM teams t
+      LEFT JOIN team_users tu ON t.id = tu.team_id
+      LEFT JOIN users u ON tu.user_id = u.id
+      LEFT JOIN tournament_teams tt ON t.id = tt.team_id
+      LEFT JOIN tournaments tor ON tt.tournament_id = tor.id
+      LEFT JOIN games g ON tor.game_id = g.id
+      LEFT JOIN team_follows uf ON t.id = uf.followed_id
+      LEFT JOIN users fu ON uf.follower_id = fu.id
+      WHERE t.id = $1
+      GROUP BY t.id;
+    `;
+
+    const result = await query(sql, [teamId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Team not found" });
+    }
 
     return res.status(200).json(result.rows[0]);
   } catch (error) {
-    console.error("Error executing query", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    sendErrorResponse(res, error);
   }
 });
 
-// http://localhost:3000/api/teams?query=myteam&page=1
 router.get("/", async (req: Request, res: Response) => {
   const { query: searchQuery, page } = req.query;
   const perPage = 10;
-  const offset = (parseInt(page as string) - 1) * perPage || 0;
+  const offset = (Math.abs(parseInt(page as string, 10) - 1) || 0) * perPage;
 
   try {
-    let result;
+    const sqlBase = `
+      SELECT
+        tm.id AS team_id,
+        tm.name AS team_name,
+        tm.description AS team_description,
+        tm.image_url AS team_image_url,
+        json_agg(DISTINCT jsonb_build_object(
+          'tournament_id', tor.id,
+          'tournament_name', tor.name,
+          'tournament_description', tor.description,
+          'tournament_image_url', tor.image_url,
+          'tournament_cash_prize', tor.cash_prize,
+          'tournament_start_date', tor.start_date,
+          'tournament_end_date', tor.end_date,
+          'game', jsonb_build_object(
+            'game_id', g.id,
+            'game_name', g.name,
+            'game_description', g.description,
+            'game_image_url', g.image_url
+          )
+        )) FILTER (WHERE tor.id IS NOT NULL) AS tournaments_info
+      FROM teams tm
+      LEFT JOIN tournament_teams tt ON tm.id = tt.team_id
+      LEFT JOIN tournaments tor ON tt.tournament_id = tor.id
+      LEFT JOIN games g ON tor.game_id = g.id
+    `;
 
-    if (searchQuery) {
-      const sql = `
-        SELECT * FROM teams
-        WHERE name ILIKE $1
-        ORDER BY id
+    const sql = searchQuery
+      ? `
+        ${sqlBase}
+        WHERE tm.name ILIKE $1
+        GROUP BY tm.id
+        ORDER BY tm.id
         LIMIT $2 OFFSET $3;
-      `;
-
-      result = await query(sql, [`%${searchQuery}%`, perPage, offset]);
-    } else {
-      const sql = `
-        SELECT * FROM teams
-        ORDER BY id
+      `
+      : `
+        ${sqlBase}
+        GROUP BY tm.id
+        ORDER BY tm.id
         LIMIT $1 OFFSET $2;
       `;
 
-      result = await query(sql, [perPage, offset]);
-    }
+    const params = searchQuery
+      ? [`%${searchQuery}%`, perPage, offset]
+      : [perPage, offset];
+    const result = await query(sql, params);
 
     return res.status(200).json(result.rows);
   } catch (error) {
-    console.error("Error executing query", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    sendErrorResponse(res, error);
   }
 });
 

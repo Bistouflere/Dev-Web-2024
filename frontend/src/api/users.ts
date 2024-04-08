@@ -1,4 +1,5 @@
-import { FullUser, Team, Tournament, User } from "@/types/type";
+import { UserProfile } from "@/types/user";
+import { APIResult } from "@/types/users";
 import { keepPreviousData, queryOptions } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -35,48 +36,23 @@ export async function fetchUsersCount(query: string): Promise<number> {
     });
 }
 
-export async function fetchUsers(query: string, page: number): Promise<User[]> {
+export async function fetchUsers(
+  query: string,
+  page: number,
+): Promise<APIResult> {
   return axios
-    .get<User[]>(`/api/users?page=${page}&query=${query}`)
+    .get<APIResult>(`/api/users?page=${page}&query=${query}`)
     .then((res) => {
       console.log("users", res.data);
       return res.data;
     });
 }
 
-export async function fetchUser(id: number): Promise<FullUser> {
+export async function fetchUser(id: number): Promise<UserProfile> {
   const user = await axios
-    .get<User>(`/api/users/${id}`)
-    .then((res) => res.data);
-  const followers = await axios
-    .get<User[]>(`/api/users/${id}/followers`)
-    .then((res) => res.data);
-  const following = await axios
-    .get<User[]>(`/api/users/${id}/following`)
-    .then((res) => res.data);
-  const teams = await axios
-    .get<Team[]>(`/api/users/${id}/teams`)
-    .then((res) => res.data);
-  const ownedTeam = await axios
-    .get<Team>(`/api/users/${id}/teams/owned`)
-    .then((res) => res.data);
-  const tournament = await axios
-    .get<Tournament>(`/api/users/${id}/tournaments`)
-    .then((res) => res.data);
-  const past_tournaments = await axios
-    .get<Tournament[]>(`/api/users/${id}/tournaments/past`)
+    .get<UserProfile>(`/api/users/${id}`)
     .then((res) => res.data);
 
-  const fullUser = {
-    user,
-    followers,
-    following,
-    teams,
-    ownedTeam,
-    tournament,
-    past_tournaments,
-  };
-
-  console.log("fullUser", fullUser);
-  return fullUser;
+  console.log("fullUser", user);
+  return user;
 }

@@ -56,7 +56,7 @@ router.post(
       try {
         const result = await query(
           `
-          INSERT INTO users (clerk_id, first_name, last_name, username, email_address, image_url)
+          INSERT INTO users (clerk_user_id, first_name, last_name, username, email_address, image_url)
           VALUES ($1, $2, $3, $4, $5, $6)
           RETURNING *;
           `,
@@ -80,8 +80,8 @@ router.post(
         const result = await query(
           `
           UPDATE users
-          SET clerk_id = $1, first_name = $2, last_name = $3, username = $4, email_address = $5, image_url = $6, last_sign_in_at = $7
-          WHERE clerk_id = $1
+          SET clerk_user_id = $1, first_name = $2, last_name = $3, username = $4, email_address = $5, image_url = $6
+          WHERE clerk_user_id = $1
           RETURNING *;
           `,
           [
@@ -91,7 +91,6 @@ router.post(
             evt.data.username,
             evt.data.email_addresses[0].email_address,
             evt.data.image_url,
-            evt.data.last_sign_in_at,
           ],
         );
 
@@ -109,7 +108,7 @@ router.post(
         const result = await query(
           `
           DELETE FROM users
-          WHERE clerk_id = $1
+          WHERE clerk_user_id = $1
           RETURNING *;
           `,
           [evt.data.id],

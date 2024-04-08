@@ -14,11 +14,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tournament } from "@/types/type";
+import { APIResult } from "@/types/tournaments";
 import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export function TournamentList({ response }: { response: Tournament[] }) {
+export function TournamentList({ response }: { response: APIResult }) {
   return (
     <Table>
       <TableHeader>
@@ -34,21 +34,23 @@ export function TournamentList({ response }: { response: Tournament[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {response.map((response: Tournament) => (
-          <TableRow key={response.id}>
+        {response.map((response) => (
+          <TableRow key={response.tournament_id}>
             <TableCell className="hidden sm:table-cell">
-              <Link to={`/tournaments/${response.id}`}>
+              <Link to={`/tournaments/${response.tournament_id}`}>
                 <img
                   className="aspect-square rounded-md object-cover"
-                  src={response.image_url || undefined}
-                  alt={response.name}
+                  src={response.tournament_image_url || undefined}
+                  alt={response.tournament_name}
                 />
               </Link>
             </TableCell>
             <TableCell className="font-medium">
-              <Link to={`/tournaments/${response.id}`}>{response.name} </Link>
+              <Link to={`/tournaments/${response.tournament_id}`}>
+                {response.tournament_name}{" "}
+              </Link>
             </TableCell>
-            <TableCell>${response.cash_prize}</TableCell>
+            <TableCell>${response.cash_prize || 0}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -60,7 +62,7 @@ export function TournamentList({ response }: { response: Tournament[] }) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuItem>
-                    <Link to={`/tournaments/${response.name}`}>
+                    <Link to={`/tournaments/${response.tournament_id}`}>
                       View Tournament
                     </Link>
                   </DropdownMenuItem>
@@ -68,7 +70,7 @@ export function TournamentList({ response }: { response: Tournament[] }) {
                     className="cursor-pointer"
                     onClick={() => {
                       console.log(
-                        `Register for the tournament ${response.name}`,
+                        `Register for the tournament ${response.tournament_name}`,
                       );
                     }}
                   >

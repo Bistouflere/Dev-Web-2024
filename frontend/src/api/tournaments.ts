@@ -1,4 +1,5 @@
-import { Tournament } from "@/types/type";
+import { APIResult } from "@/types/tournaments";
+import { APIResult as APIResultPopular } from "@/types/tournaments.popular";
 import { keepPreviousData, queryOptions } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -38,17 +39,17 @@ export async function fetchTournamentsCount(query: string): Promise<number> {
 export async function fetchTournaments(
   query: string,
   page: number,
-): Promise<Tournament[]> {
+): Promise<APIResult> {
   return axios
-    .get<Tournament[]>(`/api/tournaments?page=${page}&query=${query}`)
+    .get<APIResult>(`/api/tournaments?page=${page}&query=${query}`)
     .then((res) => {
       console.log("tournaments", res.data);
       return res.data;
     });
 }
 
-export async function fetchTournamentPopular(): Promise<Tournament[]> {
-  return axios.get<Tournament[]>("/api/tournaments/popular").then((res) => {
+export async function fetchTournamentPopular(): Promise<APIResultPopular> {
+  return axios.get<APIResultPopular>("/api/tournaments/popular").then((res) => {
     console.log("popular", res.data);
     return res.data;
   });

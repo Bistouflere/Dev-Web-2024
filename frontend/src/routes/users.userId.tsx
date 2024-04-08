@@ -38,23 +38,23 @@ export default function UserProfile() {
           <div className="grid lg:row-span-4">
             <Card>
               <CardHeader>
-                <CardTitle>{data.user.username}'s Profile</CardTitle>
+                <CardTitle>{data.username}'s Profile</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col items-center space-y-2">
                   <Avatar className="items-center w-24 h-24">
                     <AvatarImage
-                      src={data.user.image_url || undefined}
+                      src={data.image_url || undefined}
                       alt="Avatar"
                       className="rounded-full"
                     />
-                    <AvatarFallback>{data.user.id}</AvatarFallback>
+                    <AvatarFallback>{data.user_id}</AvatarFallback>
                   </Avatar>
                   <p className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
-                    {data.user.username}
+                    {data.username}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {data.user.email_address}
+                    {data.email_address}
                   </p>
                 </div>
                 <div className="mt-4 flex justify-center space-x-4">
@@ -80,7 +80,7 @@ export default function UserProfile() {
                       Followers
                     </small>
                     <small className="text-sm font-medium leading-none">
-                      {data.followers.length}
+                      {data.user_followers ? data.user_followers.length : 0}
                     </small>
                   </div>
                   <div className="flex justify-between">
@@ -88,7 +88,7 @@ export default function UserProfile() {
                       Following
                     </small>
                     <small className="text-sm font-medium leading-none">
-                      {data.following.length}
+                      {data.user_following ? data.user_following.length : 0}
                     </small>
                   </div>
                   <div className="flex justify-between">
@@ -96,9 +96,8 @@ export default function UserProfile() {
                       Member since
                     </small>
                     <small className="text-sm font-medium leading-none">
-                      {new Date(data.user.created_at).getDate()}/
-                      {new Date(data.user.created_at).getMonth()}/
-                      {new Date(data.user.created_at).getFullYear()}
+                      {new Date().getDate()}/{new Date().getMonth()}/
+                      {new Date().getFullYear()}
                     </small>
                   </div>
                 </div>
@@ -108,7 +107,7 @@ export default function UserProfile() {
           <div className="grid lg:col-span-3">
             <Card>
               <CardHeader>
-                <CardTitle>{data.user.username}'s Statistics</CardTitle>
+                <CardTitle>{data.username}'s Statistics</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-3 grid-rows-2 gap-6 lg:grid-cols-5 lg:grid-rows-1">
                 <div className="flex items-center space-x-2">
@@ -158,7 +157,7 @@ export default function UserProfile() {
           <div className="grid lg:col-span-3 lg:col-start-2 lg:row-start-2">
             <Card>
               <CardHeader>
-                <CardTitle>{data.user.username}'s Teams</CardTitle>
+                <CardTitle>{data.username}'s Teams</CardTitle>
               </CardHeader>
               <CardContent className="grid">
                 <ScrollArea>
@@ -170,45 +169,35 @@ export default function UserProfile() {
                         </TableHead>
                         <TableHead>Name</TableHead>
                         <TableHead>Description</TableHead>
-                        <TableHead className="text-right">Owner ID</TableHead>
-                        <TableHead className="text-right">
-                          Tournament ID
-                        </TableHead>
+                        <TableHead className="text-right">Role</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {data.teams
                         ? data.teams.map((team) => (
-                            <TableRow key={team.id}>
+                            <TableRow key={team.team_id}>
                               <TableCell className="w-[100px]">
-                                <Link to={`/teams/${team.id}`}>
+                                <Link to={`/teams/${team.team_id}`}>
                                   <Avatar className="items-center w-10 h-10">
                                     <AvatarImage
-                                      src={team.image_url || undefined}
+                                      src={team.team_image_url || undefined}
                                       alt="Avatar"
                                       className="rounded-full"
                                     />
-                                    <AvatarFallback>{team.id}</AvatarFallback>
+                                    <AvatarFallback>
+                                      {team.team_id}
+                                    </AvatarFallback>
                                   </Avatar>
                                 </Link>
                               </TableCell>
                               <TableCell className="font-medium">
-                                <Link to={`/teams/${team.id}`}>
-                                  {team.name}
+                                <Link to={`/teams/${team.team_id}`}>
+                                  {team.team_name}
                                 </Link>
                               </TableCell>
-                              <TableCell>{team.description}</TableCell>
+                              <TableCell>{team.team_description}</TableCell>
                               <TableCell className="text-right">
-                                <Link to={`/users/${team.owner_id}`}>
-                                  {team.owner_id}
-                                </Link>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <Link
-                                  to={`/tournaments/${team.current_tournament_id}`}
-                                >
-                                  {team.current_tournament_id}
-                                </Link>
+                                {team.team_role}
                               </TableCell>
                             </TableRow>
                           ))
@@ -222,7 +211,7 @@ export default function UserProfile() {
           <div className="grid lg:col-span-3 lg:col-start-2 lg:row-start-3">
             <Card>
               <CardHeader>
-                <CardTitle>{data.user.username}'s Tournaments</CardTitle>
+                <CardTitle>{data.username}'s Tournaments</CardTitle>
               </CardHeader>
               <CardContent>
                 <ScrollArea>
@@ -235,54 +224,62 @@ export default function UserProfile() {
                         <TableHead>Name</TableHead>
                         <TableHead>Game</TableHead>
                         <TableHead>Format</TableHead>
-                        <TableHead>Public</TableHead>
-                        <TableHead>Slots</TableHead>
+                        <TableHead>Visibility</TableHead>
+                        <TableHead>Role</TableHead>
                         <TableHead className="text-right">Cash Prize</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {data.tournaments
                         ? data.tournaments.map((tournament) => (
-                            <TableRow key={tournament.id}>
+                            <TableRow key={tournament.tournament_id}>
                               <TableCell className="w-[100px]">
-                                <Link to={`/tournaments/${tournament.id}`}>
+                                <Link
+                                  to={`/tournaments/${tournament.tournament_id}`}
+                                >
                                   <Avatar className="items-center w-10 h-10">
                                     <AvatarImage
-                                      src={tournament.image_url || undefined}
+                                      src={
+                                        tournament.tournament_image_url ||
+                                        undefined
+                                      }
                                       alt="Avatar"
                                       className="rounded-full"
                                     />
                                     <AvatarFallback>
-                                      {tournament.id}
+                                      {tournament.tournament_id}
                                     </AvatarFallback>
                                   </Avatar>
                                 </Link>
                               </TableCell>
                               <TableCell className="font-medium">
-                                <Link to={`/tournaments/${tournament.id}`}>
-                                  {tournament.name}
+                                <Link
+                                  to={`/tournaments/${tournament.tournament_id}`}
+                                >
+                                  {tournament.tournament_name}
                                 </Link>
                               </TableCell>
                               <TableCell>
-                                <Link to={`/games/${tournament.game_id}`}>
-                                  {tournament.game_id}
+                                <Link to={`/games/${tournament.game.game_id}`}>
+                                  {tournament.game.game_name}
                                 </Link>
                               </TableCell>
                               <TableCell>
-                                <Link to={`/formats/${tournament.format_id}`}>
-                                  {tournament.format_id}
-                                </Link>
+                                {tournament.tournament_format}
                               </TableCell>
                               <TableCell>
-                                {tournament.public ? (
+                                {tournament.tournament_visibility ===
+                                "public" ? (
                                   <Users className="h-5 w-5 text-green-500" />
                                 ) : (
                                   <Users className="h-5 w-5 text-red-500" />
                                 )}
                               </TableCell>
-                              <TableCell>{tournament.slots}</TableCell>
+                              <TableCell>
+                                {tournament.tournament_user_role}
+                              </TableCell>
                               <TableCell className="text-right">
-                                ${tournament.cash_prize}
+                                ${tournament.tournament_cash_prize || 0}
                               </TableCell>
                             </TableRow>
                           ))
@@ -296,7 +293,7 @@ export default function UserProfile() {
           <div className="grid lg:col-span-3 lg:col-start-2 lg:row-start-4">
             <Card>
               <CardHeader>
-                <CardTitle>{data.user.username}'s Past Tournaments</CardTitle>
+                <CardTitle>{data.username}'s Past Tournaments</CardTitle>
               </CardHeader>
               <CardContent></CardContent>
             </Card>

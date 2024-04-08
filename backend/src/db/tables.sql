@@ -41,6 +41,7 @@ CREATE TABLE user_follows (
 CREATE TABLE teams (
     id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL,
+    description TEXT,
     image_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -79,6 +80,7 @@ CREATE TABLE tournaments (
     visibility tournament_visibility NOT NULL DEFAULT 'public',
     status tournament_status NOT NULL DEFAULT 'upcoming',
     tags TEXT[],
+    cash_prize DECIMAL(16, 2),
     max_teams INT NOT NULL DEFAULT 16, -- 16 teams
     max_team_size INT NOT NULL DEFAULT 7, -- 5 players + 2 subs for a 5v5 game
     min_team_size INT NOT NULL DEFAULT 5, -- 5 players for a 5v5 game
