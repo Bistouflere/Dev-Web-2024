@@ -6,7 +6,7 @@ const doc = {
     description: "API Documentation",
   },
   host: "madbracket.xyz",
-  schemes: ["http", "https"],
+  schemes: ["http"],
 };
 
 const outputFile = "./swagger.json";

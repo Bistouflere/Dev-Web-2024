@@ -7,10 +7,7 @@
   },
   "host": "madbracket.xyz",
   "basePath": "/",
-  "schemes": [
-    "http",
-    "https"
-  ],
+  "schemes": ["http"],
   "paths": {
     "/api/webhooks/": {
       "post": {
