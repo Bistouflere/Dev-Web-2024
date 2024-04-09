@@ -322,4 +322,21 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
+router.post('/follow', async (req: Request, res: Response) => {
+
+  //const { followerid, followedid} = req.query
+  console.log(req);
+  // try {
+  //   const sql = 
+  //   `
+  //   INSERT INTO user_follows (follower_id, followed_id) VALUES
+  //   ($1, $2);
+  //   `
+  //   const result = await query(sql, [followerid, followedid])
+  //   res.status(201).json();
+  // } 
+  // catch (error) {
+  //   sendErrorResponse(res, error);
+  // }
+})
 export default router;

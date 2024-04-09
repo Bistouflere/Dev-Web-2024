@@ -56,3 +56,13 @@ export async function fetchUser(id: number): Promise<UserProfile> {
   console.log("fullUser", user);
   return user;
 }
+
+export async function addFollow(followerid: string, followedid: string) {
+  axios.post('/api/users/follow', {followerid, followedid})
+  .then(response => {
+    console.log(response)
+  })
+  .catch(error => {
+    console.error('Error following user:', error.message);
+  })
+}
