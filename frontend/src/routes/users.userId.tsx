@@ -32,10 +32,10 @@ export default function UserProfile() {
   const { data } = useQuery(userQueryOptions(Number(searchUserId)));
 
   return (
-    <div className="container max-w-screen-2xl flex-1 py-4">
+    <div className="container py-4">
       {data ? (
-        <div className="grid gap-4 lg:grid-cols-4 lg:grid-rows-4 ">
-          <div className="grid lg:row-span-4">
+        <div className="flex gap-4 flex-col lg:flex-row">
+          <div className="flex-none">
             <Card>
               <CardHeader>
                 <CardTitle>{data.username}'s Profile</CardTitle>
@@ -104,117 +104,119 @@ export default function UserProfile() {
               </CardContent>
             </Card>
           </div>
-          <div className="grid lg:col-span-3">
-            <Card>
-              <CardHeader>
-                <CardTitle>{data.username}'s Statistics</CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-3 grid-rows-2 gap-6 lg:grid-cols-5 lg:grid-rows-1">
-                <div className="flex items-center space-x-2">
-                  <Swords className="h-10 w-10 text-purple-400" />
-                  <div>
-                    <p className="text-xl font-extrabold md:text-2xl">9</p>
-                    <p className="text-sm font-medium leading-none">
-                      Game Played
-                    </p>
+          <div className="flex gap-4 flex-auto flex-col">
+            <div className="flex-auto">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{data.username}'s Statistics</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-3 grid-rows-2 gap-6 lg:grid-cols-5 lg:grid-rows-1">
+                  <div className="flex items-center space-x-2">
+                    <Swords className="h-10 w-10 text-purple-400" />
+                    <div>
+                      <p className="text-xl font-extrabold md:text-2xl">9</p>
+                      <p className="text-sm font-medium leading-none">
+                        Game Played
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <ArrowUpRight className="h-10 w-10 text-green-400" />
-                  <div>
-                    <p className="text-xl font-extrabold md:text-2xl">7</p>
-                    <p className="text-sm font-medium leading-none">
-                      Victories
-                    </p>
+                  <div className="flex items-center space-x-2">
+                    <ArrowUpRight className="h-10 w-10 text-green-400" />
+                    <div>
+                      <p className="text-xl font-extrabold md:text-2xl">7</p>
+                      <p className="text-sm font-medium leading-none">
+                        Victories
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <ArrowDownRight className="h-10 w-10 text-red-400" />
-                  <div>
-                    <p className="text-xl font-extrabold md:text-2xl">2</p>
-                    <p className="text-sm font-medium leading-none">Defeats</p>
+                  <div className="flex items-center space-x-2">
+                    <ArrowDownRight className="h-10 w-10 text-red-400" />
+                    <div>
+                      <p className="text-xl font-extrabold md:text-2xl">2</p>
+                      <p className="text-sm font-medium leading-none">
+                        Defeats
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <ArrowRight className="h-10 w-10 text-yellow-400" />
-                  <div>
-                    <p className="text-xl font-extrabold md:text-2xl">0</p>
-                    <p className="text-sm font-medium leading-none">Draws</p>
+                  <div className="flex items-center space-x-2">
+                    <ArrowRight className="h-10 w-10 text-yellow-400" />
+                    <div>
+                      <p className="text-xl font-extrabold md:text-2xl">0</p>
+                      <p className="text-sm font-medium leading-none">Draws</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Percent className="h-10 w-10 text-blue-400" />
-                  <div>
-                    <p className="text-xl font-extrabold md:text-2xl">78%</p>
-                    <p className="text-sm font-medium leading-none">
-                      Winning Rate
-                    </p>
+                  <div className="flex items-center space-x-2">
+                    <Percent className="h-10 w-10 text-blue-400" />
+                    <div>
+                      <p className="text-xl font-extrabold md:text-2xl">78%</p>
+                      <p className="text-sm font-medium leading-none">
+                        Winning Rate
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="grid lg:col-span-3 lg:col-start-2 lg:row-start-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>{data.username}'s Teams</CardTitle>
-              </CardHeader>
-              <CardContent className="grid">
-                <ScrollArea>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[100px]">
-                          <span className="sr-only">Team Avatar</span>
-                        </TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead className="text-right">Role</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {data.teams
-                        ? data.teams.map((team) => (
-                            <TableRow key={team.team_id}>
-                              <TableCell className="w-[100px]">
-                                <Link to={`/teams/${team.team_id}`}>
-                                  <Avatar className="items-center w-10 h-10">
-                                    <AvatarImage
-                                      src={team.team_image_url || undefined}
-                                      alt="Avatar"
-                                      className="rounded-full"
-                                    />
-                                    <AvatarFallback>
-                                      {team.team_id}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                </Link>
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                <Link to={`/teams/${team.team_id}`}>
-                                  {team.team_name}
-                                </Link>
-                              </TableCell>
-                              <TableCell>{team.team_description}</TableCell>
-                              <TableCell className="text-right">
-                                {team.team_role}
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        : null}
-                    </TableBody>
-                  </Table>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="grid lg:col-span-3 lg:col-start-2 lg:row-start-3">
-            <Card>
-              <CardHeader>
-                <CardTitle>{data.username}'s Tournaments</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="flex-auto">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{data.username}'s Teams</CardTitle>
+                </CardHeader>
+                <CardContent className="grid">
+                  <ScrollArea>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[100px]">
+                            <span className="sr-only">Team Avatar</span>
+                          </TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead className="text-right">Role</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {data.teams
+                          ? data.teams.map((team) => (
+                              <TableRow key={team.team_id}>
+                                <TableCell className="w-[100px]">
+                                  <Link to={`/teams/${team.team_id}`}>
+                                    <Avatar className="items-center w-10 h-10">
+                                      <AvatarImage
+                                        src={team.team_image_url || undefined}
+                                        alt="Avatar"
+                                        className="rounded-full"
+                                      />
+                                      <AvatarFallback>
+                                        {team.team_id}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  </Link>
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  <Link to={`/teams/${team.team_id}`}>
+                                    {team.team_name}
+                                  </Link>
+                                </TableCell>
+                                <TableCell>{team.team_description}</TableCell>
+                                <TableCell className="text-right">
+                                  {team.team_role}
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          : null}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="flex-auto">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{data.username}'s Tournaments</CardTitle>
+                </CardHeader>
+                <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -286,18 +288,18 @@ export default function UserProfile() {
                         : null}
                     </TableBody>
                   </Table>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="grid lg:col-span-3 lg:col-start-2 lg:row-start-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>{data.username}'s Past Tournaments</CardTitle>
-              </CardHeader>
-              <CardContent></CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="flex-auto">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{data.username}'s Past Tournaments</CardTitle>
+                </CardHeader>
+                <CardContent></CardContent>
+              </Card>
+            </div>
+          </div>{" "}
         </div>
       ) : null}
     </div>
