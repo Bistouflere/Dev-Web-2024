@@ -3,10 +3,12 @@ import teamsRouter from "./routes/teams";
 import tournamentsRouter from "./routes/tournaments";
 import usersRouter from "./routes/users";
 import webhooksRouter from "./routes/webhooks";
+import swaggerDocument from "./swagger.json";
 import { StrictAuthProp } from "@clerk/clerk-sdk-node";
 import "dotenv/config";
 import express, { Application, NextFunction, Request, Response } from "express";
 import { rateLimit } from "express-rate-limit";
+import swaggerUi from "swagger-ui-express";
 
 const limiter = rateLimit({
   windowMs: 5 * 60 * 1000,
@@ -25,6 +27,7 @@ declare global {
 }
 
 app.use(limiter);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/webhooks", webhooksRouter);
 app.use("/api/protected", protectedRouter);
 app.use("/api/teams", teamsRouter);
