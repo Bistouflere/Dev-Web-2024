@@ -2,6 +2,7 @@ import { APIResult } from "@/types/tournaments";
 import { APIResult as APIResultPopular } from "@/types/tournaments.popular";
 import { keepPreviousData, queryOptions } from "@tanstack/react-query";
 import axios from "axios";
+import { id } from "date-fns/locale";
 
 export function tournamentsCountQueryOptions(query: string) {
   return queryOptions({
@@ -19,6 +20,13 @@ export function tournamentsQueryOptions(query: string, page: number) {
   });
 }
 
+export function tournamentQueryOptions(query : number) {
+  return queryOptions({
+    queryKey : [`tournaments_id_${query}`, query],
+    queryFn : () => fetchTournamentsId(query),
+    placeholderData : keepPreviousData,
+  });
+}
 export function tournamentPopularQueryOptions() {
   return queryOptions({
     queryKey: ["tournaments_popular"],
@@ -27,6 +35,14 @@ export function tournamentPopularQueryOptions() {
   });
 }
 
+export async function fetchTournamentsId(query:number) {
+  return axios
+  .get(`/api/tournaments/${query}`)
+  .then((res) => {
+    console.log("info", res.data);
+    return res.data ;
+  })
+}
 export async function fetchTournamentsCount(query: string): Promise<number> {
   return axios
     .get<Record<string, number>>(`/api/tournaments/count?query=${query}`)
