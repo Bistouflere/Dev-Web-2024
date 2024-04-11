@@ -1,11 +1,6 @@
 import { tournamentPopularQueryOptions } from "@/api/tournaments";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -33,28 +28,29 @@ export default function IndexPage() {
       <div>
         {tournaments ? (
           <section className="flex items-center justify-center">
-            <Carousel className="w-full max-w-sm">
-              <CarouselContent className="-ml-1">
+            <Carousel className="w-full">
+              <CarouselContent>
                 {tournaments.map((response) => (
-                  <CarouselItem
-                    key={response.id}
-                    className="pl-1 md:basis-1/2 lg:basis-1/3"
-                  >
-                    <div className="p-1">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>{response.name}</CardTitle>
-                          <CardDescription>
-                            ${response.cash_prize || 0}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <span className="text-3xl font-semibold">
-                            {response.description}
-                          </span>
-                        </CardContent>
-                      </Card>
-                    </div>
+                  <CarouselItem className="basis-1/3">
+                    <Card>
+                      <CardContent className="flex flex-none grid grid-cols-2 grid-rows-3 gap-3 py-5 place-items-center h-500">
+                        <div className="flex basis-1/2 row-span-3 self-center">
+                          <img src="https://fs-prod-cdn.nintendo-europe.com/media/images/10_share_images/games_15/nintendo_switch_4/H2x1_NSwitch_SuperSmashBrosUltimate_02_image1600w.jpg" />
+                        </div>
+                        <div className="flex-wrap col-start-2 row-start-1">
+                          {response.tournament_name}
+                        </div>
+                        <div className="flex-wrap grid col-start-2 row-start-2">
+                          ${response.cash_prize || 0}
+                        </div>
+                        <div className="flex-wrap col-start-2 row-start-3"></div>
+                      </CardContent>
+                      <CardFooter className="flex flex-none justify-center">
+                        <div className="flex flex-wrap ">
+                          {response.start_date}
+                        </div>
+                      </CardFooter>
+                    </Card>
                   </CarouselItem>
                 ))}
               </CarouselContent>
