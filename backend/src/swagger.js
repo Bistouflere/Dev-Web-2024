@@ -5,7 +5,7 @@ const doc = {
     title: "MadBracket API",
     description: "API Documentation",
   },
-  host: "madbracket.xyz",
+  host: "localhost:3000",
   schemes: ["http"],
 };
 

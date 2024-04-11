@@ -14,22 +14,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tournament } from "@/types/apiResponses";
+import { Team } from "@/types/apiResponses";
 import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export function TournamentList({ response }: { response: Tournament[] }) {
+export function TeamList({ response }: { response: Team[] }) {
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead className="hidden w-[100px] sm:table-cell">
-            <span className="sr-only">Tournament Avatar</span>
+            <span className="sr-only">Team Avatar</span>
           </TableHead>
           <TableHead>Name</TableHead>
-          <TableHead>Game</TableHead>
+          <TableHead>Description</TableHead>
           <TableHead>Members</TableHead>
-          <TableHead>Cash Prize</TableHead>
           <TableHead>
             <span className="sr-only">Actions</span>
           </TableHead>
@@ -39,7 +38,7 @@ export function TournamentList({ response }: { response: Tournament[] }) {
         {response.map((response) => (
           <TableRow key={response.id}>
             <TableCell className="hidden sm:table-cell">
-              <Link to={`/tournaments/${response.id}`}>
+              <Link to={`/teams/${response.id}`}>
                 <img
                   className="aspect-square rounded-md object-cover"
                   src={response.image_url || undefined}
@@ -48,11 +47,10 @@ export function TournamentList({ response }: { response: Tournament[] }) {
               </Link>
             </TableCell>
             <TableCell className="font-medium">
-              <Link to={`/tournaments/${response.id}`}>{response.name} </Link>
+              <Link to={`/teams/${response.id}`}>{response.name}</Link>
             </TableCell>
-            <TableCell>{response.game_name}</TableCell>
+            <TableCell>{response.description}</TableCell>
             <TableCell>{response.users_count}</TableCell>
-            <TableCell>${response.cash_prize || 0}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -64,17 +62,15 @@ export function TournamentList({ response }: { response: Tournament[] }) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuItem>
-                    <Link to={`/tournaments/${response.id}`}>
-                      View Tournament
-                    </Link>
+                    <Link to={`/teams/${response.id}`}>View Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => {
-                      console.log(`Register for the tournament ${response.id}`);
+                      console.log(`Added Friend ${response.id}`);
                     }}
                   >
-                    Register
+                    Follow User
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
