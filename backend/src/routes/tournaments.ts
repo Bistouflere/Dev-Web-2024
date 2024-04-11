@@ -17,7 +17,7 @@ router.get(
           COUNT(DISTINCT(teams_users.user_id)) AS users_count
         FROM tournaments_teams
         JOIN teams ON tournaments_teams.team_id = teams.id
-        JOIN teams_users ON teams.id = teams_users.team_id
+        LEFT JOIN teams_users ON teams.id = teams_users.team_id
         WHERE tournaments_teams.tournament_id = $1
         GROUP BY teams.id;
       `;
@@ -174,8 +174,8 @@ router.get(
         games.created_at AS game_created_at,
         games.updated_at AS game_updated_at
       FROM tournaments
-      JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
-      JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
+      LEFT JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
+      LEFT JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
       JOIN games ON tournaments.game_id = games.id
       GROUP BY tournaments.id, games.id
       ORDER BY users_count DESC
@@ -231,8 +231,8 @@ router.get(
           games.created_at AS game_created_at,
           games.updated_at AS game_updated_at
         FROM tournaments
-        JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
-        JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
+        LEFT JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
+        LEFT JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
         JOIN games ON tournaments.game_id = games.id
         WHERE tournaments.id = $1
         GROUP BY tournaments.id, games.id;
@@ -273,8 +273,8 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
           games.created_at AS game_created_at,
           games.updated_at AS game_updated_at
         FROM tournaments
-        JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
-        JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
+        LEFT JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
+        LEFT JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
         JOIN games ON tournaments.game_id = games.id
         WHERE tournaments.name ILIKE $1
         GROUP BY tournaments.id, games.id
@@ -292,8 +292,8 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
           games.created_at AS game_created_at,
           games.updated_at AS game_updated_at
         FROM tournaments
-        JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
-        JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
+        LEFT JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
+        LEFT JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
         JOIN games ON tournaments.game_id = games.id
         GROUP BY tournaments.id, games.id
         LIMIT $1

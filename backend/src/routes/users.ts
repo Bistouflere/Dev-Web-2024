@@ -162,8 +162,8 @@ router.get(
           games.created_at AS game_created_at,
           games.updated_at AS game_updated_at
         FROM tournaments
-        JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
-        JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
+        LEFT JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
+        LEFT JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
         JOIN games ON tournaments.game_id = games.id
         WHERE tournaments_users.user_id = $1
         GROUP BY tournaments.id, games.id, tournaments_users.role;
