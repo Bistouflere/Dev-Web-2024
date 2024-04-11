@@ -1,6 +1,10 @@
 import { tournamentPopularQueryOptions } from "@/api/tournaments";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -9,6 +13,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { useQuery } from "@tanstack/react-query";
+import { BarChart, DollarSign, Gamepad, Users } from "lucide-react";
 import Balancer from "react-wrap-balancer";
 
 export default function IndexPage() {
@@ -32,24 +37,62 @@ export default function IndexPage() {
               <CarouselContent>
                 {tournaments.map((response) => (
                   <CarouselItem className="basis-1/3">
-                    <Card>
-                      <CardContent className="flex flex-none grid grid-cols-2 grid-rows-3 gap-3 py-5 place-items-center h-500">
-                        <div className="flex basis-1/2 row-span-3 self-center">
-                          <img src="https://fs-prod-cdn.nintendo-europe.com/media/images/10_share_images/games_15/nintendo_switch_4/H2x1_NSwitch_SuperSmashBrosUltimate_02_image1600w.jpg" />
+                    <Card className="w-full">
+                      <CardContent>
+                        <div className="flex flex-1 mt-4 gap-2 flex-col justify-between lg:flex-row">
+                          <div>
+                            <CardTitle>{response.name}</CardTitle>
+                            <CardDescription>
+                              {response.description || "No description"}
+                            </CardDescription>{" "}
+                          </div>
+                          <div className="items-center w-1/2">
+                            <img
+                              src={response.image_url || undefined}
+                              alt={response.name}
+                              className="rounded-lg"
+                            />
+                          </div>
                         </div>
-                        <div className="flex-wrap col-start-2 row-start-1">
-                          {response.tournament_name}
+                        <div className="mt-2">
+                          <div className="flex justify-between">
+                            <p className="flex font-medium text-normal items-center">
+                              <Users className="w-5 h-5 mr-2" />
+                              Members
+                            </p>
+                            <p className="font-medium text-normal">
+                              {response.users_count}
+                            </p>
+                          </div>
+                          <div className="flex justify-between">
+                            <p className="flex font-medium text-normal items-center">
+                              <DollarSign className="w-5 h-5 mr-2" />
+                              Cash Prize
+                            </p>
+                            <p className="font-medium text-normal">
+                              ${response.cash_prize || 0}
+                            </p>
+                          </div>
+                          <div className="flex justify-between">
+                            <p className="flex font-medium text-normal items-center">
+                              <BarChart className="w-5 h-5 mr-2" />
+                              Status
+                            </p>
+                            <p className="font-medium text-normal">
+                              {response.status}
+                            </p>
+                          </div>
+                          <div className="flex justify-between">
+                            <p className="flex font-medium text-normal items-center">
+                              <Gamepad className="w-5 h-5 mr-2 " />
+                              Game
+                            </p>
+                            <p className="font-medium text-normal">
+                              {response.game_name}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-wrap grid col-start-2 row-start-2">
-                          ${response.cash_prize || 0}
-                        </div>
-                        <div className="flex-wrap col-start-2 row-start-3"></div>
                       </CardContent>
-                      <CardFooter className="flex flex-none justify-center">
-                        <div className="flex flex-wrap ">
-                          {response.start_date}
-                        </div>
-                      </CardFooter>
                     </Card>
                   </CarouselItem>
                 ))}
