@@ -337,6 +337,16 @@
         }
       }
     },
+    "/api/tournaments/popular": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/tournaments/count": {
       "get": {
         "description": "",

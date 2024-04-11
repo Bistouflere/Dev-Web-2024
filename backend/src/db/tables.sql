@@ -67,7 +67,7 @@ CREATE TABLE tournaments (
     name TEXT NOT NULL,
     description TEXT,
     image_url TEXT,
-    game_id BIGINT REFERENCES games(id) ON DELETE CASCADE,
+    game_id BIGINT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
     format tournament_type NOT NULL DEFAULT 'single_elimination',
     visibility tournament_visibility NOT NULL DEFAULT 'public',
     status tournament_status NOT NULL DEFAULT 'upcoming',

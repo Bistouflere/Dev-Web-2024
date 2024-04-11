@@ -104,7 +104,7 @@ router.get(
       const sql = `
         SELECT
           teams.*,
-          teams_users.role,
+          teams_users.role AS team_role,
           COUNT(DISTINCT teams_users.user_id) AS users_count
         FROM teams_users
         JOIN teams ON teams_users.team_id = teams.id
@@ -155,7 +155,7 @@ router.get(
           tournaments.*, 
           COUNT(DISTINCT(tournaments_users.user_id)) AS users_count,
           COUNT(DISTINCT(tournaments_teams.team_id)) AS teams_count,
-          tournaments_users.role,
+          tournaments_users.role as tournament_role,
           games.name AS game_name,
           games.description AS game_description,
           games.image_url AS game_image_url,

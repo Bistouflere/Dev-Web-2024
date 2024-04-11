@@ -160,6 +160,38 @@ router.get(
 );
 
 router.get(
+  "/popular",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const sql = `
+      SELECT 
+        tournaments.*,
+        COUNT(DISTINCT(tournaments_users.user_id)) AS users_count,
+        COUNT(DISTINCT(tournaments_teams.team_id)) AS teams_count,
+        games.name AS game_name,
+        games.description AS game_description,
+        games.image_url AS game_image_url,
+        games.created_at AS game_created_at,
+        games.updated_at AS game_updated_at
+      FROM tournaments
+      JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
+      JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
+      JOIN games ON tournaments.game_id = games.id
+      GROUP BY tournaments.id, games.id
+      ORDER BY users_count DESC
+      LIMIT 10;
+    `;
+
+      const result = await query(sql);
+
+      return res.status(200).json(result.rows);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
   "/count",
   async (req: Request, res: Response, next: NextFunction) => {
     const searchQuery = req.query.query as string;
@@ -244,7 +276,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
         JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
         JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
         JOIN games ON tournaments.game_id = games.id
-        WHERE name ILIKE $1
+        WHERE tournaments.name ILIKE $1
         GROUP BY tournaments.id, games.id
         LIMIT $2
         OFFSET $3;

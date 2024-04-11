@@ -14,11 +14,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { APIResult } from "@/types/users";
+import { User } from "@/types/apiResponses";
 import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export function UserList({ response }: { response: APIResult }) {
+export function UserList({ response }: { response: User[] }) {
   return (
     <Table>
       <TableHeader>
@@ -35,18 +35,18 @@ export function UserList({ response }: { response: APIResult }) {
       </TableHeader>
       <TableBody>
         {response.map((response) => (
-          <TableRow key={response.user_id}>
+          <TableRow key={response.id}>
             <TableCell className="hidden sm:table-cell">
-              <Link to={`/users/${response.user_id}`}>
+              <Link to={`/users/${response.id}`}>
                 <img
                   className="aspect-square rounded-md object-cover"
-                  src={response.user_image_url || undefined}
+                  src={response.image_url || undefined}
                   alt={response.username}
                 />
               </Link>
             </TableCell>
             <TableCell className="font-medium">
-              <Link to={`/users/${response.user_id}`}>{response.username}</Link>
+              <Link to={`/users/${response.id}`}>{response.username}</Link>
             </TableCell>
             <TableCell>{response.email_address}</TableCell>
             <TableCell>
@@ -60,12 +60,12 @@ export function UserList({ response }: { response: APIResult }) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuItem>
-                    <Link to={`/users/${response.user_id}`}>View Profile</Link>
+                    <Link to={`/users/${response.id}`}>View Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => {
-                      console.log(`Added Friend ${response.user_id}`);
+                      console.log(`Added Friend ${response.id}`);
                     }}
                   >
                     Follow User
