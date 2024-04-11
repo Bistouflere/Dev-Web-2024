@@ -62,7 +62,7 @@ export default function IndexPage() {
                           <img
                             src={response.image_url || undefined}
                             alt={response.name}
-                            className="rounded-lg"
+                            className="rounded-lg max-h-40 object-cover"
                           />
                         </Link>
                       </div>
