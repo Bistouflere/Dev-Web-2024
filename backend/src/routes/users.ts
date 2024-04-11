@@ -111,6 +111,7 @@ router.get(
         WHERE teams.id IN (
           SELECT team_id FROM teams_users WHERE user_id = $1
         )
+        AND teams_users.user_id = $1
         GROUP BY teams.id, teams_users.role;
       `;
 
