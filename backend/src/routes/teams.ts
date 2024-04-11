@@ -1,145 +1,190 @@
 import { query } from "../db/index";
-import express, { Request, Response } from "express";
+import { validateTeamId } from "../validator/teamIdValidator";
+import express, { NextFunction, Request, Response } from "express";
 
 const router = express.Router();
 
-const sendErrorResponse = (res: Response, error: any) => {
-  console.error(error);
-  res.status(500).json({ error: "Internal Server Error" });
-};
+router.get(
+  "/:teamId/users",
+  validateTeamId,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { teamId } = req.params;
 
-router.get("/count", async (req: Request, res: Response) => {
-  const searchQuery = req.query.query as string;
-
-  try {
-    const sql = searchQuery
-      ? `SELECT COUNT(*) FROM teams WHERE name ILIKE $1;`
-      : `SELECT COUNT(*) FROM teams;`;
-    const params = searchQuery ? [`%${searchQuery}%`] : [];
-    const result = await query(sql, params);
-
-    const count = parseInt(result.rows[0].count, 10);
-    res.status(200).json({ count });
-  } catch (error) {
-    sendErrorResponse(res, error);
-  }
-});
-
-router.get("/:teamId", async (req: Request, res: Response) => {
-  const { teamId } = req.params;
-
-  try {
-    const sql = `
-      SELECT
-        t.id AS team_id,
-        t.name AS team_name,
-        t.description AS team_description,
-        t.image_url AS team_image_url,
-        json_agg(DISTINCT jsonb_build_object(
-          'user_id', u.id,
-          'username', u.username,
-          'first_name', u.first_name,
-          'last_name', u.last_name,
-          'email_address', u.email_address,
-          'image_url', u.image_url,
-          'role', tu.role
-        )) FILTER (WHERE u.id IS NOT NULL) AS team_members,
-        json_agg(DISTINCT jsonb_build_object(
-          'tournament_id', tor.id,
-          'tournament_name', tor.name,
-          'tournament_description', tor.description,
-          'tournament_image_url', tor.image_url,
-          'tournament_format', tor.format,
-          'tournament_visibility', tor.visibility,
-          'tournament_cash_prize', tor.cash_prize,
-          'tournament_status', tor.status,
-          'tournament_start_date', tor.start_date,
-          'tournament_end_date', tor.end_date,
-          'game', jsonb_build_object(
-            'game_id', g.id,
-            'game_name', g.name,
-            'game_description', g.description,
-            'game_image_url', g.image_url
-          )
-        )) FILTER (WHERE tor.id IS NOT NULL) AS participating_tournaments,
-        json_agg(DISTINCT jsonb_build_object(
-          'follower_id', uf.follower_id,
-          'follower_username', fu.username,
-          'follower_email', fu.email_address,
-          'follower_image_url', fu.image_url
-        )) FILTER (WHERE uf.follower_id IS NOT NULL) AS team_followers
-      FROM teams t
-      LEFT JOIN team_users tu ON t.id = tu.team_id
-      LEFT JOIN users u ON tu.user_id = u.id
-      LEFT JOIN tournament_teams tt ON t.id = tt.team_id
-      LEFT JOIN tournaments tor ON tt.tournament_id = tor.id
-      LEFT JOIN games g ON tor.game_id = g.id
-      LEFT JOIN team_follows uf ON t.id = uf.followed_id
-      LEFT JOIN users fu ON uf.follower_id = fu.id
-      WHERE t.id = $1
-      GROUP BY t.id;
-    `;
-
-    const result = await query(sql, [teamId]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: "Team not found" });
-    }
-
-    return res.status(200).json(result.rows[0]);
-  } catch (error) {
-    sendErrorResponse(res, error);
-  }
-});
-
-router.get("/", async (req: Request, res: Response) => {
-  const { query: searchQuery, page } = req.query;
-  const perPage = 10;
-  const offset = (Math.abs(parseInt(page as string, 10) - 1) || 0) * perPage;
-
-  try {
-    const sqlBase = `
-      SELECT
-        tm.id AS team_id,
-        tm.name AS team_name,
-        tm.description AS team_description,
-        tm.image_url AS team_image_url,
-        json_agg(DISTINCT jsonb_build_object(
-          'tournament_id', tor.id,
-          'tournament_name', tor.name,
-          'tournament_description', tor.description,
-          'tournament_image_url', tor.image_url,
-          'tournament_cash_prize', tor.cash_prize,
-          'tournament_start_date', tor.start_date,
-          'tournament_end_date', tor.end_date,
-          'game', jsonb_build_object(
-            'game_id', g.id,
-            'game_name', g.name,
-            'game_description', g.description,
-            'game_image_url', g.image_url
-          )
-        )) FILTER (WHERE tor.id IS NOT NULL) AS tournaments_info
-      FROM teams tm
-      LEFT JOIN tournament_teams tt ON tm.id = tt.team_id
-      LEFT JOIN tournaments tor ON tt.tournament_id = tor.id
-      LEFT JOIN games g ON tor.game_id = g.id
-    `;
-
-    const sql = searchQuery
-      ? `
-        ${sqlBase}
-        WHERE tm.name ILIKE $1
-        GROUP BY tm.id
-        ORDER BY tm.id
-        LIMIT $2 OFFSET $3;
-      `
-      : `
-        ${sqlBase}
-        GROUP BY tm.id
-        ORDER BY tm.id
-        LIMIT $1 OFFSET $2;
+    try {
+      const sql = `
+        SELECT
+          users.*,
+          teams_users.role AS team_role
+        FROM users
+        JOIN teams_users ON users.id = teams_users.user_id
+        WHERE teams_users.team_id = $1;
       `;
 
+      const result = await query(sql, [teamId]);
+
+      return res.status(200).json(result.rows);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
+  "/:teamId/users/count",
+  validateTeamId,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { teamId } = req.params;
+
+    try {
+      const sql = "SELECT COUNT(*) FROM teams_users WHERE team_id = $1;";
+      const result = await query(sql, [teamId]);
+      const count = parseInt(result.rows[0].count, 10);
+
+      return res.status(200).json({
+        count,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
+  "/:teamId/tournaments",
+  validateTeamId,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { teamId } = req.params;
+
+    try {
+      const sql = `
+        SELECT
+          tournaments.*,
+          COUNT(DISTINCT(tournaments_users.user_id)) AS users_count,
+          COUNT(DISTINCT(tournaments_teams.team_id)) AS teams_count,
+          games.name AS game_name,
+          games.description AS game_description,
+          games.image_url AS game_image_url,
+          games.created_at AS game_created_at,
+          games.updated_at AS game_updated_at
+        FROM tournaments
+        LEFT JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
+        LEFT JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
+        JOIN games ON tournaments.game_id = games.id
+        WHERE tournaments_teams.team_id = $1
+        GROUP BY tournaments.id, games.id;
+      `;
+
+      const result = await query(sql, [teamId]);
+
+      return res.status(200).json(result.rows);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
+  "/:teamId/tournaments/count",
+  validateTeamId,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { teamId } = req.params;
+
+    try {
+      const sql =
+        "SELECT COUNT(*) FROM tournaments_teams WHERE tournament_id = $1;";
+      const result = await query(sql, [teamId]);
+      const count = parseInt(result.rows[0].count, 10);
+
+      return res.status(200).json({
+        count,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
+  "/count",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const searchQuery = req.query.query as string;
+
+    try {
+      const sql = searchQuery
+        ? `SELECT COUNT(*) FROM teams WHERE name ILIKE $1;`
+        : `SELECT COUNT(*) FROM teams;`;
+      const params = searchQuery ? [`%${searchQuery}%`] : [];
+      const result = await query(sql, params);
+      const count = parseInt(result.rows[0].count, 10);
+
+      return res.status(200).json({
+        count,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
+  "/:teamId",
+  validateTeamId,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { teamId } = req.params;
+
+    try {
+      const sql = `
+        SELECT
+          teams.*,
+          COUNT(DISTINCT(teams_users.user_id)) AS users_count
+        FROM teams
+        LEFT JOIN teams_users ON teams.id = teams_users.team_id
+        WHERE teams.id = $1
+        GROUP BY teams.id;
+      `;
+
+      const result = await query(sql, [teamId]);
+
+      return res.status(200).json(result.rows[0]);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get("/", async (req: Request, res: Response, next: NextFunction) => {
+  const { query: searchQuery, page } = req.query as {
+    query: string;
+    page: string;
+  };
+  const perPage = 10;
+  const offset = (parseInt(page, 10) - 1) * perPage || 0;
+
+  try {
+    const sql = searchQuery
+      ? `
+        SELECT
+          teams.*,
+          COUNT(DISTINCT(teams_users.user_id)) AS users_count
+        FROM teams
+        LEFT JOIN teams_users ON teams.id = teams_users.team_id
+        WHERE teams.name ILIKE $1
+        GROUP BY teams.id
+        ORDER BY teams.id
+        LIMIT $2
+        OFFSET $3;
+      `
+      : `
+        SELECT
+          teams.*,
+          COUNT(DISTINCT(teams_users.user_id)) AS users_count
+        FROM teams
+        LEFT JOIN teams_users ON teams.id = teams_users.team_id
+        GROUP BY teams.id
+        ORDER BY teams.id
+        LIMIT $1
+        OFFSET $2;
+      `;
     const params = searchQuery
       ? [`%${searchQuery}%`, perPage, offset]
       : [perPage, offset];
@@ -147,7 +192,7 @@ router.get("/", async (req: Request, res: Response) => {
 
     return res.status(200).json(result.rows);
   } catch (error) {
-    sendErrorResponse(res, error);
+    next(error);
   }
 });
 

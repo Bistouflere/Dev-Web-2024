@@ -37,20 +37,20 @@ export default function IndexPage() {
               <CarouselContent className="-ml-1">
                 {tournaments.map((response) => (
                   <CarouselItem
-                    key={response.tournament_id}
+                    key={response.id}
                     className="pl-1 md:basis-1/2 lg:basis-1/3"
                   >
                     <div className="p-1">
                       <Card>
                         <CardHeader>
-                          <CardTitle>{response.tournament_name}</CardTitle>
+                          <CardTitle>{response.name}</CardTitle>
                           <CardDescription>
                             ${response.cash_prize || 0}
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
                           <span className="text-3xl font-semibold">
-                            {response.tournament_description}
+                            {response.description}
                           </span>
                         </CardContent>
                       </Card>

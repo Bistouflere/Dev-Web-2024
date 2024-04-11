@@ -8,11 +8,10 @@ $$ LANGUAGE plpgsql;
 
 CREATE TYPE user_role AS ENUM ('admin', 'user');
 CREATE TYPE team_role AS ENUM ('owner', 'manager', 'participant');
-CREATE TYPE tournament_type AS ENUM ('single_elimination', 'double_elimination', 'round_robin', 'swiss');
+CREATE TYPE tournament_type AS ENUM ('single_elimination', 'double_elimination', 'round_robin');
 -- single_elimination : each teams eliminated after losing a match; number of teams must be a power of 2
 -- double_elimination : each team has to lose twice to be eliminated; requires a loser's bracket
 -- round_robin : each team plays every other team; team with most wins is the winner
--- swiss : each team plays a fixed number of matches; teams are paired based on their performance
 CREATE TYPE tournament_visibility AS ENUM ('public', 'private');
 CREATE TYPE tournament_status AS ENUM ('upcoming', 'active', 'completed', 'cancelled');
 CREATE TYPE match_status AS ENUM ('upcoming', 'active', 'completed', 'cancelled');
@@ -30,7 +29,7 @@ CREATE TABLE users (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE user_follows (
+CREATE TABLE users_follows (
     follower_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
     followed_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
     followed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -47,18 +46,11 @@ CREATE TABLE teams (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE team_users (
+CREATE TABLE teams_users (
     team_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,
     user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
     role team_role NOT NULL DEFAULT 'participant',
     PRIMARY KEY (user_id, team_id)
-);
-
-CREATE TABLE team_follows (
-    follower_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
-    followed_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,
-    followed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    PRIMARY KEY (follower_id, followed_id)
 );
 
 CREATE TABLE games (
@@ -75,7 +67,7 @@ CREATE TABLE tournaments (
     name TEXT NOT NULL,
     description TEXT,
     image_url TEXT,
-    game_id BIGINT REFERENCES games(id) ON DELETE CASCADE,
+    game_id BIGINT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
     format tournament_type NOT NULL DEFAULT 'single_elimination',
     visibility tournament_visibility NOT NULL DEFAULT 'public',
     status tournament_status NOT NULL DEFAULT 'upcoming',
@@ -90,13 +82,13 @@ CREATE TABLE tournaments (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE tournament_teams (
+CREATE TABLE tournaments_teams (
     tournament_id BIGINT REFERENCES tournaments(id) ON DELETE CASCADE,
     team_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,
     PRIMARY KEY (tournament_id, team_id)
 );
 
-CREATE TABLE tournament_users (
+CREATE TABLE tournaments_users (
     tournament_id BIGINT REFERENCES tournaments(id) ON DELETE CASCADE,
     user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
     role team_role NOT NULL DEFAULT 'participant',
@@ -163,7 +155,7 @@ INSERT INTO teams (name) VALUES
 ('Team A'),
 ('Team B');
 
-INSERT INTO team_users (team_id, user_id) VALUES
+INSERT INTO teams_users (team_id, user_id) VALUES
 (1, 1),
 (2, 2),
 (1, 3),
@@ -173,10 +165,10 @@ INSERT INTO tournaments (name, game_id, start_date, end_date) VALUES
 ('Tournament A', 1, '2024-12-01', '2024-12-31'),
 ('Tournament B', 2, '2024-12-01', '2024-12-31');
 
-INSERT INTO tournament_teams (tournament_id, team_id) VALUES
+INSERT INTO tournaments_teams (tournament_id, team_id) VALUES
 (1, 1),
 (2, 2);
 
-INSERT INTO tournament_users (tournament_id, user_id) VALUES
+INSERT INTO tournaments_users (tournament_id, user_id) VALUES
 (1, 1),
 (2, 2);

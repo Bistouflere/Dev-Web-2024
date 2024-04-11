@@ -1,3 +1,4 @@
+import { errorHandler } from "./middleware/errorMiddleware";
 import protectedRouter from "./routes/protected";
 import teamsRouter from "./routes/teams";
 import tournamentsRouter from "./routes/tournaments";
@@ -27,17 +28,14 @@ declare global {
 }
 
 app.use(limiter);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/webhooks", webhooksRouter);
 app.use("/api/protected", protectedRouter);
 app.use("/api/teams", teamsRouter);
 app.use("/api/tournaments", tournamentsRouter);
 app.use("/api/users", usersRouter);
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
-  console.error(err.stack);
-  res.status(401).send("Unauthenticated!");
-});
+app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`API listening at http://localhost:${port}`);

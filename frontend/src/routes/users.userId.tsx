@@ -1,8 +1,13 @@
-import { userQueryOptions } from "@/api/users";
+import {
+  userFollowersQueryOptions,
+  userFollowingQueryOptions,
+  userQueryOptions,
+  userTeamsQueryOptions,
+  userTournamentsQueryOptions,
+} from "@/api/users";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -29,32 +34,42 @@ export default function UserProfile() {
   const { searchUserId } = useParams();
   const { userId } = useAuth();
 
-  const { data } = useQuery(userQueryOptions(Number(searchUserId)));
+  const { data: user } = useQuery(userQueryOptions(searchUserId || ""));
+  const { data: userFollowers } = useQuery(
+    userFollowersQueryOptions(searchUserId || ""),
+  );
+  const { data: userFollowing } = useQuery(
+    userFollowingQueryOptions(searchUserId || ""),
+  );
+  const { data: teams } = useQuery(userTeamsQueryOptions(searchUserId || ""));
+  const { data: tournaments } = useQuery(
+    userTournamentsQueryOptions(searchUserId || ""),
+  );
 
   return (
     <div className="container py-4">
-      {data ? (
+      {user ? (
         <div className="flex gap-4 flex-col lg:flex-row">
           <div className="flex-none">
             <Card>
               <CardHeader>
-                <CardTitle>{data.username}'s Profile</CardTitle>
+                <CardTitle>{user.username}'s Profile</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col items-center space-y-2">
                   <Avatar className="items-center w-24 h-24">
                     <AvatarImage
-                      src={data.image_url || undefined}
+                      src={user.image_url || undefined}
                       alt="Avatar"
                       className="rounded-full"
                     />
-                    <AvatarFallback>{data.user_id}</AvatarFallback>
+                    <AvatarFallback>{user.id}</AvatarFallback>
                   </Avatar>
                   <p className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
-                    {data.username}
+                    {user.username}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {data.email_address}
+                    {user.email_address}
                   </p>
                 </div>
                 <div className="mt-4 flex justify-center space-x-4">
@@ -80,7 +95,7 @@ export default function UserProfile() {
                       Followers
                     </small>
                     <small className="text-sm font-medium leading-none">
-                      {data.user_followers ? data.user_followers.length : 0}
+                      {userFollowers ? userFollowers.length : 0}
                     </small>
                   </div>
                   <div className="flex justify-between">
@@ -88,7 +103,7 @@ export default function UserProfile() {
                       Following
                     </small>
                     <small className="text-sm font-medium leading-none">
-                      {data.user_following ? data.user_following.length : 0}
+                      {userFollowing ? userFollowing.length : 0}
                     </small>
                   </div>
                   <div className="flex justify-between">
@@ -96,8 +111,9 @@ export default function UserProfile() {
                       Member since
                     </small>
                     <small className="text-sm font-medium leading-none">
-                      {new Date().getDate()}/{new Date().getMonth()}/
-                      {new Date().getFullYear()}
+                      {new Date(user.created_at).getDate()}/
+                      {new Date(user.created_at).getMonth()}/
+                      {new Date(user.created_at).getFullYear()}
                     </small>
                   </div>
                 </div>
@@ -108,7 +124,7 @@ export default function UserProfile() {
             <div className="flex-auto">
               <Card>
                 <CardHeader>
-                  <CardTitle>{data.username}'s Statistics</CardTitle>
+                  <CardTitle>{user.username}'s Statistics</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-3 grid-rows-2 gap-6 lg:grid-cols-5 lg:grid-rows-1">
                   <div className="flex items-center space-x-2">
@@ -160,128 +176,46 @@ export default function UserProfile() {
             <div className="flex-auto">
               <Card>
                 <CardHeader>
-                  <CardTitle>{data.username}'s Teams</CardTitle>
+                  <CardTitle>{user.username}'s Teams</CardTitle>
                 </CardHeader>
                 <CardContent className="grid">
-                  <ScrollArea>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[100px]">
-                            <span className="sr-only">Team Avatar</span>
-                          </TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Description</TableHead>
-                          <TableHead className="text-right">Role</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {data.teams
-                          ? data.teams.map((team) => (
-                              <TableRow key={team.team_id}>
-                                <TableCell className="w-[100px]">
-                                  <Link to={`/teams/${team.team_id}`}>
-                                    <Avatar className="items-center w-10 h-10">
-                                      <AvatarImage
-                                        src={team.team_image_url || undefined}
-                                        alt="Avatar"
-                                        className="rounded-full"
-                                      />
-                                      <AvatarFallback>
-                                        {team.team_id}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  </Link>
-                                </TableCell>
-                                <TableCell className="font-medium">
-                                  <Link to={`/teams/${team.team_id}`}>
-                                    {team.team_name}
-                                  </Link>
-                                </TableCell>
-                                <TableCell>{team.team_description}</TableCell>
-                                <TableCell className="text-right">
-                                  {team.team_role}
-                                </TableCell>
-                              </TableRow>
-                            ))
-                          : null}
-                      </TableBody>
-                    </Table>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </div>
-            <div className="flex-auto">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{data.username}'s Tournaments</CardTitle>
-                </CardHeader>
-                <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-[100px]">
-                          <span className="sr-only">Tournament Avatar</span>
+                          <span className="sr-only">Team Avatar</span>
                         </TableHead>
                         <TableHead>Name</TableHead>
-                        <TableHead>Game</TableHead>
-                        <TableHead>Format</TableHead>
-                        <TableHead>Visibility</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead className="text-right">Cash Prize</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Members</TableHead>
+                        <TableHead className="text-right">Role</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {data.tournaments
-                        ? data.tournaments.map((tournament) => (
-                            <TableRow key={tournament.tournament_id}>
+                      {teams
+                        ? teams.map((team) => (
+                            <TableRow key={team.id}>
                               <TableCell className="w-[100px]">
-                                <Link
-                                  to={`/tournaments/${tournament.tournament_id}`}
-                                >
+                                <Link to={`/teams/${team.id}`}>
                                   <Avatar className="items-center w-10 h-10">
                                     <AvatarImage
-                                      src={
-                                        tournament.tournament_image_url ||
-                                        undefined
-                                      }
+                                      src={team.image_url || undefined}
                                       alt="Avatar"
                                       className="rounded-full"
                                     />
-                                    <AvatarFallback>
-                                      {tournament.tournament_id}
-                                    </AvatarFallback>
+                                    <AvatarFallback>{team.id}</AvatarFallback>
                                   </Avatar>
                                 </Link>
                               </TableCell>
                               <TableCell className="font-medium">
-                                <Link
-                                  to={`/tournaments/${tournament.tournament_id}`}
-                                >
-                                  {tournament.tournament_name}
+                                <Link to={`/teams/${team.id}`}>
+                                  {team.name}
                                 </Link>
                               </TableCell>
-                              <TableCell>
-                                <Link to={`/games/${tournament.game.game_id}`}>
-                                  {tournament.game.game_name}
-                                </Link>
-                              </TableCell>
-                              <TableCell>
-                                {tournament.tournament_format}
-                              </TableCell>
-                              <TableCell>
-                                {tournament.tournament_visibility ===
-                                "public" ? (
-                                  <Users className="h-5 w-5 text-green-500" />
-                                ) : (
-                                  <Users className="h-5 w-5 text-red-500" />
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                {tournament.tournament_user_role}
-                              </TableCell>
+                              <TableCell>{team.description}</TableCell>
+                              <TableCell>{team.users_count}</TableCell>
                               <TableCell className="text-right">
-                                ${tournament.tournament_cash_prize || 0}
+                                {team.team_role}
                               </TableCell>
                             </TableRow>
                           ))
@@ -294,9 +228,153 @@ export default function UserProfile() {
             <div className="flex-auto">
               <Card>
                 <CardHeader>
-                  <CardTitle>{data.username}'s Past Tournaments</CardTitle>
+                  <CardTitle>{user.username}'s Tournaments</CardTitle>
                 </CardHeader>
-                <CardContent></CardContent>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[100px]">
+                          <span className="sr-only">Tournament Avatar</span>
+                        </TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Members</TableHead>
+                        <TableHead>Game</TableHead>
+                        <TableHead>Format</TableHead>
+                        <TableHead>Visibility</TableHead>
+                        <TableHead>Cash Prize</TableHead>
+                        <TableHead className="text-right">Role</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tournaments
+                        ? tournaments.map((tournament) =>
+                            tournament.status === "upcoming" ||
+                            tournament.status === "active" ? (
+                              <TableRow key={tournament.id}>
+                                <TableCell className="w-[100px]">
+                                  <Link to={`/tournaments/${tournament.id}`}>
+                                    <Avatar className="items-center w-10 h-10">
+                                      <AvatarImage
+                                        src={tournament.image_url || undefined}
+                                        alt="Avatar"
+                                        className="rounded-full"
+                                      />
+                                      <AvatarFallback>
+                                        {tournament.id}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  </Link>
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  <Link to={`/tournaments/${tournament.id}`}>
+                                    {tournament.name}
+                                  </Link>
+                                </TableCell>
+                                <TableCell>{tournament.users_count}</TableCell>
+                                <TableCell>
+                                  <Link to={`/games/${tournament.game_id}`}>
+                                    {tournament.game_name}
+                                  </Link>
+                                </TableCell>
+                                <TableCell>{tournament.format}</TableCell>
+                                <TableCell>
+                                  {tournament.visibility === "public" ? (
+                                    <Users className="h-5 w-5 text-green-500" />
+                                  ) : (
+                                    <Users className="h-5 w-5 text-red-500" />
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  ${tournament.cash_prize || 0}
+                                </TableCell>
+
+                                <TableCell className="text-right">
+                                  {tournament.tournament_role}
+                                </TableCell>
+                              </TableRow>
+                            ) : null,
+                          )
+                        : null}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="flex-auto">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{user.username}'s Past Tournaments</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[100px]">
+                          <span className="sr-only">Tournament Avatar</span>
+                        </TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Members</TableHead>
+                        <TableHead>Game</TableHead>
+                        <TableHead>Format</TableHead>
+                        <TableHead>Visibility</TableHead>
+                        <TableHead>Cash Prize</TableHead>
+                        <TableHead className="text-right">Role</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tournaments
+                        ? tournaments.map((tournament) =>
+                            tournament.status === "completed" ||
+                            tournament.status === "cancelled" ? (
+                              <TableRow key={tournament.id}>
+                                <TableCell className="w-[100px]">
+                                  <Link to={`/tournaments/${tournament.id}`}>
+                                    <Avatar className="items-center w-10 h-10">
+                                      <AvatarImage
+                                        src={tournament.image_url || undefined}
+                                        alt="Avatar"
+                                        className="rounded-full"
+                                      />
+                                      <AvatarFallback>
+                                        {tournament.id}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  </Link>
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  <Link to={`/tournaments/${tournament.id}`}>
+                                    {tournament.name}
+                                  </Link>
+                                </TableCell>
+                                <TableCell>{tournament.users_count}</TableCell>
+                                <TableCell>
+                                  <Link to={`/games/${tournament.game_id}`}>
+                                    {tournament.game_name}
+                                  </Link>
+                                </TableCell>
+                                <TableCell>{tournament.format}</TableCell>
+                                <TableCell>
+                                  {tournament.visibility === "public" ? (
+                                    <Users className="h-5 w-5 text-green-500" />
+                                  ) : (
+                                    <Users className="h-5 w-5 text-red-500" />
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  ${tournament.cash_prize || 0}
+                                </TableCell>
+
+                                <TableCell className="text-right">
+                                  {tournament.tournament_role}
+                                </TableCell>
+                              </TableRow>
+                            ) : null,
+                          )
+                        : null}
+                    </TableBody>
+                  </Table>
+                </CardContent>
               </Card>
             </div>
           </div>{" "}
