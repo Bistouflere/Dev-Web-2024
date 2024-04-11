@@ -5,7 +5,6 @@ import {
   userTeamsQueryOptions,
   userTournamentsQueryOptions,
 } from "@/api/users";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -18,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
+import dayjs from "dayjs";
 import {
   ArrowDownRight,
   ArrowRight,
@@ -57,14 +57,11 @@ export default function UserProfile() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col items-center space-y-2">
-                  <Avatar className="items-center w-24 h-24">
-                    <AvatarImage
-                      src={user.image_url || undefined}
-                      alt="Avatar"
-                      className="rounded-full"
-                    />
-                    <AvatarFallback>{user.id}</AvatarFallback>
-                  </Avatar>
+                  <img
+                    className="aspect-square rounded-md object-cover w-24 h-24"
+                    src={user.image_url || undefined}
+                    alt={user.username}
+                  />
                   <p className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
                     {user.username}
                   </p>
@@ -90,32 +87,18 @@ export default function UserProfile() {
                   </Button>
                 </div>
                 <div className="mt-4">
-                  <div className="flex justify-between">
-                    <small className="text-sm font-medium leading-none">
-                      Followers
-                    </small>
-                    <small className="text-sm font-medium leading-none">
-                      {userFollowers ? userFollowers.length : 0}
-                    </small>
-                  </div>
-                  <div className="flex justify-between">
-                    <small className="text-sm font-medium leading-none">
-                      Following
-                    </small>
-                    <small className="text-sm font-medium leading-none">
-                      {userFollowing ? userFollowing.length : 0}
-                    </small>
-                  </div>
-                  <div className="flex justify-between">
-                    <small className="text-sm font-medium leading-none">
-                      Member since
-                    </small>
-                    <small className="text-sm font-medium leading-none">
-                      {new Date(user.created_at).getDate()}/
-                      {new Date(user.created_at).getMonth()}/
-                      {new Date(user.created_at).getFullYear()}
-                    </small>
-                  </div>
+                  <UserDetail
+                    title="Followers"
+                    result={userFollowers ? userFollowers.length : 0}
+                  />
+                  <UserDetail
+                    title="Following"
+                    result={userFollowing ? userFollowing.length : 0}
+                  />
+                  <UserDetail
+                    title="Member Since"
+                    result={dayjs(user.created_at).format("DD/MM/YYYY")}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -127,49 +110,31 @@ export default function UserProfile() {
                   <CardTitle>{user.username}'s Statistics</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-3 grid-rows-2 gap-6 lg:grid-cols-5 lg:grid-rows-1">
-                  <div className="flex items-center space-x-2">
-                    <Swords className="h-10 w-10 text-purple-400" />
-                    <div>
-                      <p className="text-xl font-extrabold md:text-2xl">9</p>
-                      <p className="text-sm font-medium leading-none">
-                        Game Played
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <ArrowUpRight className="h-10 w-10 text-green-400" />
-                    <div>
-                      <p className="text-xl font-extrabold md:text-2xl">7</p>
-                      <p className="text-sm font-medium leading-none">
-                        Victories
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <ArrowDownRight className="h-10 w-10 text-red-400" />
-                    <div>
-                      <p className="text-xl font-extrabold md:text-2xl">2</p>
-                      <p className="text-sm font-medium leading-none">
-                        Defeats
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <ArrowRight className="h-10 w-10 text-yellow-400" />
-                    <div>
-                      <p className="text-xl font-extrabold md:text-2xl">0</p>
-                      <p className="text-sm font-medium leading-none">Draws</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Percent className="h-10 w-10 text-blue-400" />
-                    <div>
-                      <p className="text-xl font-extrabold md:text-2xl">78%</p>
-                      <p className="text-sm font-medium leading-none">
-                        Winning Rate
-                      </p>
-                    </div>
-                  </div>
+                  <UserStatistic
+                    icon={<Swords className="h-10 w-10 text-purple-400" />}
+                    title="Games Played"
+                    result="9"
+                  />
+                  <UserStatistic
+                    icon={<ArrowUpRight className="h-10 w-10 text-green-400" />}
+                    title="Victories"
+                    result="7"
+                  />
+                  <UserStatistic
+                    icon={<ArrowDownRight className="h-10 w-10 text-red-400" />}
+                    title="Defeats"
+                    result="2"
+                  />
+                  <UserStatistic
+                    icon={<ArrowRight className="h-10 w-10 text-yellow-400" />}
+                    title="Draws"
+                    result="0"
+                  />
+                  <UserStatistic
+                    icon={<Percent className="h-10 w-10 text-blue-400" />}
+                    title="Winning Rate"
+                    result="78%"
+                  />
                 </CardContent>
               </Card>
             </div>
@@ -197,14 +162,11 @@ export default function UserProfile() {
                             <TableRow key={team.id}>
                               <TableCell className="w-[100px]">
                                 <Link to={`/teams/${team.id}`}>
-                                  <Avatar className="items-center w-10 h-10">
-                                    <AvatarImage
-                                      src={team.image_url || undefined}
-                                      alt="Avatar"
-                                      className="rounded-full"
-                                    />
-                                    <AvatarFallback>{team.id}</AvatarFallback>
-                                  </Avatar>
+                                  <img
+                                    className="aspect-square rounded-md object-cover"
+                                    src={team.image_url || undefined}
+                                    alt={team.name}
+                                  />
                                 </Link>
                               </TableCell>
                               <TableCell className="font-medium">
@@ -254,16 +216,11 @@ export default function UserProfile() {
                               <TableRow key={tournament.id}>
                                 <TableCell className="w-[100px]">
                                   <Link to={`/tournaments/${tournament.id}`}>
-                                    <Avatar className="items-center w-10 h-10">
-                                      <AvatarImage
-                                        src={tournament.image_url || undefined}
-                                        alt="Avatar"
-                                        className="rounded-full"
-                                      />
-                                      <AvatarFallback>
-                                        {tournament.id}
-                                      </AvatarFallback>
-                                    </Avatar>
+                                    <img
+                                      className="aspect-square rounded-md object-cover"
+                                      src={tournament.image_url || undefined}
+                                      alt={tournament.name}
+                                    />
                                   </Link>
                                 </TableCell>
                                 <TableCell className="font-medium">
@@ -330,16 +287,11 @@ export default function UserProfile() {
                               <TableRow key={tournament.id}>
                                 <TableCell className="w-[100px]">
                                   <Link to={`/tournaments/${tournament.id}`}>
-                                    <Avatar className="items-center w-10 h-10">
-                                      <AvatarImage
-                                        src={tournament.image_url || undefined}
-                                        alt="Avatar"
-                                        className="rounded-full"
-                                      />
-                                      <AvatarFallback>
-                                        {tournament.id}
-                                      </AvatarFallback>
-                                    </Avatar>
+                                    <img
+                                      className="aspect-square rounded-md object-cover"
+                                      src={tournament.image_url || undefined}
+                                      alt={tournament.name}
+                                    />
                                   </Link>
                                 </TableCell>
                                 <TableCell className="font-medium">
@@ -380,6 +332,41 @@ export default function UserProfile() {
           </div>{" "}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function UserDetail({
+  title,
+  result,
+}: {
+  title: string;
+  result: string | number;
+}) {
+  return (
+    <div className="flex justify-between">
+      <small className="text-sm font-medium leading-none">{title}</small>
+      <small className="text-sm font-medium leading-none">{result}</small>
+    </div>
+  );
+}
+
+function UserStatistic({
+  icon,
+  title,
+  result,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  result: string | number;
+}) {
+  return (
+    <div className="flex items-center space-x-2">
+      {icon}
+      <div>
+        <p className="text-xl font-extrabold md:text-2xl">{result}</p>
+        <p className="text-sm font-medium leading-none">{title}</p>
+      </div>
     </div>
   );
 }

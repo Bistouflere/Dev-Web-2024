@@ -23,7 +23,7 @@ CREATE TABLE users (
   first_name TEXT,
   last_name TEXT,
   email_address TEXT UNIQUE NOT NULL,
-  image_url TEXT,
+  image_url TEXT DEFAULT 'https://madbracket.xyz/images/default',
   role user_role NOT NULL DEFAULT 'user',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -41,7 +41,7 @@ CREATE TABLE teams (
     id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
-    image_url TEXT,
+    image_url TEXT DEFAULT 'https://madbracket.xyz/images/default',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -57,7 +57,7 @@ CREATE TABLE games (
     id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
-    image_url TEXT,
+    image_url TEXT DEFAULT 'https://madbracket.xyz/images/default',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -66,7 +66,7 @@ CREATE TABLE tournaments (
     id BIGSERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
-    image_url TEXT,
+    image_url TEXT DEFAULT 'https://madbracket.xyz/images/default',
     game_id BIGINT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
     format tournament_type NOT NULL DEFAULT 'single_elimination',
     visibility tournament_visibility NOT NULL DEFAULT 'public',

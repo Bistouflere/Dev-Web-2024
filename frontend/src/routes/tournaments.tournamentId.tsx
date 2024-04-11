@@ -19,15 +19,15 @@ export default function TournamentProfile() {
         </CardHeader>
         <CardContent>
           <div>
-            <p>prize : {data ? data.cash_prize : "loading"}</p>
+            <p>prize : {data ? `$${data.cash_prize || 0}` : "loading"}</p>
             <p>status : {data ? data.status : "loading"}</p>
             <p>format : {data ? data.format : "loading"}</p>
-            <p>max team : {data ? data.max_team : "loading"}</p>
+            <p>max team : {data ? data.max_team || "unlimited" : "loading"}</p>
             <p>max team size : {data ? data.max_team_size : "loading"}</p>
             <p>min team size : {data ? data.min_team_size : "loading"}</p>
             <p>
               start date :{" "}
-              {data ? dayjs(data.start_date).format("YYYY-MM-DD") : "loading"}
+              {data ? dayjs(data.start_date).format("DD/MM/YYYY") : "loading"}
             </p>
           </div>
         </CardContent>

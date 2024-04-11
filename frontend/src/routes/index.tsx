@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/carousel";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart, DollarSign, Gamepad, Users } from "lucide-react";
+import { Link } from "react-router-dom";
 import Balancer from "react-wrap-balancer";
 
 export default function IndexPage() {
@@ -46,51 +47,38 @@ export default function IndexPage() {
                               {response.description || "No description"}
                             </CardDescription>{" "}
                           </div>
-                          <div className="items-center w-1/2">
+                          <Link
+                            to={`/tournaments/${response.id}`}
+                            className="items-center w-1/2"
+                          >
                             <img
                               src={response.image_url || undefined}
                               alt={response.name}
                               className="rounded-lg"
                             />
-                          </div>
+                          </Link>
                         </div>
                         <div className="mt-2">
-                          <div className="flex justify-between">
-                            <p className="flex font-medium text-normal items-center">
-                              <Users className="w-5 h-5 mr-2" />
-                              Members
-                            </p>
-                            <p className="font-medium text-normal">
-                              {response.users_count}
-                            </p>
-                          </div>
-                          <div className="flex justify-between">
-                            <p className="flex font-medium text-normal items-center">
-                              <DollarSign className="w-5 h-5 mr-2" />
-                              Cash Prize
-                            </p>
-                            <p className="font-medium text-normal">
-                              ${response.cash_prize || 0}
-                            </p>
-                          </div>
-                          <div className="flex justify-between">
-                            <p className="flex font-medium text-normal items-center">
-                              <BarChart className="w-5 h-5 mr-2" />
-                              Status
-                            </p>
-                            <p className="font-medium text-normal">
-                              {response.status}
-                            </p>
-                          </div>
-                          <div className="flex justify-between">
-                            <p className="flex font-medium text-normal items-center">
-                              <Gamepad className="w-5 h-5 mr-2 " />
-                              Game
-                            </p>
-                            <p className="font-medium text-normal">
-                              {response.game_name}
-                            </p>
-                          </div>
+                          <TournamentDetail
+                            icon={<Users className="w-5 h-5 mr-2" />}
+                            title="Members"
+                            result={response.users_count}
+                          />
+                          <TournamentDetail
+                            icon={<DollarSign className="w-5 h-5 mr-2" />}
+                            title="Cash Prize"
+                            result={`$${response.cash_prize || 0}`}
+                          />
+                          <TournamentDetail
+                            icon={<BarChart className="w-5 h-5 mr-2" />}
+                            title="Status"
+                            result={response.status}
+                          />
+                          <TournamentDetail
+                            icon={<Gamepad className="w-5 h-5 mr-2" />}
+                            title="Game"
+                            result={response.game_name}
+                          />
                         </div>
                       </CardContent>
                     </Card>
@@ -103,6 +91,26 @@ export default function IndexPage() {
           </section>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function TournamentDetail({
+  icon,
+  title,
+  result,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  result: string;
+}) {
+  return (
+    <div className="flex justify-between flex-col lg:flex-row">
+      <p className="flex font-medium text-normal items-center">
+        {icon}
+        {title}
+      </p>
+      <p className="font-medium text-normal">{result}</p>
     </div>
   );
 }
