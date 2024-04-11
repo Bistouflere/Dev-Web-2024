@@ -39,7 +39,7 @@ export type Tournament = {
   status: "upcoming" | "active" | "completed" | "cancelled";
   tags: string[];
   cash_prize: number | null;
-  max_Team: number;
+  max_team: number;
   max_team_size: number;
   min_team_size: number;
   start_date: string | null;
