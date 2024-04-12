@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User } from "@/types/apiResponses";
 import dayjs from "dayjs";
-import { Minus, Plus, UserPlus } from "lucide-react";
+import { Heart, HeartOff, UserPlus } from "lucide-react";
 
 export default function UserProfileCard({
   user,
@@ -54,12 +54,12 @@ export default function UserProfileCard({
                 (follower) => follower.clerk_user_id === userId,
               ) ? (
                 <>
-                  <Minus className="mr-2 h-5 w-5" />
+                  <HeartOff className="mr-2 h-5 w-5" />
                   Unfollow
                 </>
               ) : (
                 <>
-                  <Plus className="mr-2 h-5 w-5" />
+                  <Heart className="mr-2 h-5 w-5" />
                   Follow
                 </>
               )}
