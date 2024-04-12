@@ -10,9 +10,13 @@ import {
 import React from "react";
 
 export default function UserStatisticsCard({ user }: { user: User }) {
-  const games_played = 9;
-  const defeats = 2;
-  const draws = 0;
+  function getRandomInt(max: number) {
+    return Math.floor(Math.random() * max);
+  }
+
+  const games_played = getRandomInt(100);
+  const defeats = getRandomInt(games_played);
+  const draws = getRandomInt(games_played - defeats);
   const victories = games_played - defeats - draws;
   const winning_rate = Math.floor(
     ((victories + 0.5 * draws) / games_played) * 100,
