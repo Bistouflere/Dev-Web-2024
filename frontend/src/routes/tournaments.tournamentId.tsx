@@ -11,15 +11,11 @@ export default function TournamentProfile() {
     <div className="container relative">
       <Card>
         <CardHeader>
-          <CardTitle>
-            {" "}
-            {data ? data.image_url : ""}
-            {data ? data.name : <p>loading</p>}
-          </CardTitle>
+          <CardTitle> {data? (<img  alt={data.name} src={data.image_url || undefined }/>)   : ("") } </CardTitle>
         </CardHeader>
         <CardContent>
           <div>
-            <p>prize : {data ? `$${data.cash_prize || 0}` : "loading"}</p>
+            <p>prize : {data ? `${data.cash_prize || 0}` : "loading"}</p>
             <p>status : {data ? data.status : "loading"}</p>
             <p>format : {data ? data.format : "loading"}</p>
             <p>max team : {data ? data.max_team || "unlimited" : "loading"}</p>
