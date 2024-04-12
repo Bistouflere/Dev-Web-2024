@@ -1,5 +1,9 @@
 import { query } from "../db/index";
 import { validateUserId } from "../validator/userIdValidator";
+import {
+  ClerkExpressRequireAuth,
+  RequireAuthProp,
+} from "@clerk/clerk-sdk-node";
 import express, { NextFunction, Request, Response } from "express";
 
 const router = express.Router();
@@ -23,6 +27,124 @@ router.get(
       const result = await query(sql, [userId]);
 
       return res.status(200).json(result.rows);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.post(
+  "/:userId/follow",
+  validateUserId,
+  ClerkExpressRequireAuth({}),
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { userId } = req.params;
+    const followerId = req.auth.userId;
+
+    try {
+      const followingSql = "SELECT * FROM users WHERE id = $1;";
+      const followingResult = await query(followingSql, [userId]);
+
+      if (followingResult.rows.length === 0) {
+        return res
+          .status(404)
+          .json({ error: `User with ID ${userId} not found` });
+      }
+
+      const followerSql = "SELECT * FROM users WHERE clerk_user_id = $1;";
+      const followerResult = await query(followerSql, [followerId]);
+
+      if (followerResult.rows.length === 0) {
+        return res
+          .status(404)
+          .json({ error: `User with ID ${followerId} not found` });
+      }
+
+      if (followingResult.rows[0].id === followerResult.rows[0].id) {
+        return res.status(400).json({ error: "Cannot follow yourself" });
+      }
+
+      const existingFollowSql = `
+        SELECT * FROM users_follows WHERE followed_id = $1 AND follower_id = $2;
+      `;
+      const existingFollowResult = await query(existingFollowSql, [
+        followingResult.rows[0].id,
+        followerResult.rows[0].id,
+      ]);
+
+      if (existingFollowResult.rows.length > 0) {
+        return res.status(400).json({ error: "Already following this user" });
+      }
+
+      const insertSql = `
+        INSERT INTO users_follows (followed_id, follower_id)
+        VALUES ($1, $2);
+      `;
+      await query(insertSql, [
+        followingResult.rows[0].id,
+        followerResult.rows[0].id,
+      ]);
+
+      return res.status(201).json({ message: "User followed successfully" });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.delete(
+  "/:userId/unfollow",
+  validateUserId,
+  ClerkExpressRequireAuth({}),
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { userId } = req.params;
+    const followerId = req.auth.userId;
+
+    try {
+      const followingSql = "SELECT * FROM users WHERE id = $1;";
+      const followingResult = await query(followingSql, [userId]);
+
+      if (followingResult.rows.length === 0) {
+        return res
+          .status(404)
+          .json({ error: `User with ID ${userId} not found` });
+      }
+
+      const followerSql = "SELECT * FROM users WHERE clerk_user_id = $1;";
+      const followerResult = await query(followerSql, [followerId]);
+
+      if (followerResult.rows.length === 0) {
+        return res
+          .status(404)
+          .json({ error: `User with ID ${followerId} not found` });
+      }
+
+      if (followingResult.rows[0].id === followerResult.rows[0].id) {
+        return res.status(400).json({ error: "Cannot unfollow yourself" });
+      }
+
+      const followSql = `
+        SELECT * FROM users_follows WHERE followed_id = $1 AND follower_id = $2;
+      `;
+      const followResult = await query(followSql, [
+        followingResult.rows[0].id,
+        followerResult.rows[0].id,
+      ]);
+
+      if (followResult.rows.length === 0) {
+        return res.status(400).json({ error: "User is not being followed" });
+      }
+
+      const deleteSql = `
+        DELETE FROM users_follows
+        WHERE followed_id = $1 AND follower_id = $2;
+      `;
+      await query(deleteSql, [
+        followingResult.rows[0].id,
+        followerResult.rows[0].id,
+      ]);
+
+      return res.status(200).json({ message: "User unfollowed successfully" });
     } catch (error) {
       next(error);
     }

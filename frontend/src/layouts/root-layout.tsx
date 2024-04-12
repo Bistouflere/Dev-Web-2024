@@ -1,6 +1,7 @@
 import { MainFooter } from "@/components/main-footer";
 import { MainHeader } from "@/components/main-header";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -42,6 +43,7 @@ export default function RootLayout() {
               <main className="flex-1">
                 <Outlet />
               </main>
+              <Toaster />
               <MainFooter />
             </div>
           </div>
