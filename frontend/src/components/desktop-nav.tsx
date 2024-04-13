@@ -21,8 +21,8 @@ export function DesktopNav() {
                 to={item.path}
                 className={({ isActive }) => {
                   return isActive
-                    ? "transition-colors hover:text-foreground/80 text-foreground"
-                    : "transition-colors hover:text-foreground/80 text-foreground/60";
+                    ? "text-foreground transition-colors hover:text-foreground/80"
+                    : "text-foreground/60 transition-colors hover:text-foreground/80";
                 }}
               >
                 {item.title}
@@ -34,8 +34,8 @@ export function DesktopNav() {
             to="/dashboard"
             className={({ isActive }) => {
               return isActive
-                ? "transition-colors hover:text-foreground/80 text-foreground"
-                : "transition-colors hover:text-foreground/80 text-foreground/60";
+                ? "text-foreground transition-colors hover:text-foreground/80"
+                : "text-foreground/60 transition-colors hover:text-foreground/80";
             }}
           >
             Dashboard

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User } from "@/types/apiResponses";
+import { Team } from "@/types/apiResponses";
 import {
   ArrowDownRight,
   ArrowRight,
@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import React from "react";
 
-export default function UserStatisticsCard({ user }: { user: User }) {
+export default function TeamStatisticsCard({ team }: { team: Team }) {
   function getRandomInt(max: number) {
     return Math.floor(Math.random() * max);
   }
@@ -26,7 +26,7 @@ export default function UserStatisticsCard({ user }: { user: User }) {
     <div className="flex-auto">
       <Card>
         <CardHeader>
-          <CardTitle>{user.username}'s Statistics</CardTitle>
+          <CardTitle>{team.name}'s Statistics</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap justify-between gap-6">
           <UserStatistic

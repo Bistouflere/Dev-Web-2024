@@ -1,5 +1,10 @@
 import { query } from "../db/index";
 import { validateTeamId } from "../validator/teamIdValidator";
+import { validateUserId } from "../validator/userIdValidator";
+import {
+  ClerkExpressRequireAuth,
+  RequireAuthProp,
+} from "@clerk/clerk-sdk-node";
 import express, { NextFunction, Request, Response } from "express";
 
 const router = express.Router();
@@ -17,12 +22,108 @@ router.get(
           teams_users.role AS team_role
         FROM users
         JOIN teams_users ON users.id = teams_users.user_id
-        WHERE teams_users.team_id = $1;
+        WHERE teams_users.team_id = $1
+        ORDER BY teams_users.role;
       `;
 
       const result = await query(sql, [teamId]);
 
       return res.status(200).json(result.rows);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.post(
+  "/:teamId/users",
+  validateTeamId,
+  ClerkExpressRequireAuth({}),
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { teamId } = req.params;
+    const authId = req.auth.userId;
+
+    try {
+      const authUserSql = "SELECT * FROM users WHERE clerk_user_id = $1;";
+      const authUserResult = await query(authUserSql, [authId]);
+
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ error: `User with ID ${authId} not found` });
+      }
+
+      const existingTeamUserSql =
+        "SELECT * FROM teams_users WHERE team_id = $1 AND user_id = $2;";
+      const existingTeamUserResult = await query(existingTeamUserSql, [
+        teamId,
+        authUserResult.rows[0].id,
+      ]);
+
+      if (
+        existingTeamUserResult.rowCount !== null &&
+        existingTeamUserResult.rowCount > 0
+      ) {
+        return res.status(409).json({
+          error: `User with ID ${authUserResult.rows[0].id} is already a member of team with ID ${teamId}`,
+        });
+      }
+
+      const sql = `
+        INSERT INTO teams_users (team_id, user_id, role)
+        VALUES ($1, $2, 'participant')
+      `;
+
+      await query(sql, [teamId, authUserResult.rows[0].id]);
+
+      return res.status(201).json({ message: "User added to team" });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.delete(
+  "/:teamId/users",
+  validateTeamId,
+  ClerkExpressRequireAuth({}),
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { teamId } = req.params;
+    const authId = req.auth.userId;
+
+    try {
+      const authUserSql = "SELECT * FROM users WHERE clerk_user_id = $1;";
+      const authUserResult = await query(authUserSql, [authId]);
+
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ error: `User with ID ${authId} not found` });
+      }
+
+      const existingTeamUserSql =
+        "SELECT * FROM teams_users WHERE team_id = $1 AND user_id = $2;";
+      const existingTeamUserResult = await query(existingTeamUserSql, [
+        teamId,
+        authUserResult.rows[0].id,
+      ]);
+
+      if (
+        existingTeamUserResult.rowCount === null ||
+        existingTeamUserResult.rowCount === 0
+      ) {
+        return res.status(404).json({
+          error: `User with ID ${authUserResult.rows[0].id} is not a member of team with ID ${teamId}`,
+        });
+      }
+
+      const sql = `
+        DELETE FROM teams_users
+        WHERE team_id = $1 AND user_id = $2
+      `;
+      await query(sql, [teamId, authUserResult.rows[0].id]);
+
+      return res.status(200).json({ message: "User removed from team" });
     } catch (error) {
       next(error);
     }

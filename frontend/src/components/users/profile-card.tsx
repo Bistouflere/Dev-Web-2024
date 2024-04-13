@@ -28,7 +28,7 @@ export default function UserProfileCard({
         <CardContent>
           <div className="flex flex-col items-center space-y-2">
             <img
-              className="aspect-square rounded-md object-cover w-24 h-24"
+              className="aspect-square h-24 w-24 rounded-md object-cover"
               src={user.image_url || undefined}
               alt={user.username}
             />
@@ -40,30 +40,25 @@ export default function UserProfileCard({
             </p>
           </div>
           <div className="mt-4 flex justify-center space-x-4">
-            <Button
-              onClick={() =>
-                userFollowers?.find(
-                  (follower) => follower.clerk_user_id === userId,
-                )
-                  ? handleUnfollowUser()
-                  : handleFollowUser()
-              }
-              disabled={!userId || userId === user.clerk_user_id}
-            >
-              {userFollowers?.find(
-                (follower) => follower.clerk_user_id === userId,
-              ) ? (
-                <>
-                  <HeartOff className="mr-2 h-5 w-5" />
-                  Unfollow
-                </>
-              ) : (
-                <>
-                  <Heart className="mr-2 h-5 w-5" />
-                  Follow
-                </>
-              )}
-            </Button>
+            {userFollowers?.find(
+              (follower) => follower.clerk_user_id === userId,
+            ) ? (
+              <Button
+                onClick={handleUnfollowUser}
+                disabled={!userId || userId === user.clerk_user_id}
+              >
+                <HeartOff className="mr-2 h-5 w-5" />
+                Unfollow
+              </Button>
+            ) : (
+              <Button
+                onClick={handleFollowUser}
+                disabled={!userId || userId === user.clerk_user_id}
+              >
+                <Heart className="mr-2 h-5 w-5" />
+                Follow
+              </Button>
+            )}
             <Button
               variant="secondary"
               onClick={() => console.log("recruit", user.id)}

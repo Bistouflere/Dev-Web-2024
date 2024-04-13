@@ -56,7 +56,9 @@ export default function UserProfile() {
       toast({
         variant: "destructive",
         title: "Oops!",
-        description: "An error occurred while following the user.",
+        description:
+          (error as Error).message ||
+          `An error occurred while following ${user?.username}.`,
       });
     }
   };
@@ -73,7 +75,9 @@ export default function UserProfile() {
       toast({
         variant: "destructive",
         title: "Oops!",
-        description: "An error occurred while unfollowing the user.",
+        description:
+          (error as Error).message ||
+          `An error occurred while unfollowing ${user?.username}.`,
       });
     }
   };
@@ -81,7 +85,7 @@ export default function UserProfile() {
   return (
     <div className="container py-4">
       {user ? (
-        <div className="flex gap-4 flex-col lg:flex-row">
+        <div className="flex flex-col gap-4 lg:flex-row">
           <UserProfileCard
             user={user}
             userId={userId}
@@ -90,7 +94,7 @@ export default function UserProfile() {
             handleFollowUser={handleFollowUser}
             handleUnfollowUser={handleUnfollowUser}
           />
-          <div className="flex gap-4 flex-auto flex-col">
+          <div className="flex flex-auto flex-col gap-4">
             <UserStatisticsCard user={user} />
             <UserTeamsTable user={user} teams={teams || []} />
             <UserTournamentsTable

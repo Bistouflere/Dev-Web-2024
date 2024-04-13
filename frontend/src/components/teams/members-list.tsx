@@ -14,21 +14,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Team } from "@/types/apiResponses";
+import { TeamUser } from "@/types/apiResponses";
 import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
-export function TeamList({ response }: { response: Team[] }) {
+export function TeamMembersList({ response }: { response: TeamUser[] }) {
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead className="hidden w-[100px] sm:table-cell">
-            <span className="sr-only">Team Avatar</span>
+            <span className="sr-only">User Avatar</span>
           </TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Description</TableHead>
-          <TableHead>Members</TableHead>
+          <TableHead>Username</TableHead>
+          <TableHead>Role</TableHead>
           <TableHead>
             <span className="sr-only">Actions</span>
           </TableHead>
@@ -38,19 +37,18 @@ export function TeamList({ response }: { response: Team[] }) {
         {response.map((response) => (
           <TableRow key={response.id}>
             <TableCell className="hidden sm:table-cell">
-              <Link to={`/teams/${response.id}`}>
+              <Link to={`/users/${response.id}`}>
                 <img
                   className="aspect-square rounded-md object-cover"
                   src={response.image_url || undefined}
-                  alt={response.name}
+                  alt={response.username}
                 />
               </Link>
             </TableCell>
             <TableCell className="font-medium">
-              <Link to={`/teams/${response.id}`}>{response.name}</Link>
+              <Link to={`/users/${response.id}`}>{response.username}</Link>
             </TableCell>
-            <TableCell>{response.description}</TableCell>
-            <TableCell>{response.users_count}</TableCell>
+            <TableCell>{response.team_role}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -62,15 +60,15 @@ export function TeamList({ response }: { response: Team[] }) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuItem>
-                    <Link to={`/teams/${response.id}`}>View Team</Link>
+                    <Link to={`/users/${response.id}`}>View Profile</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => {
-                      console.log(`Joined ${response.id}`);
+                      console.log(`Added Friend ${response.id}`);
                     }}
                   >
-                    Join Team
+                    Follow User
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

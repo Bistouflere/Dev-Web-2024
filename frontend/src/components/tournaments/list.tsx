@@ -68,14 +68,6 @@ export function TournamentList({ response }: { response: Tournament[] }) {
                       View Tournament
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => {
-                      console.log(`Register for the tournament ${response.id}`);
-                    }}
-                  >
-                    Register
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>

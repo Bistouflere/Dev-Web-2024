@@ -33,8 +33,8 @@ export function Search({
   }, 300);
 
   return (
-    <div className="flex items-center pb-4 space-x-4 justify-end">
-      <div className="relative flex items-center w-full">
+    <div className="flex items-center justify-end space-x-4 pb-4">
+      <div className="relative flex w-full items-center">
         <span className="sr-only">Search Bar</span>
         <Input
           name="search"
@@ -52,7 +52,7 @@ export function Search({
       {button_placeholder && button_path && (
         <Link to={userId ? button_path : "/sign-in"} className="ml-4">
           <Button>
-            <Plus className="sm:mr-2 h-5 w-5" />
+            <Plus className="h-5 w-5 sm:mr-2" />
             <span className="sr-only sm:hidden">{button_placeholder}</span>
             <span className="hidden sm:inline">{button_placeholder}</span>
           </Button>

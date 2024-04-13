@@ -1,4 +1,4 @@
-import { Count, Team, Tournament, UserTeam } from "@/types/apiResponses";
+import { Count, Team, TeamUser, Tournament } from "@/types/apiResponses";
 import { keepPreviousData, queryOptions } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -81,8 +81,8 @@ export async function fetchTeamsCount(query: string): Promise<number> {
   });
 }
 
-export async function fetchTeamUsers(id: string): Promise<UserTeam[]> {
-  return axios.get<UserTeam[]>(`/api/teams/${id}/users`).then((res) => {
+export async function fetchTeamUsers(id: string): Promise<TeamUser[]> {
+  return axios.get<TeamUser[]>(`/api/teams/${id}/users`).then((res) => {
     console.log(`/api/teams/${id}/users`, res.data);
     return res.data;
   });

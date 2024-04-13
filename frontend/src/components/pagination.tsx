@@ -88,7 +88,7 @@ export default function UrlPagination({ totalPages }: { totalPages: number }) {
           return (
             <PaginationItem
               key={index}
-              className="cursor-pointer hidden sm:flex"
+              className="hidden cursor-pointer sm:flex"
             >
               <PaginationLink
                 onClick={() => {

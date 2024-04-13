@@ -42,6 +42,7 @@ CREATE TABLE teams (
     name TEXT NOT NULL,
     description TEXT,
     image_url TEXT DEFAULT 'https://madbracket.xyz/images/default',
+    open BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );

@@ -73,13 +73,14 @@ router.post(
       ]);
 
       if (existingFollowResult.rows.length > 0) {
-        return res.status(400).json({ error: "Already following this user" });
+        return res.status(409).json({ error: "Already following this user" });
       }
 
       const insertSql = `
         INSERT INTO users_follows (followed_id, follower_id)
         VALUES ($1, $2);
       `;
+
       await query(insertSql, [
         followingResult.rows[0].id,
         followerResult.rows[0].id,
@@ -93,7 +94,7 @@ router.post(
 );
 
 router.delete(
-  "/:userId/unfollow",
+  "/:userId/follow",
   validateUserId,
   ClerkExpressRequireAuth({}),
   async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {

@@ -25,9 +25,12 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <IndexPage /> },
       { path: "/teams", element: <TeamsPage /> },
-      { path: "/teams/:teamId", element: <TeamProfile /> },
+      { path: "/teams/:searchTeamId", element: <TeamProfile /> },
       { path: "/tournaments", element: <TournamentsPage /> },
-      { path: "/tournaments/:tournamentId", element: <TournamentProfile /> },
+      {
+        path: "/tournaments/:searchTournamentId",
+        element: <TournamentProfile />,
+      },
       { path: "/users", element: <UsersPage /> },
       { path: "/users/:searchUserId", element: <UserProfile /> },
       { path: "/sign-in", element: <SignInPage /> },
@@ -39,7 +42,10 @@ const router = createBrowserRouter([
           { path: "/dashboard", element: <DashboardPage /> },
           { path: "/dashboard/teams", element: <TeamPage /> },
           { path: "/dashboard/teams/create", element: <CreateTeamPage /> },
-          { path: "/dashboard/tournaments/create", element: <CreateTournamentPage /> },
+          {
+            path: "/dashboard/tournaments/create",
+            element: <CreateTournamentPage />,
+          },
         ],
       },
       {

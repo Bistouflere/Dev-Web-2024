@@ -68,6 +68,7 @@ export type Team = {
   name: string;
   description: string | null;
   image_url: string | null;
+  open: boolean;
   created_at: string;
   updated_at: string;
   users_count: string;

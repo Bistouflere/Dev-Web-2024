@@ -5,13 +5,20 @@ import dayjs from "dayjs";
 import { useParams } from "react-router-dom";
 
 export default function TournamentProfile() {
-  const { tournamentId } = useParams();
-  const { data } = useQuery(tournamentQueryOptions(tournamentId || ""));
+  const { searchTournamentId } = useParams();
+  const { data } = useQuery(tournamentQueryOptions(searchTournamentId || ""));
   return (
     <div className="container relative">
       <Card>
         <CardHeader>
-          <CardTitle> {data? (<img  alt={data.name} src={data.image_url || undefined }/>)   : ("") } </CardTitle>
+          <CardTitle>
+            {" "}
+            {data ? (
+              <img alt={data.name} src={data.image_url || undefined} />
+            ) : (
+              ""
+            )}{" "}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div>
