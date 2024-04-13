@@ -276,21 +276,26 @@ router.get(
       const sql = `
         SELECT 
           tournaments.*, 
-          COUNT(DISTINCT(tournaments_users.user_id)) AS users_count,
-          COUNT(DISTINCT(tournaments_teams.team_id)) AS teams_count,
-          tournaments_users.role as tournament_role,
+          (
+              SELECT COUNT(DISTINCT user_id)
+              FROM tournaments_users
+              WHERE tournament_id = tournaments.id
+          ) AS users_count,
+          (
+              SELECT COUNT(DISTINCT team_id)
+              FROM tournaments_teams
+              WHERE tournament_id = tournaments.id
+          ) AS teams_count,
+          tournaments_users.role AS tournament_role,
           games.name AS game_name,
           games.description AS game_description,
           games.image_url AS game_image_url,
           games.created_at AS game_created_at,
           games.updated_at AS game_updated_at
         FROM tournaments
-        LEFT JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
         LEFT JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
         JOIN games ON tournaments.game_id = games.id
-        WHERE tournaments.id IN (
-          SELECT tournament_id FROM tournaments_users WHERE user_id = $1
-        )
+        WHERE tournaments_users.user_id = $1
         GROUP BY tournaments.id, games.id, tournaments_users.role;
       `;
 
