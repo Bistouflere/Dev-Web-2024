@@ -1,6 +1,5 @@
 import { query } from "../db/index";
 import { validateTeamId } from "../validator/teamIdValidator";
-import { validateUserId } from "../validator/userIdValidator";
 import {
   ClerkExpressRequireAuth,
   RequireAuthProp,
@@ -50,7 +49,22 @@ router.post(
       if (authUserResult.rowCount === 0) {
         return res
           .status(404)
-          .json({ error: `User with ID ${authId} not found` });
+          .json({ message: `User with ID ${authId} not found` });
+      }
+
+      const teamSql = "SELECT * FROM teams WHERE id = $1;";
+      const teamResult = await query(teamSql, [teamId]);
+
+      if (teamResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `Team with ID ${teamId} not found` });
+      }
+
+      if (teamResult.rows[0].open === false) {
+        return res.status(403).json({
+          message: `Team with ID ${teamId} is not open for new members`,
+        });
       }
 
       const existingTeamUserSql =
@@ -65,7 +79,7 @@ router.post(
         existingTeamUserResult.rowCount > 0
       ) {
         return res.status(409).json({
-          error: `User with ID ${authUserResult.rows[0].id} is already a member of team with ID ${teamId}`,
+          message: `User with ID ${authUserResult.rows[0].id} is already a member of team with ID ${teamId}`,
         });
       }
 
@@ -98,7 +112,7 @@ router.delete(
       if (authUserResult.rowCount === 0) {
         return res
           .status(404)
-          .json({ error: `User with ID ${authId} not found` });
+          .json({ message: `User with ID ${authId} not found` });
       }
 
       const existingTeamUserSql =
@@ -113,7 +127,7 @@ router.delete(
         existingTeamUserResult.rowCount === 0
       ) {
         return res.status(404).json({
-          error: `User with ID ${authUserResult.rows[0].id} is not a member of team with ID ${teamId}`,
+          message: `User with ID ${authUserResult.rows[0].id} is not a member of team with ID ${teamId}`,
         });
       }
 

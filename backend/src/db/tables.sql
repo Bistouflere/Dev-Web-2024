@@ -139,7 +139,7 @@ CREATE TRIGGER updated_at_matches BEFORE UPDATE ON matches FOR EACH ROW EXECUTE 
 CREATE TRIGGER updated_at_match_scores BEFORE UPDATE ON match_scores FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 INSERT INTO users (clerk_user_id, username, first_name, last_name, email_address) VALUES 
-('1', 'owhestia', 'simon', 'fontaine', 'simon.fontaine@gmail.com'), 
+('user_2ewoAgaj7Zk1uQhFtdO9r6Prv70', 'owhestia', 'simon', 'fontaine', 'simon.fontaine@gmail.com'), 
 ('2', 'bistouflere', 'timothy', 'truong', 'timothy.truong@gmail.com'),
 ('3', 'echoo', 'bastien', 'patureau', 'bastien.patureau@gmail.com'),
 ('4', 'guignaume', 'guillaume', 'ladriere', 'guillaume.ladriere@gmail.com');

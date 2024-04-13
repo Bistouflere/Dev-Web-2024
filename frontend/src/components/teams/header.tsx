@@ -61,7 +61,7 @@ export default function TeamHeader({
         {users?.some((u) => u.clerk_user_id === userId) ? (
           <Button
             onClick={handleTeamLeave}
-            disabled={!team.open || !userId}
+            disabled={!userId}
             variant="destructive"
           >
             <DoorClosed className="mr-2 h-5 w-5" />

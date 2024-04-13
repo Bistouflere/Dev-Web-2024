@@ -48,7 +48,7 @@ router.post(
       if (followingResult.rows.length === 0) {
         return res
           .status(404)
-          .json({ error: `User with ID ${userId} not found` });
+          .json({ message: `User with ID ${userId} not found` });
       }
 
       const followerSql = "SELECT * FROM users WHERE clerk_user_id = $1;";
@@ -57,11 +57,11 @@ router.post(
       if (followerResult.rows.length === 0) {
         return res
           .status(404)
-          .json({ error: `User with ID ${followerId} not found` });
+          .json({ message: `User with ID ${followerId} not found` });
       }
 
       if (followingResult.rows[0].id === followerResult.rows[0].id) {
-        return res.status(400).json({ error: "Cannot follow yourself" });
+        return res.status(400).json({ message: "Cannot follow yourself" });
       }
 
       const existingFollowSql = `
@@ -73,7 +73,7 @@ router.post(
       ]);
 
       if (existingFollowResult.rows.length > 0) {
-        return res.status(409).json({ error: "Already following this user" });
+        return res.status(409).json({ message: "Already following this user" });
       }
 
       const insertSql = `
@@ -108,7 +108,7 @@ router.delete(
       if (followingResult.rows.length === 0) {
         return res
           .status(404)
-          .json({ error: `User with ID ${userId} not found` });
+          .json({ message: `User with ID ${userId} not found` });
       }
 
       const followerSql = "SELECT * FROM users WHERE clerk_user_id = $1;";
@@ -117,11 +117,11 @@ router.delete(
       if (followerResult.rows.length === 0) {
         return res
           .status(404)
-          .json({ error: `User with ID ${followerId} not found` });
+          .json({ message: `User with ID ${followerId} not found` });
       }
 
       if (followingResult.rows[0].id === followerResult.rows[0].id) {
-        return res.status(400).json({ error: "Cannot unfollow yourself" });
+        return res.status(400).json({ message: "Cannot unfollow yourself" });
       }
 
       const followSql = `
@@ -133,7 +133,7 @@ router.delete(
       ]);
 
       if (followResult.rows.length === 0) {
-        return res.status(400).json({ error: "User is not being followed" });
+        return res.status(400).json({ message: "User is not being followed" });
       }
 
       const deleteSql = `
@@ -228,13 +228,12 @@ router.get(
         SELECT
           teams.*,
           teams_users.role AS team_role,
-          COUNT(DISTINCT teams_users.user_id) AS users_count
+          COUNT(DISTINCT(teams_users.user_id)) AS users_count
         FROM teams_users
         JOIN teams ON teams_users.team_id = teams.id
         WHERE teams.id IN (
           SELECT team_id FROM teams_users WHERE user_id = $1
         )
-        AND teams_users.user_id = $1
         GROUP BY teams.id, teams_users.role;
       `;
 
@@ -289,7 +288,9 @@ router.get(
         LEFT JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
         LEFT JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
         JOIN games ON tournaments.game_id = games.id
-        WHERE tournaments_users.user_id = $1
+        WHERE tournaments.id IN (
+          SELECT tournament_id FROM tournaments_users WHERE user_id = $1
+        )
         GROUP BY tournaments.id, games.id, tournaments_users.role;
       `;
 

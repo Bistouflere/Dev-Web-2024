@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 export async function followUser(
   userId: string,
@@ -6,21 +6,24 @@ export async function followUser(
   invalidateQueries: () => void,
 ) {
   const token = await getToken();
-  const result = await axios.post(
-    `/api/users/${userId}/follow`,
-    {},
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
 
-  if (result.status === 201) {
+  try {
+    await axios.post(
+      `/api/users/${userId}/follow`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+
     invalidateQueries();
     return true;
-  } else {
-    throw new Error(
-      result.data.error || "An error occurred while following the user.",
-    );
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(error.response?.data.message);
+    } else {
+      throw new Error((error as Error).message);
+    }
   }
 }
 
@@ -30,17 +33,20 @@ export async function unfollowUser(
   invalidateQueries: () => void,
 ) {
   const token = await getToken();
-  const result = await axios.delete(`/api/users/${userId}/follow`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
 
-  if (result.status === 200) {
+  try {
+    await axios.delete(`/api/users/${userId}/follow`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
     invalidateQueries();
     return true;
-  } else {
-    throw new Error(
-      result.data.error || "An error occurred while unfollowing the user.",
-    );
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(error.response?.data.message);
+    } else {
+      throw new Error((error as Error).message);
+    }
   }
 }
 
@@ -50,21 +56,24 @@ export async function joinTeam(
   invalidateQueries: () => void,
 ) {
   const token = await getToken();
-  const result = await axios.post(
-    `/api/teams/${userId}/users`,
-    {},
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
 
-  if (result.status === 201) {
+  try {
+    await axios.post(
+      `/api/teams/${userId}/users`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+
     invalidateQueries();
     return true;
-  } else {
-    throw new Error(
-      result.data.error || "An error occurred while joining the team.",
-    );
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(error.response?.data.message);
+    } else {
+      throw new Error((error as Error).message);
+    }
   }
 }
 
@@ -74,16 +83,19 @@ export async function leaveTeam(
   invalidateQueries: () => void,
 ) {
   const token = await getToken();
-  const result = await axios.delete(`/api/teams/${userId}/users`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
 
-  if (result.status === 200) {
+  try {
+    await axios.delete(`/api/teams/${userId}/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
     invalidateQueries();
     return true;
-  } else {
-    throw new Error(
-      result.data.error || "An error occurred while leaving the team.",
-    );
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(error.response?.data.message);
+    } else {
+      throw new Error((error as Error).message);
+    }
   }
 }
