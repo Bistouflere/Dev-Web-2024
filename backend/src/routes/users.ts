@@ -227,13 +227,18 @@ router.get(
       const sql = `
         SELECT
           teams.*,
-          teams_users.role AS team_role,
-          COUNT(DISTINCT(teams_users.user_id)) AS users_count
+          (
+            SELECT COUNT(DISTINCT user_id)
+            FROM teams_users
+            WHERE team_id = teams.id
+          ) AS users_count,
+          teams_users.role AS team_role
         FROM teams_users
         JOIN teams ON teams_users.team_id = teams.id
         WHERE teams.id IN (
           SELECT team_id FROM teams_users WHERE user_id = $1
         )
+        AND teams_users.user_id = $1
         GROUP BY teams.id, teams_users.role;
       `;
 
