@@ -4,7 +4,6 @@ export type Count = {
 
 export type User = {
   id: string;
-  clerk_user_id: string;
   username: string;
   first_name: string | null;
   last_name: string | null;

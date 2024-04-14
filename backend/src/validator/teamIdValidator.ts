@@ -7,8 +7,10 @@ export const validateTeamId = (
 ) => {
   const { teamId } = req.params;
 
-  if (isNaN(parseInt(teamId, 10))) {
-    return res.status(400).json({ error: "teamId must be an integer" });
+  const teamIdNumber = parseInt(teamId, 10);
+
+  if (isNaN(teamIdNumber) || teamIdNumber < 1) {
+    return res.status(400).json({ error: "teamId must be a positive integer" });
   }
 
   next();

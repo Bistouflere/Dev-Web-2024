@@ -7,15 +7,17 @@ import { Heart, HeartOff, UserPlus } from "lucide-react";
 export default function UserProfileCard({
   user,
   userId,
-  userFollowers,
-  userFollowing,
+  userFollowersCount,
+  userFollowingCount,
+  isFollowing,
   handleFollowUser,
   handleUnfollowUser,
 }: {
   user: User;
   userId: string | null | undefined;
-  userFollowers: User[];
-  userFollowing: User[];
+  userFollowersCount: number;
+  userFollowingCount: number;
+  isFollowing: boolean;
   handleFollowUser: () => void;
   handleUnfollowUser: () => void;
 }) {
@@ -40,12 +42,10 @@ export default function UserProfileCard({
             </p>
           </div>
           <div className="mt-4 flex justify-center space-x-4">
-            {userFollowers?.find(
-              (follower) => follower.clerk_user_id === userId,
-            ) ? (
+            {isFollowing ? (
               <Button
                 onClick={handleUnfollowUser}
-                disabled={!userId || userId === user.clerk_user_id}
+                disabled={!userId || userId === user.id}
               >
                 <HeartOff className="mr-2 h-5 w-5" />
                 Unfollow
@@ -53,7 +53,7 @@ export default function UserProfileCard({
             ) : (
               <Button
                 onClick={handleFollowUser}
-                disabled={!userId || userId === user.clerk_user_id}
+                disabled={!userId || userId === user.id}
               >
                 <Heart className="mr-2 h-5 w-5" />
                 Follow
@@ -62,21 +62,15 @@ export default function UserProfileCard({
             <Button
               variant="secondary"
               onClick={() => console.log("recruit", user.id)}
-              disabled={!userId || userId === user.clerk_user_id}
+              disabled={!userId || userId === user.id}
             >
               <UserPlus className="mr-2 h-5 w-5" />
               Recruit
             </Button>
           </div>
           <div className="mt-4">
-            <UserDetail
-              title="Followers"
-              result={userFollowers ? userFollowers.length : 0}
-            />
-            <UserDetail
-              title="Following"
-              result={userFollowing ? userFollowing.length : 0}
-            />
+            <UserDetail title="Followers" result={userFollowersCount} />
+            <UserDetail title="Following" result={userFollowingCount} />
             <UserDetail
               title="Member Since"
               result={dayjs(user.created_at).format("DD/MM/YYYY")}

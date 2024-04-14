@@ -1,7 +1,8 @@
 import { followUser, unfollowUser } from "@/api/userActions";
 import {
-  userFollowersQueryOptions,
-  userFollowingQueryOptions,
+  isFollowingQueryOptions,
+  userFollowersCountQueryOptions,
+  userFollowingCountQueryOptions,
   userQueryOptions,
   userTeamsQueryOptions,
   userTournamentsQueryOptions,
@@ -22,27 +23,34 @@ export default function UserProfile() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: user } = useQuery(userQueryOptions(searchUserId || ""));
-  const { data: userFollowers } = useQuery(
-    userFollowersQueryOptions(searchUserId || ""),
+  const { data: user } = useQuery(userQueryOptions(searchUserId));
+  const { data: userFollowersCount } = useQuery(
+    userFollowersCountQueryOptions(searchUserId),
   );
-  const { data: userFollowing } = useQuery(
-    userFollowingQueryOptions(searchUserId || ""),
+  const { data: userFollowingCount } = useQuery(
+    userFollowingCountQueryOptions(searchUserId),
   );
-  const { data: teams } = useQuery(userTeamsQueryOptions(searchUserId || ""));
+  const { data: isFollowing } = useQuery(
+    isFollowingQueryOptions(userId, searchUserId),
+  );
+
+  const { data: teams } = useQuery(userTeamsQueryOptions(searchUserId));
   const { data: tournaments } = useQuery(
-    userTournamentsQueryOptions(searchUserId || ""),
+    userTournamentsQueryOptions(searchUserId),
   );
 
   const invalidateQueries = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: [`user_${searchUserId}`] });
     queryClient.invalidateQueries({
-      queryKey: [`user_followers_${searchUserId}`],
+      queryKey: [`user_followers_count_${searchUserId}_`],
     });
     queryClient.invalidateQueries({
-      queryKey: [`user_following_${searchUserId}`],
+      queryKey: [`user_following_count_${searchUserId}_`],
     });
-  }, [queryClient, searchUserId]);
+    queryClient.invalidateQueries({
+      queryKey: [`is_following_${userId}_${searchUserId}`],
+    });
+  }, [queryClient, userId, searchUserId]);
 
   const handleFollowUser = async () => {
     try {
@@ -89,8 +97,9 @@ export default function UserProfile() {
           <UserProfileCard
             user={user}
             userId={userId}
-            userFollowers={userFollowers || []}
-            userFollowing={userFollowing || []}
+            userFollowersCount={userFollowersCount || 0}
+            userFollowingCount={userFollowingCount || 0}
+            isFollowing={isFollowing || false}
             handleFollowUser={handleFollowUser}
             handleUnfollowUser={handleUnfollowUser}
           />

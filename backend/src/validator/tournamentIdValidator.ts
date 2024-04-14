@@ -7,8 +7,12 @@ export const validateTournamentId = (
 ) => {
   const { tournamentId } = req.params;
 
-  if (isNaN(parseInt(tournamentId, 10))) {
-    return res.status(400).json({ error: "tournamentId must be an integer" });
+  const tournamentIdNumber = parseInt(tournamentId, 10);
+
+  if (isNaN(tournamentIdNumber) || tournamentIdNumber < 1) {
+    return res
+      .status(400)
+      .json({ error: "tournamentId must be a positive integer" });
   }
 
   next();

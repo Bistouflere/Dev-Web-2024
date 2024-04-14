@@ -65,17 +65,17 @@ export const navigationConfig: NavigationConfig = {
       ],
     },
     {
-      title: "Friend Management",
+      title: "Follow Management",
       items: [
         {
-          title: "Friends",
-          path: "/dashboard/friends",
-          label: "new",
+          title: "Your Followers",
+          path: "/dashboard/followers",
+          label: "",
         },
         {
-          title: "Friend Requests",
-          path: "/dashboard/friends/requests",
-          label: "new",
+          title: "Your Following",
+          path: "/dashboard/following",
+          label: "",
         },
       ],
     },

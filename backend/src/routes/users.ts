@@ -1,5 +1,5 @@
 import { query } from "../db/index";
-import { validateUserId } from "../validator/userIdValidator";
+import { validatePage } from "../validator/pageValidator";
 import {
   ClerkExpressRequireAuth,
   RequireAuthProp,
@@ -10,21 +10,41 @@ const router = express.Router();
 
 router.get(
   "/:userId/followers",
-  validateUserId,
+  validatePage,
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
+    const { query: searchQuery, page } = req.query as {
+      query: string;
+      page: string;
+    };
+    const perPage = 10;
+    const offset = (parseInt(page, 10) - 1) * perPage || 0;
 
     try {
-      const sql = `
-        SELECT
-          users.*,
-          users_follows.followed_at
-        FROM users_follows
-        JOIN users ON users_follows.follower_id = users.id
-        WHERE users_follows.followed_id = $1;
-      `;
+      const sql = searchQuery
+        ? `
+          SELECT
+            users.*,
+            users_follows.followed_at
+          FROM users_follows
+          JOIN users ON users_follows.follower_id = users.id
+          WHERE users_follows.followed_id = $1 AND users.username ILIKE $2
+          ORDER BY id LIMIT $3 OFFSET $4;
+        `
+        : `
+          SELECT
+            users.*,
+            users_follows.followed_at
+          FROM users_follows
+          JOIN users ON users_follows.follower_id = users.id
+          WHERE users_follows.followed_id = $1
+          ORDER BY id LIMIT $2 OFFSET $3;
+        `;
+      const params = searchQuery
+        ? [userId, `%${searchQuery}%`, perPage, offset]
+        : [userId, perPage, offset];
 
-      const result = await query(sql, [userId]);
+      const result = await query(sql, params);
 
       return res.status(200).json(result.rows);
     } catch (error) {
@@ -35,7 +55,6 @@ router.get(
 
 router.post(
   "/:userId/follow",
-  validateUserId,
   ClerkExpressRequireAuth({}),
   async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
     const { userId } = req.params;
@@ -51,7 +70,7 @@ router.post(
           .json({ message: `User with ID ${userId} not found` });
       }
 
-      const followerSql = "SELECT * FROM users WHERE clerk_user_id = $1;";
+      const followerSql = "SELECT * FROM users WHERE id = $1;";
       const followerResult = await query(followerSql, [followerId]);
 
       if (followerResult.rows.length === 0) {
@@ -60,7 +79,7 @@ router.post(
           .json({ message: `User with ID ${followerId} not found` });
       }
 
-      if (followingResult.rows[0].id === followerResult.rows[0].id) {
+      if (followerId === userId) {
         return res.status(400).json({ message: "Cannot follow yourself" });
       }
 
@@ -68,8 +87,8 @@ router.post(
         SELECT * FROM users_follows WHERE followed_id = $1 AND follower_id = $2;
       `;
       const existingFollowResult = await query(existingFollowSql, [
-        followingResult.rows[0].id,
-        followerResult.rows[0].id,
+        userId,
+        followerId,
       ]);
 
       if (existingFollowResult.rows.length > 0) {
@@ -81,10 +100,7 @@ router.post(
         VALUES ($1, $2);
       `;
 
-      await query(insertSql, [
-        followingResult.rows[0].id,
-        followerResult.rows[0].id,
-      ]);
+      await query(insertSql, [userId, followerId]);
 
       return res.status(201).json({ message: "User followed successfully" });
     } catch (error) {
@@ -95,7 +111,6 @@ router.post(
 
 router.delete(
   "/:userId/follow",
-  validateUserId,
   ClerkExpressRequireAuth({}),
   async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
     const { userId } = req.params;
@@ -111,7 +126,7 @@ router.delete(
           .json({ message: `User with ID ${userId} not found` });
       }
 
-      const followerSql = "SELECT * FROM users WHERE clerk_user_id = $1;";
+      const followerSql = "SELECT * FROM users WHERE id = $1;";
       const followerResult = await query(followerSql, [followerId]);
 
       if (followerResult.rows.length === 0) {
@@ -120,17 +135,14 @@ router.delete(
           .json({ message: `User with ID ${followerId} not found` });
       }
 
-      if (followingResult.rows[0].id === followerResult.rows[0].id) {
+      if (followerId === userId) {
         return res.status(400).json({ message: "Cannot unfollow yourself" });
       }
 
       const followSql = `
         SELECT * FROM users_follows WHERE followed_id = $1 AND follower_id = $2;
       `;
-      const followResult = await query(followSql, [
-        followingResult.rows[0].id,
-        followerResult.rows[0].id,
-      ]);
+      const followResult = await query(followSql, [userId, followerId]);
 
       if (followResult.rows.length === 0) {
         return res.status(400).json({ message: "User is not being followed" });
@@ -140,10 +152,7 @@ router.delete(
         DELETE FROM users_follows
         WHERE followed_id = $1 AND follower_id = $2;
       `;
-      await query(deleteSql, [
-        followingResult.rows[0].id,
-        followerResult.rows[0].id,
-      ]);
+      await query(deleteSql, [userId, followerId]);
 
       return res.status(200).json({ message: "User unfollowed successfully" });
     } catch (error) {
@@ -154,13 +163,25 @@ router.delete(
 
 router.get(
   "/:userId/followers/count",
-  validateUserId,
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
+    const { query: searchQuery } = req.query as { query: string };
 
     try {
-      const sql = "SELECT COUNT(*) FROM users_follows WHERE followed_id = $1;";
-      const result = await query(sql, [userId]);
+      const sql = searchQuery
+        ? `
+          SELECT COUNT(*)
+          FROM users_follows
+          WHERE followed_id = $1  AND follower_id IN (SELECT id FROM users WHERE username ILIKE $2);
+        `
+        : `
+          SELECT COUNT(*)
+          FROM users_follows
+          WHERE followed_id = $1
+        `;
+
+      const params = searchQuery ? [userId, `%${searchQuery}%`] : [userId];
+      const result = await query(sql, params);
       const count = parseInt(result.rows[0].count, 10);
 
       return res.status(200).json({
@@ -174,21 +195,41 @@ router.get(
 
 router.get(
   "/:userId/following",
-  validateUserId,
+  validatePage,
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
+    const { query: searchQuery, page } = req.query as {
+      query: string;
+      page: string;
+    };
+    const perPage = 10;
+    const offset = (parseInt(page, 10) - 1) * perPage || 0;
 
     try {
-      const sql = `
-        SELECT
-          users.*,
-          users_follows.followed_at
-        FROM users_follows
-        JOIN users ON users_follows.followed_id = users.id
-        WHERE users_follows.follower_id = $1;
-      `;
+      const sql = searchQuery
+        ? `
+          SELECT
+            users.*,
+            users_follows.followed_at
+          FROM users_follows
+          JOIN users ON users_follows.followed_id = users.id
+          WHERE users_follows.follower_id = $1 AND users.username ILIKE $2
+          ORDER BY id LIMIT $3 OFFSET $4;
+        `
+        : `
+          SELECT
+            users.*,
+            users_follows.followed_at
+          FROM users_follows
+          JOIN users ON users_follows.followed_id = users.id
+          WHERE users_follows.follower_id = $1
+          ORDER BY id LIMIT $2 OFFSET $3;
+        `;
+      const params = searchQuery
+        ? [userId, `%${searchQuery}%`, perPage, offset]
+        : [userId, perPage, offset];
 
-      const result = await query(sql, [userId]);
+      const result = await query(sql, params);
 
       return res.status(200).json(result.rows);
     } catch (error) {
@@ -199,13 +240,25 @@ router.get(
 
 router.get(
   "/:userId/following/count",
-  validateUserId,
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
+    const { query: searchQuery } = req.query as { query: string };
 
     try {
-      const sql = "SELECT COUNT(*) FROM users_follows WHERE follower_id = $1;";
-      const result = await query(sql, [userId]);
+      const sql = searchQuery
+        ? `
+          SELECT COUNT(*)
+          FROM users_follows
+          WHERE follower_id = $1 AND followed_id IN (SELECT id FROM users WHERE username ILIKE $2);
+        `
+        : `
+          SELECT COUNT(*)
+          FROM users_follows
+          WHERE follower_id = $1;
+        `;
+
+      const params = searchQuery ? [userId, `%${searchQuery}%`] : [userId];
+      const result = await query(sql, params);
       const count = parseInt(result.rows[0].count, 10);
 
       return res.status(200).json({
@@ -218,8 +271,41 @@ router.get(
 );
 
 router.get(
+  "/:followerId/following/:followedId",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { followerId, followedId } = req.params;
+
+    try {
+      const followerSql = "SELECT * FROM users WHERE id = $1;";
+      const followerResult = await query(followerSql, [followerId]);
+
+      if (followerResult.rows.length === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${followerId} not found` });
+      }
+
+      const sql = `
+        SELECT EXISTS (
+          SELECT 1
+          FROM users_follows
+          WHERE follower_id = $1 AND followed_id = $2
+        ) AS is_following;
+      `;
+      const params = [followerId, followedId];
+
+      const result = await query(sql, params);
+      const isFollowing = result.rows[0].is_following;
+
+      return res.status(200).json({ isFollowing });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
   "/:userId/teams",
-  validateUserId,
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
 
@@ -253,7 +339,6 @@ router.get(
 
 router.get(
   "/:userId/teams/count",
-  validateUserId,
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
 
@@ -273,7 +358,6 @@ router.get(
 
 router.get(
   "/:userId/tournaments",
-  validateUserId,
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
 
@@ -315,7 +399,6 @@ router.get(
 
 router.get(
   "/:userId/tournaments/count",
-  validateUserId,
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
 
@@ -357,7 +440,6 @@ router.get(
 
 router.get(
   "/:userId",
-  validateUserId,
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
 

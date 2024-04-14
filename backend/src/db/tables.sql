@@ -17,8 +17,7 @@ CREATE TYPE tournament_status AS ENUM ('upcoming', 'active', 'completed', 'cance
 CREATE TYPE match_status AS ENUM ('upcoming', 'active', 'completed', 'cancelled');
 
 CREATE TABLE users (
-  id BIGSERIAL PRIMARY KEY,
-  clerk_user_id TEXT UNIQUE NOT NULL,
+  id TEXT UNIQUE NOT NULL,
   username TEXT UNIQUE NOT NULL,
   first_name TEXT,
   last_name TEXT,
@@ -30,8 +29,8 @@ CREATE TABLE users (
 );
 
 CREATE TABLE users_follows (
-    follower_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
-    followed_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    follower_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+    followed_id TEXT REFERENCES users(id) ON DELETE CASCADE,
     followed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     PRIMARY KEY (follower_id, followed_id),
     CHECK (follower_id != followed_id)
@@ -49,7 +48,7 @@ CREATE TABLE teams (
 
 CREATE TABLE teams_users (
     team_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,
-    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
     role team_role NOT NULL DEFAULT 'participant',
     PRIMARY KEY (user_id, team_id)
 );
@@ -91,7 +90,7 @@ CREATE TABLE tournaments_teams (
 
 CREATE TABLE tournaments_users (
     tournament_id BIGINT REFERENCES tournaments(id) ON DELETE CASCADE,
-    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
     role team_role NOT NULL DEFAULT 'participant',
     PRIMARY KEY (tournament_id, user_id)
 );
@@ -138,7 +137,7 @@ CREATE TRIGGER updated_at_pools BEFORE UPDATE ON pools FOR EACH ROW EXECUTE FUNC
 CREATE TRIGGER updated_at_matches BEFORE UPDATE ON matches FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER updated_at_match_scores BEFORE UPDATE ON match_scores FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-INSERT INTO users (clerk_user_id, username, first_name, last_name, email_address) VALUES 
+INSERT INTO users (id, username, first_name, last_name, email_address) VALUES 
 ('user_2ewoAgaj7Zk1uQhFtdO9r6Prv70', 'owhestia', 'simon', 'fontaine', 'simon.fontaine@gmail.com'), 
 ('2', 'bistouflere', 'timothy', 'truong', 'timothy.truong@gmail.com'),
 ('3', 'echoo', 'bastien', 'patureau', 'bastien.patureau@gmail.com'),
@@ -157,19 +156,19 @@ INSERT INTO teams (name) VALUES
 ('Team B');
 
 INSERT INTO teams_users (team_id, user_id) VALUES
-(1, 1),
-(2, 2),
-(1, 3),
-(2, 4);
+(1, 'user_2ewoAgaj7Zk1uQhFtdO9r6Prv70'),
+(2, '2'),
+(1, '3'),
+(2, '4');
 
 INSERT INTO tournaments (name, game_id, start_date, end_date) VALUES
 ('Tournament A', 1, '2024-12-01', '2024-12-31'),
 ('Tournament B', 2, '2024-12-01', '2024-12-31');
 
 INSERT INTO tournaments_teams (tournament_id, team_id) VALUES
-(1, 1),
-(2, 2);
+(1, '1'),
+(2, '2');
 
 INSERT INTO tournaments_users (tournament_id, user_id) VALUES
-(1, 1),
-(2, 2);
+(1, 'user_2ewoAgaj7Zk1uQhFtdO9r6Prv70'),
+(2, '2');

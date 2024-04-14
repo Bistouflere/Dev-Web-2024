@@ -43,7 +43,7 @@ router.post(
     const authId = req.auth.userId;
 
     try {
-      const authUserSql = "SELECT * FROM users WHERE clerk_user_id = $1;";
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
       const authUserResult = await query(authUserSql, [authId]);
 
       if (authUserResult.rowCount === 0) {
@@ -71,7 +71,7 @@ router.post(
         "SELECT * FROM teams_users WHERE team_id = $1 AND user_id = $2;";
       const existingTeamUserResult = await query(existingTeamUserSql, [
         teamId,
-        authUserResult.rows[0].id,
+        authId,
       ]);
 
       if (
@@ -79,7 +79,7 @@ router.post(
         existingTeamUserResult.rowCount > 0
       ) {
         return res.status(409).json({
-          message: `User with ID ${authUserResult.rows[0].id} is already a member of team with ID ${teamId}`,
+          message: `User with ID ${authId} is already a member of team with ID ${teamId}`,
         });
       }
 
@@ -88,7 +88,7 @@ router.post(
         VALUES ($1, $2, 'participant')
       `;
 
-      await query(sql, [teamId, authUserResult.rows[0].id]);
+      await query(sql, [teamId, authId]);
 
       return res.status(201).json({ message: "User added to team" });
     } catch (error) {
@@ -106,7 +106,7 @@ router.delete(
     const authId = req.auth.userId;
 
     try {
-      const authUserSql = "SELECT * FROM users WHERE clerk_user_id = $1;";
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
       const authUserResult = await query(authUserSql, [authId]);
 
       if (authUserResult.rowCount === 0) {
@@ -119,7 +119,7 @@ router.delete(
         "SELECT * FROM teams_users WHERE team_id = $1 AND user_id = $2;";
       const existingTeamUserResult = await query(existingTeamUserSql, [
         teamId,
-        authUserResult.rows[0].id,
+        authId,
       ]);
 
       if (
@@ -127,7 +127,7 @@ router.delete(
         existingTeamUserResult.rowCount === 0
       ) {
         return res.status(404).json({
-          message: `User with ID ${authUserResult.rows[0].id} is not a member of team with ID ${teamId}`,
+          message: `User with ID ${authId} is not a member of team with ID ${teamId}`,
         });
       }
 
@@ -135,7 +135,7 @@ router.delete(
         DELETE FROM teams_users
         WHERE team_id = $1 AND user_id = $2
       `;
-      await query(sql, [teamId, authUserResult.rows[0].id]);
+      await query(sql, [teamId, authId]);
 
       return res.status(200).json({ message: "User removed from team" });
     } catch (error) {

@@ -2,7 +2,7 @@ import { Count, User, UserTeam, UserTournament } from "@/types/apiResponses";
 import { keepPreviousData, queryOptions } from "@tanstack/react-query";
 import axios from "axios";
 
-export function userQueryOptions(id: string) {
+export function userQueryOptions(id: string | null | undefined) {
   return queryOptions({
     queryKey: [`user_${id}`, id],
     queryFn: () => fetchUser(id),
@@ -26,39 +26,68 @@ export function usersCountQueryOptions(query: string) {
   });
 }
 
-export function userFollowersQueryOptions(id: string) {
+export function userFollowersQueryOptions(
+  id: string | null | undefined,
+  query: string,
+  page: number,
+) {
   return queryOptions({
-    queryKey: [`user_followers_${id}`, id],
-    queryFn: () => fetchUserFollowers(id),
+    queryKey: [`user_followers_${id}_${query}_${page}`, id, query, page],
+    queryFn: () => fetchUserFollowers(id, query, page),
     placeholderData: keepPreviousData,
   });
 }
 
-export function userFollowersCountQueryOptions(id: string) {
+export function userFollowersCountQueryOptions(
+  id: string | null | undefined,
+  query: string = "",
+) {
   return queryOptions({
-    queryKey: [`user_followers_count_${id}`, id],
-    queryFn: () => fetchUserFollowersCount(id),
+    queryKey: [`user_followers_count_${id}_${query}`, id, query],
+    queryFn: () => fetchUserFollowersCount(id, query),
     placeholderData: keepPreviousData,
   });
 }
 
-export function userFollowingQueryOptions(id: string) {
+export function userFollowingQueryOptions(
+  id: string | null | undefined,
+  query: string,
+  page: number,
+) {
   return queryOptions({
-    queryKey: [`user_following_${id}`, id],
-    queryFn: () => fetchUserFollowing(id),
+    queryKey: [`user_following_${id}_${query}_${page}`, id, query, page],
+    queryFn: () => fetchUserFollowing(id, query, page),
     placeholderData: keepPreviousData,
   });
 }
 
-export function userFollowingCountQueryOptions(id: string) {
+export function userFollowingCountQueryOptions(
+  id: string | null | undefined,
+  query: string = "",
+) {
   return queryOptions({
-    queryKey: [`user_following_count_${id}`, id],
-    queryFn: () => fetchUserFollowingCount(id),
+    queryKey: [`user_following_count_${id}_${query}`, id, query],
+    queryFn: () => fetchUserFollowingCount(id, query),
     placeholderData: keepPreviousData,
   });
 }
 
-export function userTeamsQueryOptions(id: string) {
+export function isFollowingQueryOptions(
+  followerId: string | null | undefined,
+  followedId: string | null | undefined,
+) {
+  return queryOptions({
+    queryKey: [
+      `is_following_${followerId}_${followedId}`,
+      followerId,
+      followedId,
+    ],
+    queryFn: () => isFollowing(followerId, followedId),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function userTeamsQueryOptions(id: string | null | undefined) {
   return queryOptions({
     queryKey: [`user_teams_${id}`, id],
     queryFn: () => fetchUserTeams(id),
@@ -66,7 +95,7 @@ export function userTeamsQueryOptions(id: string) {
   });
 }
 
-export function userTeamsCountQueryOptions(id: string) {
+export function userTeamsCountQueryOptions(id: string | null | undefined) {
   return queryOptions({
     queryKey: [`user_teams_count_${id}`, id],
     queryFn: () => fetchUserTeamsCount(id),
@@ -74,7 +103,7 @@ export function userTeamsCountQueryOptions(id: string) {
   });
 }
 
-export function userTournamentsQueryOptions(id: string) {
+export function userTournamentsQueryOptions(id: string | null | undefined) {
   return queryOptions({
     queryKey: [`user_tournaments_${id}`, id],
     queryFn: () => fetchUserTournaments(id),
@@ -82,7 +111,9 @@ export function userTournamentsQueryOptions(id: string) {
   });
 }
 
-export function userTournamentsCountQueryOptions(id: string) {
+export function userTournamentsCountQueryOptions(
+  id: string | null | undefined,
+) {
   return queryOptions({
     queryKey: [`user_tournaments_count_${id}`, id],
     queryFn: () => fetchUserTournamentsCount(id),
@@ -90,7 +121,11 @@ export function userTournamentsCountQueryOptions(id: string) {
   });
 }
 
-export async function fetchUser(id: string): Promise<User> {
+export async function fetchUser(id: string | null | undefined): Promise<User> {
+  if (!id) {
+    throw new Error("User ID is required to fetch user data.");
+  }
+
   const user = await axios
     .get<User>(`/api/users/${id}`)
     .then((res) => res.data);
@@ -115,42 +150,116 @@ export async function fetchUsersCount(query: string): Promise<number> {
   });
 }
 
-export async function fetchUserFollowers(id: string): Promise<User[]> {
-  return axios.get<User[]>(`/api/users/${id}/followers`).then((res) => {
-    console.log(`/api/users/${id}/followers`, res.data);
-    return res.data;
-  });
+export async function fetchUserFollowers(
+  id: string | null | undefined,
+  query: string,
+  page: number,
+): Promise<User[]> {
+  if (!id) {
+    throw new Error("User ID is required to fetch user followers.");
+  }
+
+  return axios
+    .get<User[]>(`/api/users/${id}/followers?page=${page}&query=${query}`)
+    .then((res) => {
+      console.log(
+        `/api/users/${id}/followers?page=${page}&query=${query}`,
+        res.data,
+      );
+      return res.data;
+    });
 }
 
-export async function fetchUserFollowersCount(id: string): Promise<number> {
-  return axios.get<Count>(`/api/users/${id}/followers/count`).then((res) => {
-    console.log(`/api/users/${id}/followers/count`, res.data);
-    return res.data.count;
-  });
+export async function fetchUserFollowersCount(
+  id: string | null | undefined,
+  query?: string,
+): Promise<number> {
+  if (!id) {
+    throw new Error("User ID is required to fetch user followers count.");
+  }
+
+  return axios
+    .get<Count>(`/api/users/${id}/followers/count?query=${query}`)
+    .then((res) => {
+      console.log(`/api/users/${id}/followers/count?query=${query}`, res.data);
+      return res.data.count;
+    });
 }
 
-export async function fetchUserFollowing(id: string): Promise<User[]> {
-  return axios.get<User[]>(`/api/users/${id}/following`).then((res) => {
-    console.log(`/api/users/${id}/following`, res.data);
-    return res.data;
-  });
+export async function fetchUserFollowing(
+  id: string | null | undefined,
+  query: string,
+  page: number,
+): Promise<User[]> {
+  if (!id) {
+    throw new Error("User ID is required to fetch user following.");
+  }
+
+  return axios
+    .get<User[]>(`/api/users/${id}/following?page=${page}&query=${query}`)
+    .then((res) => {
+      console.log(
+        `/api/users/${id}/following?page=${page}&query=${query}`,
+        res.data,
+      );
+      return res.data;
+    });
 }
 
-export async function fetchUserFollowingCount(id: string): Promise<number> {
-  return axios.get<Count>(`/api/users/${id}/following/count`).then((res) => {
-    console.log(`/api/users/${id}/following/count`, res.data);
-    return res.data.count;
-  });
+export async function fetchUserFollowingCount(
+  id: string | null | undefined,
+  query?: string,
+): Promise<number> {
+  if (!id) {
+    throw new Error("User ID is required to fetch user following count.");
+  }
+
+  return axios
+    .get<Count>(`/api/users/${id}/following/count?query=${query}`)
+    .then((res) => {
+      console.log(`/api/users/${id}/following/count?query=${query}`, res.data);
+      return res.data.count;
+    });
 }
 
-export async function fetchUserTeams(id: string): Promise<UserTeam[]> {
+export async function isFollowing(
+  followerId: string | null | undefined,
+  followedId: string | null | undefined,
+): Promise<boolean> {
+  if (!followerId || !followedId) {
+    return false;
+  }
+
+  return axios
+    .get<
+      Record<string, boolean>
+    >(`/api/users/${followerId}/following/${followedId}`)
+    .then((res) => {
+      console.log(`/api/users/${followerId}/following/${followedId}`, res.data);
+      return res.data.isFollowing;
+    });
+}
+
+export async function fetchUserTeams(
+  id: string | null | undefined,
+): Promise<UserTeam[]> {
+  if (!id) {
+    throw new Error("User ID is required to fetch user teams.");
+  }
+
   return axios.get<UserTeam[]>(`/api/users/${id}/teams`).then((res) => {
     console.log(`/api/users/${id}/teams`, res.data);
     return res.data;
   });
 }
 
-export async function fetchUserTeamsCount(id: string): Promise<number> {
+export async function fetchUserTeamsCount(
+  id: string | null | undefined,
+): Promise<number> {
+  if (!id) {
+    throw new Error("User ID is required to fetch user teams count.");
+  }
+
   return axios.get<Count>(`/api/users/${id}/teams/count`).then((res) => {
     console.log(`/api/users/${id}/teams/count`, res.data);
     return res.data.count;
@@ -158,7 +267,7 @@ export async function fetchUserTeamsCount(id: string): Promise<number> {
 }
 
 export async function fetchUserTournaments(
-  id: string,
+  id: string | null | undefined,
 ): Promise<UserTournament[]> {
   return axios
     .get<UserTournament[]>(`/api/users/${id}/tournaments`)
@@ -168,7 +277,13 @@ export async function fetchUserTournaments(
     });
 }
 
-export async function fetchUserTournamentsCount(id: string): Promise<number> {
+export async function fetchUserTournamentsCount(
+  id: string | null | undefined,
+): Promise<number> {
+  if (!id) {
+    throw new Error("User ID is required to fetch user tournaments count.");
+  }
+
   return axios.get<Count>(`/api/users/${id}/tournaments/count`).then((res) => {
     console.log(`/api/users/${id}/tournaments/count`, res.data);
     return res.data.count;

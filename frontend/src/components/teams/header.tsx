@@ -58,7 +58,7 @@ export default function TeamHeader({
         </div>
       </div>
       <div className="flex justify-center sm:justify-end">
-        {users?.some((u) => u.clerk_user_id === userId) ? (
+        {users?.some((u) => u.id === userId) ? (
           <Button
             onClick={handleTeamLeave}
             disabled={!userId}
@@ -71,9 +71,7 @@ export default function TeamHeader({
           <Button
             onClick={handleTeamJoin}
             disabled={
-              !team.open ||
-              !userId ||
-              users?.some((u) => u.clerk_user_id === userId)
+              !team.open || !userId || users?.some((u) => u.id === userId)
             }
           >
             <UserPlus className="mr-2 h-5 w-5" />
