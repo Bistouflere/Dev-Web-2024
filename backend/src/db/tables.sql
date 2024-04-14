@@ -137,38 +137,39 @@ CREATE TRIGGER updated_at_pools BEFORE UPDATE ON pools FOR EACH ROW EXECUTE FUNC
 CREATE TRIGGER updated_at_matches BEFORE UPDATE ON matches FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER updated_at_match_scores BEFORE UPDATE ON match_scores FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-INSERT INTO users (id, username, first_name, last_name, email_address) VALUES 
-('user_2ewoAgaj7Zk1uQhFtdO9r6Prv70', 'owhestia', 'simon', 'fontaine', 'simon.fontaine@gmail.com'), 
-('2', 'bistouflere', 'timothy', 'truong', 'timothy.truong@gmail.com'),
-('3', 'echoo', 'bastien', 'patureau', 'bastien.patureau@gmail.com'),
-('4', 'guignaume', 'guillaume', 'ladriere', 'guillaume.ladriere@gmail.com');
+INSERT INTO users (id, username, image_url, email_address) VALUES 
+('user_2ewoAgaj7Zk1uQhFtdO9r6Prv70', 'owhestia', 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZGlzY29yZC9pbWdfMmV3b0FqSlZtczBkbHJPU1Z4eFMyVXhpMFJnIn0', 'simon.fontaine@gmail.com'), 
+('user_2ewu63juKL5jSj0hfiXqoVGGbZm', 'eechho', 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZGlzY29yZC9pbWdfMmV3dTYySm5vU0xtaTNBU2RqUUN3MkxPblZuIn0', 'bastien.patureau@gmail.com'),
+('user_2f04zDgK6au6PrWu6K9Wo07LJa1', 'guignome54', 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZGlzY29yZC9pbWdfMmYwNHpHQ253NWxNWDZXZmdjT1NzdWgzb0lSIn0', 'guillaume.ladriere@gmail.com');
 
-INSERT INTO games (name) VALUES
-('League of Legends'),
-('Valorant'),
-('Counter-Strike: Global Offensive'),
-('Overwatch'),
-('Rainbow Six Siege'),
-('Rocket League');
+INSERT INTO games (name, description, image_url) VALUES
+('League of Legends', 'League of Legends, commonly referred to as League, is a 2009 multiplayer online battle arena video game.', 'https://madbracket.xyz/images/lol'),
+('Apex Legends', 'Apex Legends is a free-to-play battle royale-hero shooter game.', 'https://madbracket.xyz/images/apexlegends'),
+('Counter-Strike: Global Offensive', 'Global Offensive is a 2012 multiplayer tactical first-person shooter.', 'https://madbracket.xyz/images/csgo'),
+('Overwatch 2', 'Overwatch 2 is a 2022 first-person shooter game developed and published by Blizzard Entertainment.', 'https://madbracket.xyz/images/overwatch2'),
+('Rocket League', 'Rocket League is a vehicular soccer video game.', 'https://madbracket.xyz/images/rocketleague');
 
-INSERT INTO teams (name) VALUES
-('Team A'),
-('Team B');
+INSERT INTO teams (name, description, image_url) VALUES
+('4Esport Overwatch', 'Équipe e-sport sur Overwatch 2', 'https://madbracket.xyz/images/4esport'),
+('Les Fennecs', 'C''est un petit renard des sables', 'https://madbracket.xyz/images/fennec');
 
 INSERT INTO teams_users (team_id, user_id) VALUES
 (1, 'user_2ewoAgaj7Zk1uQhFtdO9r6Prv70'),
-(2, '2'),
-(1, '3'),
-(2, '4');
+(1, 'user_2f04zDgK6au6PrWu6K9Wo07LJa1'),
+(2, 'user_2ewu63juKL5jSj0hfiXqoVGGbZm');
 
-INSERT INTO tournaments (name, game_id, start_date, end_date) VALUES
-('Tournament A', 1, '2024-12-01', '2024-12-31'),
-('Tournament B', 2, '2024-12-01', '2024-12-31');
+INSERT INTO tournaments (name, description, image_url, game_id, cash_prize, max_team_size, min_team_size) VALUES
+('League of Legends World Championship', 'The League of Legends World Championship is the annual professional League of Legends world championship tournament hosted by Riot Games.', 'https://madbracket.xyz/images/lolworlds', 1, 1000000.00, 5, 5),
+('Apex Legends Global Series', 'The Apex Legends Global Series is the official tournament circuit by EA.', 'https://madbracket.xyz/images/globalseries', 2, 1000.00, 3, 3),
+('ESL One', '', 'https://madbracket.xyz/images/eslone', 3, 30000.00, 7, 5),
+('All For One Overwatch', 'The French Overwatch All For One Championship !', 'https://madbracket.xyz/images/allforone', 4, 500.00, 7, 5),
+('Rocket League Championship Series', 'The Rocket League Championship Series is the official tournament circuit by Psyonix.', 'https://madbracket.xyz/images/rlcs', 5, 1000.00, 7, 5);
 
 INSERT INTO tournaments_teams (tournament_id, team_id) VALUES
-(1, '1'),
-(2, '2');
+(1, 4),
+(2, 2);
 
 INSERT INTO tournaments_users (tournament_id, user_id) VALUES
-(1, 'user_2ewoAgaj7Zk1uQhFtdO9r6Prv70'),
-(2, '2');
+(4, 'user_2ewoAgaj7Zk1uQhFtdO9r6Prv70'),
+(4, 'user_2f04zDgK6au6PrWu6K9Wo07LJa1'),
+(2, 'user_2ewu63juKL5jSj0hfiXqoVGGbZm');
