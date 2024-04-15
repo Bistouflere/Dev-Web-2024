@@ -19,7 +19,7 @@ import Balancer from "react-wrap-balancer";
 import { z } from "zod";
 
 const profileFormSchema = z.object({
-  username: z
+  team_name: z
     .string()
     .min(2, {
       message: "Username must be at least 2 characters.",
@@ -27,8 +27,8 @@ const profileFormSchema = z.object({
     .max(30, {
       message: "Username must not be longer than 30 characters.",
     }),
-  bio: z.string().max(160).min(4),
-  picture: z.string().optional(),
+  team_description: z.string().max(160).min(4),
+  team_image_url: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -42,9 +42,40 @@ export default function CreateTeamPage() {
   function onSubmit(data: ProfileFormValues) {
     console.log(data);
 
-    toast({
-      title: "Your team is created !",
-    });
+    const formData = {
+      team_name: data.team_name,
+      team_description: data.team_description,
+      team_image_url: data.team_image_url,
+    };
+
+    fetch('/api/teams', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to create team');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Team created:', data);
+        toast({
+          title: "Your team is created !",
+        });
+        setTimeout(() => {
+          window.location.href = '/dashboard/teams';
+        }, 1000);
+      })
+      .catch(error => {
+        console.error('Error creating team:', error);
+        toast({
+          title: "Failed to create team",
+        });
+      });
   }
 
   return (
@@ -70,7 +101,7 @@ export default function CreateTeamPage() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
-              name="username"
+              name="team_name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name *</FormLabel>
@@ -90,7 +121,7 @@ export default function CreateTeamPage() {
             />
             <FormField
               control={form.control}
-              name="bio"
+              name="team_description"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description *</FormLabel>
@@ -109,10 +140,16 @@ export default function CreateTeamPage() {
                 </FormItem>
               )}
             />
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="picture">Picture</Label>
-              <Input id="picture" type="file" />
-            </div>
+            <FormField
+              control={form.control}
+              name="team_image_url"
+              render={({ field }) => (
+                <FormItem className="grid w-full max-w-sm items-center gap-1.5">
+                  <Label htmlFor="picture">Picture</Label>
+                  <Input id="picture" type="file" {...field} />
+                </FormItem>
+              )}
+            />
             <Button type="submit">Create My Team</Button>
           </form>
         </Form>
