@@ -22,7 +22,7 @@ export default function FollowersPage() {
   const page = Number(searchParams.get("page")) || 1;
 
   const countQuery = useQuery(userFollowersCountQueryOptions(userId, query));
-  const usersQuery = useQuery(userFollowersQueryOptions(query, query, page));
+  const usersQuery = useQuery(userFollowersQueryOptions(userId, query, page));
   const pageCount = Math.ceil(countQuery.data! / USERS_PER_PAGE);
 
   const startUserIndex = (page - 1) * USERS_PER_PAGE + 1;
