@@ -80,19 +80,17 @@ const profileFormSchema = z.object({
   format: z.string({
     required_error: "Please select a format.",
   }),
+  public: z.string().optional(),
   cash_prize: z.string().optional(),
-  max_teams: z
-    .string({
-      required_error: "Please specify the number max for teams.",
-    })
-    .min(5, {
-      message:
-        "Number of players must be at least 5. (5 players for a 5v5 game)",
-    })
-    .max(7, {
-      message:
-        "Number of players must not exceed 7. (5 players + 2 subs for a 5v5 game)",
-    }),
+  max_teams: z.string({
+    required_error: "Please specify the number max for teams.",
+  }),
+  // .min(5, {
+  //     message: "Number of players must be at least 5. (5 players for a 5v5 game)",
+  // })
+  // .max(7, {
+  //     message: "Number of players must not exceed 7. (5 players + 2 subs for a 5v5 game)",
+  // }),
   team_size: z
     .string({
       required_error: "Please specify the number max of teams.",

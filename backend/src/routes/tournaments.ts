@@ -252,6 +252,52 @@ router.get(
   },
 );
 
+router.post("/", async (req: Request, res: Response, next: NextFunction) => {
+  const {
+    name,
+    description,
+    imageUrl,
+    format,
+    visibility,
+    status,
+    startDate,
+    endDate,
+    cashPrize,
+    maxTeams,
+    maxTeamSize,
+    minTeamSize,
+    gameId,
+  } = req.body;
+
+  try {
+    const sql = `
+      INSERT INTO tournaments (name, description, image_url, format, visibility, status, start_date, end_date, cash_prize, max_teams, max_team_size, min_team_size, game_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      RETURNING *;
+    `;
+    const params = [
+      name,
+      description,
+      imageUrl,
+      format,
+      visibility,
+      status,
+      startDate,
+      endDate,
+      cashPrize,
+      maxTeams,
+      maxTeamSize,
+      minTeamSize,
+      gameId,
+    ];
+
+    const result = await query(sql, params);
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   const { query: searchQuery, page } = req.query as {
     query: string;

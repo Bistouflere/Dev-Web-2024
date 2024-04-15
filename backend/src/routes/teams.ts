@@ -267,6 +267,28 @@ router.get(
   },
 );
 
+router.post("/", async (req: Request, res: Response, next: NextFunction) => {
+  console.log(req);
+  const { team_name, team_description, team_image_url } = req.body;
+
+  try {
+    const sql = `
+      INSERT INTO teams (name, description, image_url)
+      VALUES ($1, $2, $3)
+      RETURNING *;
+    `;
+    const result = await query(sql, [
+      team_name,
+      team_description,
+      team_image_url,
+    ]);
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   const { query: searchQuery, page } = req.query as {
     query: string;
