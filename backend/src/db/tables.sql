@@ -166,7 +166,7 @@ INSERT INTO tournaments (name, description, image_url, game_id, cash_prize, max_
 ('Rocket League Championship Series', 'The Rocket League Championship Series is the official tournament circuit by Psyonix.', 'https://madbracket.xyz/images/rlcs', 5, 1000.00, 7, 5);
 
 INSERT INTO tournaments_teams (tournament_id, team_id) VALUES
-(1, 4),
+(4, 1),
 (2, 2);
 
 INSERT INTO tournaments_users (tournament_id, user_id) VALUES
