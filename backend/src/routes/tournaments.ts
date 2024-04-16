@@ -1,5 +1,9 @@
 import { query } from "../db/index";
 import { validateTournamentId } from "../validator/tournamentIdValidator";
+import {
+  ClerkExpressRequireAuth,
+  RequireAuthProp,
+} from "@clerk/clerk-sdk-node";
 import express, { NextFunction, Request, Response } from "express";
 
 const router = express.Router();
@@ -246,6 +250,119 @@ router.get(
       }
 
       return res.status(200).json(result.rows[0]);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+router.post(
+  "/:tournamentId/users",
+  ClerkExpressRequireAuth({}),
+  validateTournamentId,
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { tournamentId } = req.params;
+    const user_id = req.auth.userId;
+    try {
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
+      const authUserResult = await query(authUserSql, [user_id]);
+
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${user_id} not found` });
+      }
+      const tournamentSql = "SELECT * FROM tournaments WHERE id = $1;";
+      const tournamentResult = await query(tournamentSql, [tournamentId]);
+
+      if (tournamentResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `tournament with ID${tournamentId} is not found` });
+      }
+      if (tournamentResult.rows[0].open === false) {
+        return res.status(403).json({
+          message: `Tournament with ID ${tournamentId} is not joignable`,
+        });
+      }
+
+      const existingTournamentUserSql =
+        "SELECT * FROM tournaments_users WHERE tournament_id = $1 AND user_id = $2";
+      const existingTournamentUserResult = await query(
+        existingTournamentUserSql,
+        [tournamentId, user_id],
+      );
+
+      if (
+        existingTournamentUserResult.rowCount !== null &&
+        existingTournamentUserResult.rowCount > 0
+      ) {
+        return res.status(409).json({
+          message: `User with ID ${user_id} is already a participant of tournaments with ID ${tournamentId}`,
+        });
+      }
+
+      const sql = `
+        INSERT INTO tournaments_users (tournament_id, user_id, role)
+        VALUES ($1, $2, 'participant')
+        `;
+
+      await query(sql, [tournamentId, user_id]);
+
+      return res.status(201).json({ message: "User added to tournament" });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
+  "/:tournamentId/users",
+  validateTournamentId,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { tournamentId } = req.params;
+  },
+);
+router.delete(
+  "/:tournamentId/users",
+  ClerkExpressRequireAuth({}),
+  validateTournamentId,
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { tournamentId } = req.params;
+    const authId = req.auth.userId;
+
+    try {
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
+      const authUserResult = await query(authUserSql, [authId]);
+
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${authId} not found` });
+      }
+
+      const existingTournamentUserSql =
+        "SELECT * FROM tournaments_users WHERE tournament_id = $1 AND user_id = $2;";
+      const existingTournamentUserResult = await query(
+        existingTournamentUserSql,
+        [tournamentId, authId],
+      );
+
+      if (
+        existingTournamentUserResult.rowCount === null ||
+        existingTournamentUserResult.rowCount === 0
+      ) {
+        return res.status(404).json({
+          message: `User with ID ${authId} is not a member of tournament with ID ${tournamentId}`,
+        });
+      }
+
+      const sql = `
+        DELETE FROM tournaments_users
+        WHERE tournament_id = $1 AND user_id = $2
+      `;
+      await query(sql, [tournamentId, authId]);
+
+      return res.status(200).json({ message: "User removed from tournament" });
     } catch (error) {
       next(error);
     }
