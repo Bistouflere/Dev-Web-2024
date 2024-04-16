@@ -46,6 +46,7 @@ export default function CreateTeamPage() {
     defaultValues: {
       team_name: "",
       team_description: "",
+      team_image_url: "",
     },
   });
 
@@ -148,8 +149,8 @@ export default function CreateTeamPage() {
                 name="team_image_url"
                 render={({ field }) => (
                   <FormItem className="grid w-full max-w-sm items-center gap-1.5">
-                    <Label htmlFor="picture">Picture</Label>
-                    <Input id="picture" type="file" {...field} />
+                    <Label htmlFor="file">Picture</Label>
+                    <Input type="file" id="file" accept="image/*" {...field} />
                   </FormItem>
                 )}
               />
