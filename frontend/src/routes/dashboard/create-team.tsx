@@ -15,6 +15,7 @@ import { toast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRightIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 const profileFormSchema = z.object({
@@ -33,6 +34,8 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function CreateTeamPage() {
+  const navigate = useNavigate();
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     mode: "onChange",
@@ -66,7 +69,7 @@ export default function CreateTeamPage() {
           title: "Your team is created !",
         });
         setTimeout(() => {
-          window.location.href = "/dashboard/teams";
+          navigate(`/dashboard/teams/${data.id}`);
         }, 1000);
       })
       .catch((error) => {
