@@ -129,6 +129,15 @@ CREATE TABLE match_scores (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE teams_invitations (
+    invited_id text references users(id) on delete cascade,
+    invitor_id text references users(id) on delete cascade,
+    team_id bigint references teams(id) on delete cascade,
+    invited_at timestamp default current_timestamp not null,
+    primary key (invited_id, invitor_id, team_id),
+    check (invited_id != invitor_id)
+);
+
 CREATE TRIGGER updated_at_users BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER updated_at_teams BEFORE UPDATE ON teams FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER updated_at_games BEFORE UPDATE ON games FOR EACH ROW EXECUTE FUNCTION update_updated_at();
@@ -175,3 +184,6 @@ INSERT INTO tournaments_users (tournament_id, user_id) VALUES
 (4, 'user_2ewoAgaj7Zk1uQhFtdO9r6Prv70'),
 (4, 'user_2f04zDgK6au6PrWu6K9Wo07LJa1'),
 (2, 'user_2f85ACEznYo6IoifDjSLRe9DQUO');
+
+INSERT INTO teams_invitations (invited_id, invitor_id, team_id) VALUES
+ ('user_2ewoAgaj7Zk1uQhFtdO9r6Prv70', 'user_2f85ACEznYo6IoifDjSLRe9DQUO', 1);
