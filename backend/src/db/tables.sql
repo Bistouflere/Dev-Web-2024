@@ -139,8 +139,10 @@ CREATE TRIGGER updated_at_match_scores BEFORE UPDATE ON match_scores FOR EACH RO
 
 INSERT INTO users (id, username, image_url, email_address) VALUES 
 ('user_2ewoAgaj7Zk1uQhFtdO9r6Prv70', 'owhestia', 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZGlzY29yZC9pbWdfMmV3b0FqSlZtczBkbHJPU1Z4eFMyVXhpMFJnIn0', 'simon.fontaine@gmail.com'), 
-('user_2ewu63juKL5jSj0hfiXqoVGGbZm', 'eechho', 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZGlzY29yZC9pbWdfMmV3dTYySm5vU0xtaTNBU2RqUUN3MkxPblZuIn0', 'bastien.patureau@gmail.com'),
-('user_2f04zDgK6au6PrWu6K9Wo07LJa1', 'guignome54', 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZGlzY29yZC9pbWdfMmYwNHpHQ253NWxNWDZXZmdjT1NzdWgzb0lSIn0', 'guillaume.ladriere@gmail.com');
+('user_2f85ACEznYo6IoifDjSLRe9DQUO', 'eechho', 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZGlzY29yZC9pbWdfMmY4NUFCZ0lPSmhZc2VOYVlON1ZnOFpxNE9PIn0', 'bastien.patureau@gmail.com'),
+('user_2f04zDgK6au6PrWu6K9Wo07LJa1', 'guignome54', 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZGlzY29yZC9pbWdfMmYwNHpHQ253NWxNWDZXZmdjT1NzdWgzb0lSIn0', 'guillaume.ladriere@gmail.com'),
+('user_2f6fkmvmQOAV86nVDpB0v9TM2a4', 'quentiinlvq', 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZGlzY29yZC9pbWdfMmY2ZmtwTHg4dDJBaEVYeTZuUW02OU1INmt3In0', 'quentiinlvq@gmail.com'),
+('user_2f7x7T88Sbm8DMKoR3aTHIIA4xB', 'bistouflere', 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZGlzY29yZC9pbWdfMmY3eDdab3lqUE1Vb042c2ljakNoUjdiZHZQIn0', 'bistouflere@gmail.com');
 
 INSERT INTO games (name, description, image_url) VALUES
 ('League of Legends', 'League of Legends, commonly referred to as League, is a 2009 multiplayer online battle arena video game.', 'https://madbracket.xyz/images/lol'),
@@ -156,7 +158,7 @@ INSERT INTO teams (name, description, image_url) VALUES
 INSERT INTO teams_users (team_id, user_id) VALUES
 (1, 'user_2ewoAgaj7Zk1uQhFtdO9r6Prv70'),
 (1, 'user_2f04zDgK6au6PrWu6K9Wo07LJa1'),
-(2, 'user_2ewu63juKL5jSj0hfiXqoVGGbZm');
+(2, 'user_2f85ACEznYo6IoifDjSLRe9DQUO');
 
 INSERT INTO tournaments (name, description, image_url, game_id, cash_prize, max_team_size, min_team_size) VALUES
 ('League of Legends World Championship', 'The League of Legends World Championship is the annual professional League of Legends world championship tournament hosted by Riot Games.', 'https://madbracket.xyz/images/lolworlds', 1, 1000000.00, 5, 5),
@@ -172,4 +174,4 @@ INSERT INTO tournaments_teams (tournament_id, team_id) VALUES
 INSERT INTO tournaments_users (tournament_id, user_id) VALUES
 (4, 'user_2ewoAgaj7Zk1uQhFtdO9r6Prv70'),
 (4, 'user_2f04zDgK6au6PrWu6K9Wo07LJa1'),
-(2, 'user_2ewu63juKL5jSj0hfiXqoVGGbZm');
+(2, 'user_2f85ACEznYo6IoifDjSLRe9DQUO');

@@ -4,8 +4,8 @@ import {
   ClerkExpressRequireAuth,
   RequireAuthProp,
 } from "@clerk/clerk-sdk-node";
-import express, { NextFunction, Request, Response } from "express";
 import bodyParser from "body-parser";
+import express, { NextFunction, Request, Response } from "express";
 
 const router = express.Router();
 
@@ -35,31 +35,31 @@ router.get(
   },
 );
 
-router.post("/", bodyParser.json(), async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    console.log("Req.body:", req.body);
-    
-    const { team_name, team_description, team_image_url } = req.body;
+router.post(
+  "/",
+  bodyParser.json(),
+  // ClerkExpressRequireAuth({}),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { team_name, team_description, team_image_url } = req.body;
 
-    console.log("Team name:", team_name); 
-    console.log("Team description:", team_description);
-    console.log("Team image URL:", team_image_url);
-
-    const sql = `
+      const sql = `
       INSERT INTO teams (name, description, image_url)
       VALUES ($1, $2, $3)
       RETURNING *;
     `;
-    const result = await query(sql, [team_name, team_description, team_image_url]);
+      const result = await query(sql, [
+        team_name,
+        team_description,
+        team_image_url,
+      ]);
 
-    console.log("Result:", result);
-    
-    res.status(201).json(result.rows[0]);
-  } catch (error) {
-    console.error("Error creating team:", error);
-    res.status(500).json({ error: "Failed to create team" });
-  }
-});
+      res.status(201).json(result.rows[0]);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 router.post(
   "/:teamId/users",

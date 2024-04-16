@@ -46,7 +46,6 @@ import {
 import { useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { useForm } from "react-hook-form";
-import Balancer from "react-wrap-balancer";
 import { z } from "zod";
 
 const games = [
@@ -151,16 +150,14 @@ export default function CreateTournamentPage() {
             Dashboard
           </div>
           <ChevronRightIcon className="h-4 w-4" />
-          <div className="font-medium text-foreground">
-            Create My Tournament
-          </div>
+          <div className="font-medium text-foreground">Create Tournament</div>
         </div>
         <div className="space-y-2">
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-            Create My Tournament
+            Create Tournament
           </h1>
-          <p className="text-lg text-muted-foreground">
-            <Balancer>This is the protected tournament creation page.</Balancer>
+          <p className="pb-2 text-xl text-muted-foreground">
+            Create your tournament and start competing against other teams.
           </p>
         </div>
         <br />

@@ -15,7 +15,6 @@ import { toast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRightIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import Balancer from "react-wrap-balancer";
 import { z } from "zod";
 
 const profileFormSchema = z.object({
@@ -48,30 +47,30 @@ export default function CreateTeamPage() {
       team_image_url: data.team_image_url,
     };
 
-    fetch('/api/teams', {
-      method: 'POST',
+    fetch("/api/teams", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
     })
-      .then(response => {
+      .then((response) => {
         if (!response.ok) {
-          throw new Error('Failed to create team');
+          throw new Error("Failed to create team");
         }
         return response.json();
       })
-      .then(data => {
-        console.log('Team created:', data);
+      .then((data) => {
+        console.log("Team created:", data);
         toast({
           title: "Your team is created !",
         });
         setTimeout(() => {
-          window.location.href = '/dashboard/teams';
+          window.location.href = "/dashboard/teams";
         }, 1000);
       })
-      .catch(error => {
-        console.error('Error creating team:', error);
+      .catch((error) => {
+        console.error("Error creating team:", error);
         toast({
           title: "Failed to create team",
         });
@@ -86,14 +85,14 @@ export default function CreateTeamPage() {
             Dashboard
           </div>
           <ChevronRightIcon className="h-4 w-4" />
-          <div className="font-medium text-foreground">Create My Team</div>
+          <div className="font-medium text-foreground">Create Team</div>
         </div>
         <div className="space-y-2">
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-            Create My Team
+            Create Team
           </h1>
-          <p className="text-lg text-muted-foreground">
-            <Balancer>This is the protected team creation page.</Balancer>
+          <p className="pb-2 text-xl text-muted-foreground">
+            Create your team and start competing with your friends !
           </p>
         </div>
 
@@ -112,8 +111,7 @@ export default function CreateTeamPage() {
                     />
                   </FormControl>
                   <FormDescription>
-                    This is your public display name. It can be your real name
-                    or a pseudonym. You can only change this once every 30 days.
+                    This is the name that will be displayed to other users.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -133,8 +131,7 @@ export default function CreateTeamPage() {
                     />
                   </FormControl>
                   <FormDescription>
-                    You can <span>@mention</span> other users and organizations
-                    to link to them.
+                    Give a brief description of your team.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -150,7 +147,7 @@ export default function CreateTeamPage() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Create My Team</Button>
+            <Button type="submit">Create Team</Button>
           </form>
         </Form>
       </div>
