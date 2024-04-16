@@ -38,7 +38,7 @@ CREATE TABLE users_follows (
 
 CREATE TABLE teams (
     id BIGSERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     description TEXT,
     image_url TEXT DEFAULT 'https://madbracket.xyz/images/default',
     open BOOLEAN NOT NULL DEFAULT TRUE,
@@ -64,7 +64,7 @@ CREATE TABLE games (
 
 CREATE TABLE tournaments (
     id BIGSERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     description TEXT,
     image_url TEXT DEFAULT 'https://madbracket.xyz/images/default',
     game_id BIGINT NOT NULL REFERENCES games(id) ON DELETE CASCADE,

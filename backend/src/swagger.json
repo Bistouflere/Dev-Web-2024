@@ -117,6 +117,62 @@
         }
       }
     },
+    "/api/teams/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "team_name": {
+                  "example": "any"
+                },
+                "team_description": {
+                  "example": "any"
+                },
+                "team_image_url": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/teams/{teamId}/users/count": {
       "get": {
         "description": "",
@@ -214,28 +270,6 @@
           },
           "400": {
             "description": "Bad Request"
-          }
-        }
-      }
-    },
-    "/api/teams/": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "query",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
           }
         }
       }
@@ -439,6 +473,64 @@
       }
     },
     "/api/tournaments/": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "example": "any"
+                },
+                "description": {
+                  "example": "any"
+                },
+                "imageUrl": {
+                  "example": "any"
+                },
+                "format": {
+                  "example": "any"
+                },
+                "visibility": {
+                  "example": "any"
+                },
+                "status": {
+                  "example": "any"
+                },
+                "startDate": {
+                  "example": "any"
+                },
+                "endDate": {
+                  "example": "any"
+                },
+                "cashPrize": {
+                  "example": "any"
+                },
+                "maxTeams": {
+                  "example": "any"
+                },
+                "maxTeamSize": {
+                  "example": "any"
+                },
+                "minTeamSize": {
+                  "example": "any"
+                },
+                "gameId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      },
       "get": {
         "description": "",
         "parameters": [
