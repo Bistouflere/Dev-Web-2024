@@ -130,12 +130,12 @@ CREATE TABLE match_scores (
 );
 
 CREATE TABLE teams_invitations (
-    invited_id text references users(id) on delete cascade,
-    invitor_id text references users(id) on delete cascade,
-    team_id bigint references teams(id) on delete cascade,
-    invited_at timestamp default current_timestamp not null,
-    primary key (invited_id, invitor_id, team_id),
-    check (invited_id != invitor_id)
+    invited_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+    inviter_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+    team_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,
+    invited_at TIMESTAMP DEFAULT current_timestamp NOT NULL,
+    PRIMARY KEY (invited_id, inviter_id, team_id),
+    CHECK (invited_id != inviter_id)
 );
 
 CREATE TRIGGER updated_at_users BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at();
