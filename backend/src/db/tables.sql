@@ -185,5 +185,5 @@ INSERT INTO tournaments_users (tournament_id, user_id) VALUES
 (4, 'user_2f04zDgK6au6PrWu6K9Wo07LJa1'),
 (2, 'user_2f85ACEznYo6IoifDjSLRe9DQUO');
 
-INSERT INTO teams_invitations (invited_id, invitor_id, team_id) VALUES
+INSERT INTO teams_invitations (invited_id, inviter_id, team_id) VALUES
  ('user_2ewoAgaj7Zk1uQhFtdO9r6Prv70', 'user_2f85ACEznYo6IoifDjSLRe9DQUO', 1);
