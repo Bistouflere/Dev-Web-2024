@@ -7,6 +7,9 @@ import {
 } from "@clerk/clerk-sdk-node";
 import bodyParser from "body-parser";
 import express, { NextFunction, Request, Response } from "express";
+import multer from "multer";
+
+const upload = multer({ dest: "uploads/" });
 
 const router = express.Router();
 
@@ -40,6 +43,7 @@ router.post(
   "/",
   ClerkExpressRequireAuth({}),
   bodyParser.json(),
+  upload.single("team_image_url"),
   validateTeamData,
   async (req: Request, res: Response, next: NextFunction) => {
     try {

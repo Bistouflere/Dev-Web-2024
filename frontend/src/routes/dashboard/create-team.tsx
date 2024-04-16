@@ -110,7 +110,7 @@ export default function CreateTeamPage() {
                 name="team_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name *</FormLabel>
+                    <FormLabel>Name (Required)</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Give a name at your team !"
@@ -151,6 +151,9 @@ export default function CreateTeamPage() {
                   <FormItem className="grid w-full max-w-sm items-center gap-1.5">
                     <Label htmlFor="file">Picture</Label>
                     <Input type="file" id="file" accept="image/*" {...field} />
+                    <FormDescription>
+                      Upload an image to represent your team.
+                    </FormDescription>
                   </FormItem>
                 )}
               />
