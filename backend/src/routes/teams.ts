@@ -44,17 +44,37 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { team_name, team_description, team_image_url } = req.body;
+      const authId = req.auth.userId;
+
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
+      const authUserResult = await query(authUserSql, [authId]);
+
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${authId} not found` });
+      }
 
       const sql = `
-      INSERT INTO teams (name, description, image_url)
-      VALUES ($1, $2, $3)
-      RETURNING *;
-    `;
+        INSERT INTO teams (name, description, image_url)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+      `;
+
       const result = await query(sql, [
         team_name,
         team_description,
         team_image_url,
       ]);
+
+      const teamId = result.rows[0].id;
+
+      const teamUserSql = `
+        INSERT INTO teams_users (team_id, user_id, role)
+        VALUES ($1, $2, 'owner')
+      `;
+
+      await query(teamUserSql, [teamId, authId]);
 
       res.status(201).json(result.rows[0]);
     } catch (error) {
