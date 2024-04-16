@@ -26,9 +26,12 @@ const formSchema = z.object({
   team_name: z.string().min(2, {
     message: "Team name must be at least 2 characters.",
   }),
-  team_description: z.string().min(4, {
-    message: "Team description must be at least 4 characters.",
-  }),
+  team_description: z
+    .string()
+    .min(4, {
+      message: "Team description must be at least 4 characters.",
+    })
+    .optional(),
   team_image_url: z.string().optional(),
 });
 
@@ -125,7 +128,7 @@ export default function CreateTeamPage() {
                 name="team_description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description *</FormLabel>
+                    <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Tell us a little bit about your team..."

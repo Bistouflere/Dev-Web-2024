@@ -1,4 +1,5 @@
 import { query } from "../db/index";
+import { validateTeamData } from "../validator/teamDataValidator";
 import { validateTeamId } from "../validator/teamIdValidator";
 import {
   ClerkExpressRequireAuth,
@@ -37,8 +38,9 @@ router.get(
 
 router.post(
   "/",
+  ClerkExpressRequireAuth({}),
   bodyParser.json(),
-  // ClerkExpressRequireAuth({}),
+  validateTeamData,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { team_name, team_description, team_image_url } = req.body;
@@ -63,8 +65,8 @@ router.post(
 
 router.post(
   "/:teamId/users",
-  validateTeamId,
   ClerkExpressRequireAuth({}),
+  validateTeamId,
   async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
     const { teamId } = req.params;
     const authId = req.auth.userId;
@@ -126,8 +128,8 @@ router.post(
 
 router.delete(
   "/:teamId/users",
-  validateTeamId,
   ClerkExpressRequireAuth({}),
+  validateTeamId,
   async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
     const { teamId } = req.params;
     const authId = req.auth.userId;

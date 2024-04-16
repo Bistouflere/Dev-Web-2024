@@ -104,7 +104,7 @@ export async function leaveTeam(
 export async function createTeam(
   data: {
     team_name: string;
-    team_description: string;
+    team_description?: string;
     team_image_url?: string;
   },
   getToken: () => Promise<string | null>,
