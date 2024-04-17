@@ -35,6 +35,7 @@ export default function TeamProfile() {
   );
 
   const invalidateQueries = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: [`teams`] });
     queryClient.invalidateQueries({ queryKey: [`team_${searchTeamId}`] });
     queryClient.invalidateQueries({
       queryKey: [`team_users_${searchTeamId}`],

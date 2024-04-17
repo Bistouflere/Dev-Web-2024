@@ -10,7 +10,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@clerk/clerk-react";
@@ -22,18 +21,30 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
-const formSchema = z.object({
-  team_name: z.string().min(2, {
-    message: "Team name must be at least 2 characters.",
-  }),
-  team_description: z
+const teamFormSchema = z.object({
+  name: z
     .string()
-    .min(4, {
-      message: "Team description must be at least 4 characters.",
+    .min(2, {
+      message: "Team name must be at least 2 characters.",
+    })
+    .max(30, {
+      message: "Team name must not be longer than 30 characters.",
+    }),
+  description: z
+    .string()
+    .max(160, {
+      message: "Team description must not be longer than 160 characters.",
     })
     .optional(),
-  team_image_url: z.string().optional(),
+  file: z.instanceof(FileList).optional(),
 });
+
+type TeamFormValues = z.infer<typeof teamFormSchema>;
+
+const defaultValues: Partial<TeamFormValues> = {
+  name: "",
+  description: "",
+};
 
 export default function CreateTeamPage() {
   const navigate = useNavigate();
@@ -41,29 +52,28 @@ export default function CreateTeamPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      team_name: "",
-      team_description: "",
-      team_image_url: "",
-    },
+  const form = useForm<TeamFormValues>({
+    resolver: zodResolver(teamFormSchema),
+    defaultValues,
   });
+  const fileRef = form.register("file");
 
   const invalidateQueries = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: [`teams`] });
     queryClient.invalidateQueries({
       queryKey: [`team_users_${userId}`],
     });
   }, [queryClient, userId]);
 
-  async function onSubmit(data: z.infer<typeof formSchema>) {
-    const formData = {
-      team_name: data.team_name,
-      team_description: data.team_description,
-      team_image_url: data.team_image_url,
-    };
+  const onSubmit = async (data: TeamFormValues) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("description", data.description ?? "");
+    if (data.file) formData.append("file", data.file[0]);
 
-    console.log(formData);
+    formData.forEach((value, key) => {
+      console.log(key, value);
+    });
 
     try {
       const response = await createTeam(formData, getToken, invalidateQueries);
@@ -84,7 +94,7 @@ export default function CreateTeamPage() {
           `An error occurred while creating your team.`,
       });
     }
-  }
+  };
 
   return (
     <main className="relative py-6 lg:gap-10 lg:py-8">
@@ -107,13 +117,13 @@ export default function CreateTeamPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
-                name="team_name"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name (Required)</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Give a name at your team !"
+                        placeholder="Give your team a name..."
                         {...field}
                       />
                     </FormControl>
@@ -126,19 +136,14 @@ export default function CreateTeamPage() {
               />
               <FormField
                 control={form.control}
-                name="team_description"
+                name="description"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Tell us a little bit about your team..."
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
+                    <Textarea placeholder="Describe your team..." {...field} />
                     <FormDescription>
-                      Give a brief description of your team.
+                      This is the description that will be displayed to other
+                      users.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -146,18 +151,28 @@ export default function CreateTeamPage() {
               />
               <FormField
                 control={form.control}
-                name="team_image_url"
+                name="file"
                 render={({ field }) => (
-                  <FormItem className="grid w-full max-w-sm items-center gap-1.5">
-                    <Label htmlFor="file">Picture</Label>
-                    <Input type="file" id="file" accept="image/*" {...field} />
+                  <FormItem>
+                    <FormLabel>Image</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        {...fileRef}
+                        onChange={(event) => {
+                          field.onChange(event.target?.files?.[0] ?? undefined);
+                        }}
+                      />
+                    </FormControl>
                     <FormDescription>
-                      Upload an image to represent your team.
+                      This is the image that will be displayed to other users.
                     </FormDescription>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit">Create Team</Button>
+              <Button type="submit">Update profile</Button>
             </form>
           </Form>
         </div>

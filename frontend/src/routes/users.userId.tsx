@@ -40,15 +40,23 @@ export default function UserProfile() {
   );
 
   const invalidateQueries = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: [`user_${searchUserId}`] });
     queryClient.invalidateQueries({
-      queryKey: [`user_followers_count_${searchUserId}_`],
+      queryKey: [`user_${searchUserId}`],
     });
     queryClient.invalidateQueries({
-      queryKey: [`user_following_count_${searchUserId}_`],
+      queryKey: [`user_followers_count_${searchUserId}`],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [`user_following_count_${searchUserId}`],
     });
     queryClient.invalidateQueries({
       queryKey: [`is_following_${userId}_${searchUserId}`],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [`user_followers_${userId}`],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [`user_following_${userId}`],
     });
   }, [queryClient, userId, searchUserId]);
 

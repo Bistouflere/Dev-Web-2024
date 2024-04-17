@@ -12,7 +12,7 @@ export function userQueryOptions(id: string | null | undefined) {
 
 export function usersQueryOptions(query: string, page: number) {
   return queryOptions({
-    queryKey: [`users_${query}_${page}`, query, page],
+    queryKey: [`users`],
     queryFn: () => fetchUsers(query, page),
     placeholderData: keepPreviousData,
   });
@@ -20,7 +20,7 @@ export function usersQueryOptions(query: string, page: number) {
 
 export function usersCountQueryOptions(query: string) {
   return queryOptions({
-    queryKey: [`users_count_${query}`, query],
+    queryKey: [`users_count`],
     queryFn: () => fetchUsersCount(query),
     placeholderData: keepPreviousData,
   });
@@ -32,7 +32,7 @@ export function userFollowersQueryOptions(
   page: number,
 ) {
   return queryOptions({
-    queryKey: [`user_followers_${id}_${query}_${page}`, id, query, page],
+    queryKey: [`user_followers_${id}`, id],
     queryFn: () => fetchUserFollowers(id, query, page),
     placeholderData: keepPreviousData,
   });
@@ -43,7 +43,7 @@ export function userFollowersCountQueryOptions(
   query: string = "",
 ) {
   return queryOptions({
-    queryKey: [`user_followers_count_${id}_${query}`, id, query],
+    queryKey: [`user_followers_count_${id}`, id],
     queryFn: () => fetchUserFollowersCount(id, query),
     placeholderData: keepPreviousData,
   });
@@ -55,7 +55,7 @@ export function userFollowingQueryOptions(
   page: number,
 ) {
   return queryOptions({
-    queryKey: [`user_following_${id}_${query}_${page}`, id, query, page],
+    queryKey: [`user_following_${id}`, id],
     queryFn: () => fetchUserFollowing(id, query, page),
     placeholderData: keepPreviousData,
   });
@@ -66,7 +66,7 @@ export function userFollowingCountQueryOptions(
   query: string = "",
 ) {
   return queryOptions({
-    queryKey: [`user_following_count_${id}_${query}`, id, query],
+    queryKey: [`user_following_count_${id}`, id],
     queryFn: () => fetchUserFollowingCount(id, query),
     placeholderData: keepPreviousData,
   });

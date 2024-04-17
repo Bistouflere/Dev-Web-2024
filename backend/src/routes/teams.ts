@@ -5,11 +5,26 @@ import {
   ClerkExpressRequireAuth,
   RequireAuthProp,
 } from "@clerk/clerk-sdk-node";
-import bodyParser from "body-parser";
 import express, { NextFunction, Request, Response } from "express";
 import multer from "multer";
+import path from "path";
+import slugify from "slugify";
 
-const upload = multer({ dest: "uploads/" });
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    const timestamp = new Date().getTime();
+    const randomString = Math.random().toString(36).substring(7);
+    const originalExtension = path.extname(file.originalname);
+    const slug = slugify(`${timestamp}-${randomString}`, { lower: true });
+    const sanitizedFilename = `${slug}${originalExtension}`;
+    cb(null, sanitizedFilename);
+  },
+});
+
+const upload = multer({ storage: storage });
 
 const router = express.Router();
 
@@ -42,12 +57,11 @@ router.get(
 router.post(
   "/",
   ClerkExpressRequireAuth({}),
-  bodyParser.json(),
-  upload.single("team_image_url"),
+  upload.single("file"),
   validateTeamData,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { team_name, team_description, team_image_url } = req.body;
+      const { name, description } = req.body;
       const authId = req.auth.userId;
 
       const authUserSql = "SELECT * FROM users WHERE id = $1;";
@@ -59,17 +73,26 @@ router.post(
           .json({ message: `User with ID ${authId} not found` });
       }
 
+      const existingTeamSql = "SELECT * FROM teams WHERE name ILIKE $1;";
+      const existingTeamResult = await query(existingTeamSql, [name]);
+
+      if (existingTeamResult.rowCount !== 0) {
+        return res.status(409).json({
+          message: `Team with name ${name} already exists`,
+        });
+      }
+
+      const imageUrl = req.file
+        ? `https://madbrackets.xyz/images/${req.file.filename}`
+        : `https://madbracket.xyz/images/default`;
+
       const sql = `
         INSERT INTO teams (name, description, image_url)
         VALUES ($1, $2, $3)
         RETURNING *;
       `;
 
-      const result = await query(sql, [
-        team_name,
-        team_description,
-        team_image_url,
-      ]);
+      const result = await query(sql, [name, description, imageUrl]);
 
       const teamId = result.rows[0].id;
 

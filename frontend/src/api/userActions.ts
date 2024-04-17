@@ -102,19 +102,18 @@ export async function leaveTeam(
 }
 
 export async function createTeam(
-  data: {
-    team_name: string;
-    team_description?: string;
-    team_image_url?: string;
-  },
+  formData: globalThis.FormData,
   getToken: () => Promise<string | null>,
   invalidateQueries: () => void,
 ) {
   const token = await getToken();
 
   try {
-    const response = await axios.post<Promise<Team>>(`/api/teams`, data, {
-      headers: { Authorization: `Bearer ${token}` },
+    const response = await axios.post<Promise<Team>>(`/api/teams`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
     });
 
     invalidateQueries();

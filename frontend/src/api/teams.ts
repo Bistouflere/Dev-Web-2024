@@ -12,7 +12,7 @@ export function teamQueryOptions(id: string) {
 
 export function teamsQueryOptions(query: string, page: number) {
   return queryOptions({
-    queryKey: [`teams_${query}_${page}`, query, page],
+    queryKey: [`teams`],
     queryFn: () => fetchTeams(query, page),
     placeholderData: keepPreviousData,
   });
@@ -20,7 +20,7 @@ export function teamsQueryOptions(query: string, page: number) {
 
 export function teamsCountQueryOptions(query: string) {
   return queryOptions({
-    queryKey: [`teams_count_${query}`, query],
+    queryKey: [`teams_count`],
     queryFn: () => fetchTeamsCount(query),
     placeholderData: keepPreviousData,
   });
