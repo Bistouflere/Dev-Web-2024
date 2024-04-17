@@ -83,7 +83,7 @@ router.post(
       }
 
       const imageUrl = req.file
-        ? `https://madbrackets.xyz/images/${req.file.filename}`
+        ? `https://madbracket.xyz/images/${req.file.filename.split(".")[0]}`
         : `https://madbracket.xyz/images/default`;
 
       const sql = `
