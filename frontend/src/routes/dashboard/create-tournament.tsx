@@ -30,14 +30,27 @@ import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@clerk/clerk-react";
 import { zodResolver } from "@hookform/resolvers/zod";
+<<<<<<< Updated upstream
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { CalendarIcon, ChevronRightIcon } from "lucide-react";
 import { useCallback } from "react";
+=======
+import { addDays, format } from "date-fns";
+import {
+  Calendar as CalendarIcon,
+  Check,
+  ChevronRightIcon,
+  ChevronsUpDown,
+} from "lucide-react";
+import React from "react";
+import { useEffect, useState } from "react";
+>>>>>>> Stashed changes
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
+<<<<<<< Updated upstream
 enum TournamentFormat {
   single_elimination = "single_elimination",
   double_elimination = "double_elimination",
@@ -47,10 +60,30 @@ enum TournamentFormat {
 const tournamentFormSchema = z.object({
   name: z
     .string()
+=======
+const games = [
+  { label: "League Of Legends", value: "1" },
+  { label: "Counter-Strike: Global Offensive", value: "2" },
+  { label: "Fortnite", value: "3" },
+  { label: "Valorant", value: "4" },
+  { label: "Rocket League", value: "5" },
+  { label: "Apex Legends", value: "6" },
+  { label: "Fifa 24", value: "7" },
+  { label: "Overwatch", value: "8" },
+  { label: "Brawl Stars", value: "9" },
+] as const;
+
+const profileFormSchema = z.object({
+  name: z
+    .string({
+      required_error: "Please give a name.",
+    })
+>>>>>>> Stashed changes
     .min(2, {
       message: "Tournament name must be at least 2 characters.",
     })
     .max(30, {
+<<<<<<< Updated upstream
       message: "Tournament name must not be longer than 30 characters.",
     })
     .trim(),
@@ -82,6 +115,49 @@ const tournamentFormSchema = z.object({
   start_date: z.date().optional(),
   end_date: z.date().optional(),
   visibility: z.boolean(),
+=======
+      message: "Username must not be longer than 30 characters.",
+    }).optional(),
+  description: z.string().max(160).min(4).optional(),
+  image_url: z.string().optional(),
+  game_id: z.string({
+    required_error: "Please select a game.",
+  }).optional(),
+  format: z.string({
+    // required_error: "Please select a format.",
+  }).optional(),
+  visibility: z.string().optional(),
+  cash_prize: z.string().optional(),
+  max_teams: z.string({
+    required_error: "Please specify the number max for teams.",
+  }).optional(),
+  // .min(5, {
+  //     message: "Number of players must be at least 5. (5 players for a 5v5 game)",
+  // })
+  // .max(7, {
+  //     message: "Number of players must not exceed 7. (5 players + 2 subs for a 5v5 game)",
+  // }),
+  max_team_size: z
+    .string({
+      required_error: "Please specify the number max of teams.",
+    }).optional(),
+  // .min(1, {
+  //   message: "Number of slots must be at least 1.",
+  // })
+  // .max(16, {
+  //   message: "Number of slots must not exceed 16.",
+  // }).optional(),
+  min_team_size: z
+    .string({
+      required_error: "Please specify the number max of teams.",
+    }).optional(),
+  start_date: z.string({
+    // required_error: "Please give the start date.",
+  }).optional(),
+  end_date: z.string({
+    // required_error: "Please give the end date.",
+  }).optional(),
+>>>>>>> Stashed changes
 });
 
 type TournamentFormValues = z.infer<typeof tournamentFormSchema>;
@@ -112,10 +188,54 @@ export default function CreateTournamentPage() {
     resolver: zodResolver(tournamentFormSchema),
   });
 
+<<<<<<< Updated upstream
   const invalidateQueries = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: [`tournaments`] });
     queryClient.invalidateQueries({
       queryKey: [`tournaments_users_${userId}`],
+=======
+  function onSubmit(data: ProfileFormValues) {
+    console.log(data);
+  
+    const formData = {
+      name: data.name,
+      description: data.description,
+      image_url: data.image_url,
+      format: data.format,
+      visibility: data.visibility,
+      start_date: data.start_date,
+      cash_prize: data.cash_prize,
+      max_teams: data.max_teams,
+      max_team_size: data.max_team_size,
+      min_team_size: data.min_team_size,
+      // game_name: data.game_name,
+    };
+  
+    fetch('/api/tournaments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to create tournament');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Tournament created:', data);
+      toast({
+        title: "Your tournament is created !",
+      });
+    })
+    .catch(error => {
+      console.error('Error creating tournament:', error);
+      toast({
+        title: "Failed to create tournament",
+      });
+>>>>>>> Stashed changes
     });
   }, [queryClient, userId]);
 
@@ -136,6 +256,7 @@ export default function CreateTournamentPage() {
     if (data.end_date) formData.append("end_date", data.end_date.toISOString());
     formData.append("visibility", data.visibility?.toString() ?? "false");
 
+<<<<<<< Updated upstream
     try {
       const response = await createTournament(
         formData,
@@ -160,6 +281,10 @@ export default function CreateTournamentPage() {
       });
     }
   };
+=======
+  const [start_date, setStartDate] = React.useState<Date>()
+  const [end_date, setEndDate] = React.useState<Date>()
+>>>>>>> Stashed changes
 
   return (
     <main className="relative py-6 lg:gap-10 lg:py-8">
@@ -178,6 +303,7 @@ export default function CreateTournamentPage() {
           <p className="pb-2 text-xl text-muted-foreground">
             Create your tournament and start competing with your friends !
           </p>
+<<<<<<< Updated upstream
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
@@ -205,10 +331,50 @@ export default function CreateTournamentPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
+=======
+        </div>
+        <br />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormDescription>
+              Fields marked with * are required.
+            </FormDescription>
+
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name *</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Give a name at your tournament !"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    This is the public name under which you will be displayed
+                    during the tournament. Please note that this name cannot be
+                    changed once chosen.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+>>>>>>> Stashed changes
                     <Textarea
                       placeholder="Describe your tournament..."
                       {...field}
                     />
+<<<<<<< Updated upstream
                     <FormDescription>
                       This is the description that will be displayed to other
                       users.
@@ -502,6 +668,280 @@ export default function CreateTournamentPage() {
             </form>
           </Form>
         </div>
+=======
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="image_url"
+              render={({ field }) => (
+                <FormItem className="grid w-full max-w-sm items-center gap-1.5">
+                  <FormLabel htmlFor="picture">Picture</FormLabel>
+                  <Input id="picture" type="file" {...field} />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="game_id"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Game *</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-[200px] justify-between",
+                            !field.value && "text-muted-foreground",
+                          )}
+                        >
+                          {field.value
+                            ? games.find((games) => games.value === field.value)
+                              ?.label
+                            : "Select a game"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[200px] p-0">
+                      <Command>
+                        <CommandInput placeholder="Search a game..." />
+                        <CommandList>
+                          <CommandEmpty>No game found.</CommandEmpty>
+                          <CommandGroup>
+                            {games.map((game, index) => (
+                              <CommandItem
+                                className={`${game.value === field.value ? "font-bold" : ""
+                                  } ${hoveredGameIndex === index ? "font-bold" : ""
+                                  } data-[disabled]:pointer-events-auto`}
+                                value={game.label}
+                                key={game.value}
+                                onMouseEnter={() => setHoveredGameIndex(index)}
+                                onMouseLeave={() => setHoveredGameIndex(null)}
+                                onSelect={() => {
+                                  form.setValue("game_id", game.value);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    game.value === field.value
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                {game.label}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormDescription>
+                    This will be the game played in this tournament.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="format"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Format *</FormLabel>
+                  <Select>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select a format" {...field} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="single_elimination">
+                        Single Elimination
+                      </SelectItem>
+                      <SelectItem value="double_elimination">
+                        Double Elimination
+                      </SelectItem>
+                      <SelectItem value="round_robin">Round Robin</SelectItem>
+                      <SelectItem value="swiss">Swiss</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="visibility"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Public *</FormLabel>
+                  <div className="flex items-center space-x-2">
+                    <Label htmlFor="true">Yes</Label>
+                    <Switch />
+                    <Label htmlFor="false">No</Label>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cash_prize"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cash Prize (En €)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="Enter the cash prize for the tournament."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="max_teams"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Max Teams *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="1"
+                      placeholder="Enter the max of teams for the tournament."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="max_team_size"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Max Team Size *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="1"
+                      placeholder="Enter the team size for the tournament."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="min_team_size"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Min Team Size *</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="1"
+                      placeholder="Enter the team size for the tournament."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="start_date"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Start date *</FormLabel>
+                  <div className={cn("grid gap-2")}>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-[280px] justify-start text-left font-normal",
+                            !start_date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {start_date ? format(start_date, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={start_date}
+                          onSelect={setStartDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="end_date"
+              render={() => (
+                <FormItem>
+                  <FormLabel>End date *</FormLabel>
+                  <div className={cn("grid gap-2")}>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-[280px] justify-start text-left font-normal",
+                            !end_date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {end_date ? format(end_date, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={end_date}
+                          onSelect={setEndDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit">Create My Team</Button>
+          </form>
+        </Form>
+>>>>>>> Stashed changes
       </div>
     </main>
   );

@@ -6,6 +6,7 @@ import {
   RequireAuthProp,
 } from "@clerk/clerk-sdk-node";
 import express, { NextFunction, Request, Response } from "express";
+<<<<<<< Updated upstream
 import multer from "multer";
 import path from "path";
 import slugify from "slugify";
@@ -25,6 +26,9 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
+=======
+import bodyParser from "body-parser";
+>>>>>>> Stashed changes
 
 const router = express.Router();
 
@@ -286,6 +290,7 @@ router.post(
       const authUserSql = "SELECT * FROM users WHERE id = $1;";
       const authUserResult = await query(authUserSql, [user_id]);
 
+<<<<<<< Updated upstream
       if (authUserResult.rowCount === 0) {
         return res
           .status(404)
@@ -494,6 +499,57 @@ router.post(
     }
   },
 );
+=======
+router.post("/", bodyParser.json(), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    console.log("Req.body:", req.body);
+
+    const {
+      name,
+      description,
+      image_url,
+      game_id,
+      // format,
+      // visibility,
+      cash_prize,
+      // max_teams,
+      max_team_size,
+      min_team_size,
+      start_date,
+      end_date,
+    } = req.body;
+
+    const sql = `
+      INSERT INTO tournaments (name, description, image_url, game_id, cash_prize, max_team_size, min_team_size, start_date, end_date)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING *;
+    `;
+    const params = [
+      name,
+      description,
+      image_url,
+      game_id,
+      // format,
+      // visibility,
+      cash_prize,
+      // max_teams,
+      max_team_size,
+      min_team_size,
+      start_date,
+      end_date,
+    ];
+
+    const result = await query(sql, params);
+
+    console.log("Result:", result);
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error creating tournament:", error);
+    res.status(500).json({ error: "Failed to create tournament" });
+  }
+});
+>>>>>>> Stashed changes
 
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   const { query: searchQuery, page } = req.query as {
