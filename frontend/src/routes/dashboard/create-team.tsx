@@ -29,22 +29,19 @@ const teamFormSchema = z.object({
     })
     .max(30, {
       message: "Team name must not be longer than 30 characters.",
-    }),
+    })
+    .trim(),
   description: z
     .string()
     .max(160, {
       message: "Team description must not be longer than 160 characters.",
     })
+    .trim()
     .optional(),
-  file: z.instanceof(FileList).optional(),
+  file: z.instanceof(File).optional(),
 });
 
 type TeamFormValues = z.infer<typeof teamFormSchema>;
-
-const defaultValues: Partial<TeamFormValues> = {
-  name: "",
-  description: "",
-};
 
 export default function CreateTeamPage() {
   const navigate = useNavigate();
@@ -53,10 +50,14 @@ export default function CreateTeamPage() {
   const queryClient = useQueryClient();
 
   const form = useForm<TeamFormValues>({
+    defaultValues: {
+      name: "",
+      description: "",
+      file: undefined,
+    },
+    mode: "onChange",
     resolver: zodResolver(teamFormSchema),
-    defaultValues,
   });
-  const fileRef = form.register("file");
 
   const invalidateQueries = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: [`teams`] });
@@ -69,7 +70,7 @@ export default function CreateTeamPage() {
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("description", data.description ?? "");
-    if (data.file) formData.append("file", data.file[0]);
+    if (data.file) formData.append("file", data.file);
 
     formData.forEach((value, key) => {
       console.log(key, value);
@@ -152,16 +153,17 @@ export default function CreateTeamPage() {
               <FormField
                 control={form.control}
                 name="file"
-                render={({ field }) => (
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                render={({ field: { value, onChange, ...fieldProps } }) => (
                   <FormItem>
                     <FormLabel>Image</FormLabel>
                     <FormControl>
                       <Input
                         type="file"
                         accept="image/*"
-                        {...fileRef}
+                        {...fieldProps}
                         onChange={(event) => {
-                          field.onChange(event.target?.files?.[0] ?? undefined);
+                          onChange(event.target.files && event.target.files[0]);
                         }}
                       />
                     </FormControl>
@@ -172,7 +174,7 @@ export default function CreateTeamPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Update profile</Button>
+              <Button type="submit">Create Team</Button>
             </form>
           </Form>
         </div>
