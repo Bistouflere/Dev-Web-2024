@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { User } from "@/types/apiResponses";
+import dayjs from "dayjs";
 import { MoreHorizontal } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -27,7 +28,7 @@ export function UserList({ response }: { response: User[] }) {
             <span className="sr-only">User Avatar</span>
           </TableHead>
           <TableHead>Username</TableHead>
-          <TableHead>Email Adresse</TableHead>
+          <TableHead>Joined Date</TableHead>
           <TableHead>
             <span className="sr-only">Actions</span>
           </TableHead>
@@ -48,7 +49,9 @@ export function UserList({ response }: { response: User[] }) {
             <TableCell className="font-medium">
               <Link to={`/users/${response.id}`}>{response.username}</Link>
             </TableCell>
-            <TableCell>{response.email_address}</TableCell>
+            <TableCell>
+              {dayjs(response.created_at).format("DD/MM/YYYY")}
+            </TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

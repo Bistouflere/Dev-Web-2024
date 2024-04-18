@@ -37,9 +37,6 @@ export default function UserProfileCard({
             <p className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
               {user.username}
             </p>
-            <p className="text-sm text-muted-foreground">
-              {user.email_address}
-            </p>
           </div>
           <div className="mt-4 flex justify-center space-x-4">
             {isFollowing ? (
