@@ -1,4 +1,5 @@
 import { errorHandler } from "./middleware/errorMiddleware";
+import gamesRouter from "./routes/games";
 import protectedRouter from "./routes/protected";
 import teamsRouter from "./routes/teams";
 import tournamentsRouter from "./routes/tournaments";
@@ -34,6 +35,7 @@ app.use("/api/protected", protectedRouter);
 app.use("/api/teams", teamsRouter);
 app.use("/api/tournaments", tournamentsRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/games", gamesRouter);
 
 app.use(errorHandler);
 

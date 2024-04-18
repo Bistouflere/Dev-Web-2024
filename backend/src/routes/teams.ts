@@ -61,7 +61,7 @@ router.post(
   validateTeamData,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, description } = req.body;
+      const { name, description, visibility } = req.body;
       const authId = req.auth.userId;
 
       const authUserSql = "SELECT * FROM users WHERE id = $1;";
@@ -87,12 +87,17 @@ router.post(
         : `https://madbracket.xyz/images/default`;
 
       const sql = `
-        INSERT INTO teams (name, description, image_url)
-        VALUES ($1, $2, $3)
+        INSERT INTO teams (name, description, image_url, open)
+        VALUES ($1, $2, $3, $4)
         RETURNING *;
       `;
 
-      const result = await query(sql, [name, description, imageUrl]);
+      const result = await query(sql, [
+        name,
+        description,
+        imageUrl,
+        visibility,
+      ]);
 
       const teamId = result.rows[0].id;
 

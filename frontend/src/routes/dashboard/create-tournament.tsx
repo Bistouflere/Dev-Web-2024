@@ -1,4 +1,5 @@
-// import { createTeam } from "@/api/userActions";
+import { gamesQueryOptions } from "@/api/games";
+import { createTournament } from "@/api/userActions";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,16 +26,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
-// import { useToast } from "@/components/ui/use-toast";
-// import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-// import { useQueryClient } from "@tanstack/react-query";
 import { CalendarIcon, ChevronRightIcon } from "lucide-react";
-// import { useCallback } from "react";
+import { useCallback } from "react";
 import { useForm } from "react-hook-form";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 enum TournamentFormat {
@@ -61,9 +62,10 @@ const tournamentFormSchema = z.object({
     .trim()
     .optional(),
   file: z.instanceof(File).optional(),
-  game: z.string(),
+  game: z.string().refine((value) => {
+    return value.length > 0;
+  }, "Game must be selected."),
   format: z.nativeEnum(TournamentFormat),
-  public: z.boolean().optional(),
   tags: z.string().optional(),
   cash_prize: z.string().refine((value) => {
     return !isNaN(parseFloat(value)) && parseFloat(value) >= 0;
@@ -79,72 +81,51 @@ const tournamentFormSchema = z.object({
   }, "Min team size must be a positive number."),
   start_date: z.date().optional(),
   end_date: z.date().optional(),
+  visibility: z.boolean(),
 });
 
 type TournamentFormValues = z.infer<typeof tournamentFormSchema>;
 
 export default function CreateTournamentPage() {
-  // const navigate = useNavigate();
-  // const { userId, getToken } = useAuth();
-  // const { toast } = useToast();
-  // const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { userId, getToken } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const games = [
-    {
-      id: "1",
-      name: "League of Legends",
-    },
-    {
-      id: "2",
-      name: "Apex Legends",
-    },
-    {
-      id: "3",
-      name: "Counter-Strike: Global Offensive",
-    },
-    {
-      id: "4",
-      name: "Overwatch 2",
-    },
-    {
-      id: "5",
-      name: "Rocket League",
-    },
-  ];
+  const { data: games } = useQuery(gamesQueryOptions());
 
   const form = useForm<TournamentFormValues>({
     defaultValues: {
       name: "",
       description: "",
       file: undefined,
-      game: games[0].id,
+      game: "",
       format: TournamentFormat.single_elimination,
-      public: false,
       tags: "",
       cash_prize: "0",
       max_teams: "32",
       max_team_size: "5",
       min_team_size: "1",
+      visibility: true,
     },
     mode: "onChange",
     resolver: zodResolver(tournamentFormSchema),
   });
 
-  // const invalidateQueries = useCallback(() => {
-  //   queryClient.invalidateQueries({ queryKey: [`tournaments`] });
-  //   queryClient.invalidateQueries({
-  //     queryKey: [`tournaments_users_${userId}`],
-  //   });
-  // }, [queryClient, userId]);
+  const invalidateQueries = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: [`tournaments`] });
+    queryClient.invalidateQueries({
+      queryKey: [`tournaments_users_${userId}`],
+    });
+  }, [queryClient, userId]);
 
   const onSubmit = async (data: TournamentFormValues) => {
     const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("description", data.description ?? "");
+    formData.append("name", data.name.trim());
+    formData.append("description", data.description?.trim() ?? "");
     if (data.file) formData.append("file", data.file);
     formData.append("game", data.game);
     formData.append("format", data.format);
-    formData.append("public", data.public?.toString() ?? "false");
     formData.append("tags", data.tags ?? "");
     formData.append("cash_prize", data.cash_prize.toString());
     formData.append("max_teams", data.max_teams.toString());
@@ -153,30 +134,31 @@ export default function CreateTournamentPage() {
     if (data.start_date)
       formData.append("start_date", data.start_date.toISOString());
     if (data.end_date) formData.append("end_date", data.end_date.toISOString());
+    formData.append("visibility", data.visibility?.toString() ?? "false");
 
-    formData.forEach((value, key) => {
-      console.log(key, value);
-    });
+    try {
+      const response = await createTournament(
+        formData,
+        getToken,
+        invalidateQueries,
+      );
 
-    // try {
-    //   const response = await createTeam(formData, getToken, invalidateQueries);
+      toast({
+        title: "Success!",
+        description: `The tournament ${response.name} has been created.`,
+      });
 
-    //   toast({
-    //     title: "Success!",
-    //     description: `The tournament ${response.name} has been created.`,
-    //   });
-
-    //   navigate(`/dashboard/tournaments/${response.id}`);
-    // } catch (error) {
-    //   console.error("Error creating tournament:", error);
-    //   toast({
-    //     variant: "destructive",
-    //     title: "Oops!",
-    //     description:
-    //       (error as Error).message ||
-    //       `An error occurred while creating your tournament.`,
-    //   });
-    // }
+      navigate(`/dashboard/tournaments/${response.id}`);
+    } catch (error) {
+      console.error("Error creating tournament:", error);
+      toast({
+        variant: "destructive",
+        title: "Oops!",
+        description:
+          (error as Error).message ||
+          `An error occurred while creating your tournament.`,
+      });
+    }
   };
 
   return (
@@ -284,7 +266,7 @@ export default function CreateTournamentPage() {
                   name="game"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Game</FormLabel>
+                      <FormLabel>Game (Required)</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -295,11 +277,12 @@ export default function CreateTournamentPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {games.map((game) => (
-                            <SelectItem key={game.id} value={game.id}>
-                              {game.name}
-                            </SelectItem>
-                          ))}
+                          {games &&
+                            games.map((game) => (
+                              <SelectItem key={game.id} value={game.id}>
+                                {game.name}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                       <FormDescription>
@@ -314,7 +297,7 @@ export default function CreateTournamentPage() {
                   name="format"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Format</FormLabel>
+                      <FormLabel>Format (Required)</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -345,7 +328,7 @@ export default function CreateTournamentPage() {
                   name="cash_prize"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cash Prize</FormLabel>
+                      <FormLabel>Cash Prize (Required)</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>
@@ -364,7 +347,7 @@ export default function CreateTournamentPage() {
                   name="max_teams"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Max Teams</FormLabel>
+                      <FormLabel>Max Teams (Required)</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>
@@ -381,7 +364,7 @@ export default function CreateTournamentPage() {
                   name="max_team_size"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Max Team Size</FormLabel>
+                      <FormLabel>Max Team Size (Required)</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>
@@ -397,7 +380,7 @@ export default function CreateTournamentPage() {
                   name="min_team_size"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Min Team Size</FormLabel>
+                      <FormLabel>Min Team Size (Required)</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>
@@ -497,7 +480,7 @@ export default function CreateTournamentPage() {
               </div>
               <FormField
                 control={form.control}
-                name="public"
+                name="visibility"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>

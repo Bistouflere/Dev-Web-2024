@@ -18,7 +18,11 @@ const teamData = z.object({
     })
     .trim()
     .optional(),
-  file: z.instanceof(File).optional(),
+  file: typeof window === "undefined" ? z.any() : z.instanceof(File),
+  visibility: z.string().refine((value) => {
+    if (value === "true" || value === "false") return true;
+    return false;
+  }, "Visibility must be a boolean value."),
 });
 
 export const validateTeamData = (
@@ -26,13 +30,14 @@ export const validateTeamData = (
   res: Response,
   next: NextFunction,
 ) => {
-  const { name, description, file } = req.body;
+  const { name, description, file, visibility } = req.body;
 
   try {
     teamData.parse({
       name,
       description,
       file,
+      visibility,
     });
   } catch (error) {
     return res.status(400).json({ error: (error as ZodError).errors });

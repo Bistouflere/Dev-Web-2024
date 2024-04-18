@@ -1,5 +1,6 @@
 import { createTeam } from "@/api/userActions";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -39,6 +40,7 @@ const teamFormSchema = z.object({
     .trim()
     .optional(),
   file: z.instanceof(File).optional(),
+  visibility: z.boolean(),
 });
 
 type TeamFormValues = z.infer<typeof teamFormSchema>;
@@ -54,6 +56,7 @@ export default function CreateTeamPage() {
       name: "",
       description: "",
       file: undefined,
+      visibility: true,
     },
     mode: "onChange",
     resolver: zodResolver(teamFormSchema),
@@ -71,10 +74,7 @@ export default function CreateTeamPage() {
     formData.append("name", data.name);
     formData.append("description", data.description ?? "");
     if (data.file) formData.append("file", data.file);
-
-    formData.forEach((value, key) => {
-      console.log(key, value);
-    });
+    formData.append("visibility", data.visibility?.toString() ?? "false");
 
     try {
       const response = await createTeam(formData, getToken, invalidateQueries);
@@ -171,6 +171,26 @@ export default function CreateTeamPage() {
                       This is the image that will be displayed to other users.
                     </FormDescription>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="visibility"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Public</FormLabel>
+                      <FormDescription>
+                        Should everyone be able to join your team?
+                      </FormDescription>
+                    </div>
                   </FormItem>
                 )}
               />

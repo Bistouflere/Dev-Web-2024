@@ -1,10 +1,30 @@
 import { query } from "../db/index";
+import { validateTournamentData } from "../validator/tournamentDataValidator";
 import { validateTournamentId } from "../validator/tournamentIdValidator";
 import {
   ClerkExpressRequireAuth,
   RequireAuthProp,
 } from "@clerk/clerk-sdk-node";
 import express, { NextFunction, Request, Response } from "express";
+import multer from "multer";
+import path from "path";
+import slugify from "slugify";
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    const timestamp = new Date().getTime();
+    const randomString = Math.random().toString(36).substring(7);
+    const originalExtension = path.extname(file.originalname);
+    const slug = slugify(`${timestamp}-${randomString}`, { lower: true });
+    const sanitizedFilename = `${slug}${originalExtension}`;
+    cb(null, sanitizedFilename);
+  },
+});
+
+const upload = multer({ storage: storage });
 
 const router = express.Router();
 
@@ -369,51 +389,111 @@ router.delete(
   },
 );
 
-router.post("/", async (req: Request, res: Response, next: NextFunction) => {
-  const {
-    name,
-    description,
-    imageUrl,
-    format,
-    visibility,
-    status,
-    startDate,
-    endDate,
-    cashPrize,
-    maxTeams,
-    maxTeamSize,
-    minTeamSize,
-    gameId,
-  } = req.body;
+router.post(
+  "/",
+  ClerkExpressRequireAuth({}),
+  upload.single("file"),
+  validateTournamentData,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const {
+        name,
+        description,
+        game,
+        format,
+        tags,
+        cash_prize,
+        max_teams,
+        max_team_size,
+        min_team_size,
+        start_date,
+        end_date,
+        visibility,
+      } = req.body;
+      const authId = req.auth.userId;
 
-  try {
-    const sql = `
-      INSERT INTO tournaments (name, description, image_url, format, visibility, status, start_date, end_date, cash_prize, max_teams, max_team_size, min_team_size, game_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-      RETURNING *;
-    `;
-    const params = [
-      name,
-      description,
-      imageUrl,
-      format,
-      visibility,
-      status,
-      startDate,
-      endDate,
-      cashPrize,
-      maxTeams,
-      maxTeamSize,
-      minTeamSize,
-      gameId,
-    ];
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
+      const authUserResult = await query(authUserSql, [authId]);
 
-    const result = await query(sql, params);
-    res.status(201).json(result.rows[0]);
-  } catch (error) {
-    next(error);
-  }
-});
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${authId} not found` });
+      }
+
+      const existingTournamentSql =
+        "SELECT * FROM tournaments WHERE name ILIKE $1;";
+      const existingTournamentResult = await query(existingTournamentSql, [
+        name,
+      ]);
+
+      if (existingTournamentResult.rowCount !== 0) {
+        return res.status(409).json({
+          message: `Tournament with name ${name} already exists`,
+        });
+      }
+
+      const imageUrl = req.file
+        ? `https://madbracket.xyz/images/${req.file.filename.split(".")[0]}`
+        : `https://madbracket.xyz/images/default`;
+
+      const tagsArray = (tags || "")
+        .toLowerCase()
+        .split(",")
+        .map((tag: string) => tag.trim())
+        .filter(Boolean);
+
+      const sql = `
+        INSERT INTO tournaments (
+          name,
+          description,
+          image_url,
+          game_id,
+          format,
+          visibility,
+          tags,
+          cash_prize,
+          max_teams,
+          max_team_size,
+          min_team_size,
+          start_date,
+          end_date
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        RETURNING *;
+      `;
+
+      const result = await query(sql, [
+        name,
+        description,
+        imageUrl,
+        game,
+        format,
+        visibility ? "public" : "private",
+        tagsArray,
+        cash_prize,
+        max_teams,
+        max_team_size,
+        min_team_size,
+        start_date,
+        end_date,
+      ]);
+
+      const teamId = result.rows[0].id;
+
+      const teamUserSql = `
+        INSERT INTO tournaments_users (tournament_id, user_id, role)
+        VALUES ($1, $2, 'owner')
+      `;
+
+      await query(teamUserSql, [teamId, authId]);
+
+      res.status(201).json(result.rows[0]);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   const { query: searchQuery, page } = req.query as {
