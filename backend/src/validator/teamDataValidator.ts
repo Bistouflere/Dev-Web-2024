@@ -9,17 +9,16 @@ const teamData = z.object({
     })
     .max(30, {
       message: "Team name must not be longer than 30 characters.",
-    }),
+    })
+    .trim(),
   description: z
     .string()
     .max(160, {
       message: "Team description must not be longer than 160 characters.",
     })
+    .trim()
     .optional(),
-  file:
-    typeof window === "undefined"
-      ? z.any().optional()
-      : z.instanceof(FileList).optional(),
+  file: z.instanceof(File).optional(),
 });
 
 export const validateTeamData = (
