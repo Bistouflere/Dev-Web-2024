@@ -121,7 +121,7 @@ export default function CreateTeamPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>Name (Required)</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Give your team a name..."

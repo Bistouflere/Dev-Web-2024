@@ -1,13 +1,7 @@
+// import { createTeam } from "@/api/userActions";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -18,7 +12,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -31,116 +24,160 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+// import { useToast } from "@/components/ui/use-toast";
+// import { useAuth } from "@clerk/clerk-react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addDays, format } from "date-fns";
-import {
-  Calendar as CalendarIcon,
-  Check,
-  ChevronRightIcon,
-  ChevronsUpDown,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
+// import { useQueryClient } from "@tanstack/react-query";
+import { CalendarIcon, ChevronRightIcon } from "lucide-react";
+// import { useCallback } from "react";
 import { useForm } from "react-hook-form";
+// import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
-const games = [
-  { label: "League Of Legends", value: "lol" },
-  { label: "Counter-Strike: Global Offensive", value: "csgo" },
-  { label: "Fortnite", value: "fortnite" },
-  { label: "Valorant", value: "valorant" },
-  { label: "Rocket League", value: "rocketLeague" },
-  { label: "Apex Legends", value: "apex" },
-  { label: "Fifa 24", value: "fifa" },
-  { label: "Overwatch", value: "overwatch" },
-  { label: "Brawl Stars", value: "brawlStars" },
-] as const;
+enum TournamentFormat {
+  single_elimination = "single_elimination",
+  double_elimination = "double_elimination",
+  round_robin = "round_robin",
+}
 
-const profileFormSchema = z.object({
-  username: z
-    .string({
-      required_error: "Please give a name.",
-    })
+const tournamentFormSchema = z.object({
+  name: z
+    .string()
     .min(2, {
-      message: "Username must be at least 2 characters.",
+      message: "Tournament name must be at least 2 characters.",
     })
     .max(30, {
-      message: "Username must not be longer than 30 characters.",
-    }),
-  bio: z.string().max(160).min(4).optional(),
-  picture: z.string().optional(),
-  game: z.string({
-    required_error: "Please select a game.",
-  }),
-  format: z.string({
-    required_error: "Please select a format.",
-  }),
-  public: z.string().optional(),
-  cash_prize: z.string().optional(),
-  max_teams: z.string({
-    required_error: "Please specify the number max for teams.",
-  }),
-  // .min(5, {
-  //     message: "Number of players must be at least 5. (5 players for a 5v5 game)",
-  // })
-  // .max(7, {
-  //     message: "Number of players must not exceed 7. (5 players + 2 subs for a 5v5 game)",
-  // }),
-  team_size: z
-    .string({
-      required_error: "Please specify the number max of teams.",
+      message: "Tournament name must not be longer than 30 characters.",
     })
-    .min(1, {
-      message: "Number of slots must be at least 1.",
+    .trim(),
+  description: z
+    .string()
+    .max(160, {
+      message: "Tournament description must not be longer than 160 characters.",
     })
-    .max(16, {
-      message: "Number of slots must not exceed 16.",
-    }),
-  dates: z.string({
-    required_error: "Please give the dates.",
-  }),
+    .trim()
+    .optional(),
+  file: z.instanceof(File).optional(),
+  game: z.string(),
+  format: z.nativeEnum(TournamentFormat),
+  public: z.boolean().optional(),
+  tags: z.string().optional(),
+  cash_prize: z.string().refine((value) => {
+    return !isNaN(parseFloat(value)) && parseFloat(value) >= 0;
+  }, "Cash prize must be a positive number."),
+  max_teams: z.string().refine((value) => {
+    return !isNaN(parseFloat(value)) && parseFloat(value) >= 0;
+  }, "Max teams must be a positive number."),
+  max_team_size: z.string().refine((value) => {
+    return !isNaN(parseFloat(value)) && parseFloat(value) >= 0;
+  }, "Max team size must be a positive number."),
+  min_team_size: z.string().refine((value) => {
+    return !isNaN(parseFloat(value)) && parseFloat(value) >= 0;
+  }, "Min team size must be a positive number."),
+  start_date: z.date().optional(),
+  end_date: z.date().optional(),
 });
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>;
+type TournamentFormValues = z.infer<typeof tournamentFormSchema>;
 
 export default function CreateTournamentPage() {
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileFormSchema),
+  // const navigate = useNavigate();
+  // const { userId, getToken } = useAuth();
+  // const { toast } = useToast();
+  // const queryClient = useQueryClient();
+
+  const games = [
+    {
+      id: "1",
+      name: "League of Legends",
+    },
+    {
+      id: "2",
+      name: "Apex Legends",
+    },
+    {
+      id: "3",
+      name: "Counter-Strike: Global Offensive",
+    },
+    {
+      id: "4",
+      name: "Overwatch 2",
+    },
+    {
+      id: "5",
+      name: "Rocket League",
+    },
+  ];
+
+  const form = useForm<TournamentFormValues>({
+    defaultValues: {
+      name: "",
+      description: "",
+      file: undefined,
+      game: games[0].id,
+      format: TournamentFormat.single_elimination,
+      public: false,
+      tags: "",
+      cash_prize: "0",
+      max_teams: "32",
+      max_team_size: "5",
+      min_team_size: "1",
+    },
     mode: "onChange",
+    resolver: zodResolver(tournamentFormSchema),
   });
 
-  function onSubmit(data: ProfileFormValues) {
-    console.log(data);
+  // const invalidateQueries = useCallback(() => {
+  //   queryClient.invalidateQueries({ queryKey: [`tournaments`] });
+  //   queryClient.invalidateQueries({
+  //     queryKey: [`tournaments_users_${userId}`],
+  //   });
+  // }, [queryClient, userId]);
 
-    toast({
-      title: "Your tournament is created !",
+  const onSubmit = async (data: TournamentFormValues) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("description", data.description ?? "");
+    if (data.file) formData.append("file", data.file);
+    formData.append("game", data.game);
+    formData.append("format", data.format);
+    formData.append("public", data.public?.toString() ?? "false");
+    formData.append("tags", data.tags ?? "");
+    formData.append("cash_prize", data.cash_prize.toString());
+    formData.append("max_teams", data.max_teams.toString());
+    formData.append("max_team_size", data.max_team_size.toString());
+    formData.append("min_team_size", data.min_team_size.toString());
+    if (data.start_date)
+      formData.append("start_date", data.start_date.toISOString());
+    if (data.end_date) formData.append("end_date", data.end_date.toISOString());
+
+    formData.forEach((value, key) => {
+      console.log(key, value);
     });
-  }
 
-  const [hoveredGameIndex, setHoveredGameIndex] = useState<number | null>(null);
+    // try {
+    //   const response = await createTeam(formData, getToken, invalidateQueries);
 
-  const [date, setDate] = useState<DateRange | undefined>({
-    from: new Date(),
-    to: addDays(new Date(), 7),
-  });
+    //   toast({
+    //     title: "Success!",
+    //     description: `The tournament ${response.name} has been created.`,
+    //   });
 
-  useEffect(() => {
-    const interval = setInterval(
-      () => {
-        setDate((prevDate) => ({
-          from: prevDate?.from,
-          to: addDays(new Date(), 7),
-        }));
-      },
-      24 * 60 * 60 * 1000,
-    );
-
-    return () => clearInterval(interval);
-  }, []);
+    //   navigate(`/dashboard/tournaments/${response.id}`);
+    // } catch (error) {
+    //   console.error("Error creating tournament:", error);
+    //   toast({
+    //     variant: "destructive",
+    //     title: "Oops!",
+    //     description:
+    //       (error as Error).message ||
+    //       `An error occurred while creating your tournament.`,
+    //   });
+    // }
+  };
 
   return (
     <main className="relative py-6 lg:gap-10 lg:py-8">
@@ -157,285 +194,331 @@ export default function CreateTournamentPage() {
             Create Tournament
           </h1>
           <p className="pb-2 text-xl text-muted-foreground">
-            Create your tournament and start competing against other teams.
+            Create your tournament and start competing with your friends !
           </p>
-        </div>
-        <br />
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormDescription>
-              Fields marked with * are required.
-            </FormDescription>
-
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name *</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Give a name at your tournament !"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    This is the public name under which you will be displayed
-                    during the tournament. Please note that this name cannot be
-                    changed once chosen.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="bio"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name (Required)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Give your tournament a name..."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      This is the name that will be displayed to other users.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
                     <Textarea
-                      placeholder="Tell us a little bit about your tournament..."
-                      className="resize-none"
+                      placeholder="Describe your tournament..."
                       {...field}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="picture"
-              render={({ field }) => (
-                <FormItem className="grid w-full max-w-sm items-center gap-1.5">
-                  <FormLabel htmlFor="picture">Picture</FormLabel>
-                  <Input id="picture" type="file" {...field} />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="game"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Game *</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
+                    <FormDescription>
+                      This is the description that will be displayed to other
+                      users.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags</FormLabel>
+                    <Input
+                      type="text"
+                      placeholder="Tags, separated by commas..."
+                      {...field}
+                    />
+                    <FormDescription>
+                      These are the tags that will be used to find your
+                      tournament.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="file"
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                render={({ field: { value, onChange, ...fieldProps } }) => (
+                  <FormItem>
+                    <FormLabel>Image</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        {...fieldProps}
+                        onChange={(event) => {
+                          onChange(event.target.files && event.target.files[0]);
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      This is the image that will be displayed to other users.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex flex-col md:flex-row md:gap-10">
+                <FormField
+                  control={form.control}
+                  name="game"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Game</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a game for your tournament" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {games.map((game) => (
+                            <SelectItem key={game.id} value={game.id}>
+                              {game.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        This is the game that will be played in your tournament.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="format"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Format</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a format for your tournament" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.values(TournamentFormat).map((format) => (
+                            <SelectItem key={format} value={format}>
+                              {format}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        This is the format that will be used for your
+                        tournament.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="cash_prize"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cash Prize</FormLabel>
                       <FormControl>
-                        <Button
-                          variant="outline"
-                          role="combobox"
-                          className={cn(
-                            "w-[200px] justify-between",
-                            !field.value && "text-muted-foreground",
-                          )}
-                        >
-                          {field.value
-                            ? games.find((games) => games.value === field.value)
-                                ?.label
-                            : "Select a game"}
-                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
+                        <Input type="number" {...field} />
                       </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-0">
-                      <Command>
-                        <CommandInput placeholder="Search a game..." />
-                        <CommandList>
-                          <CommandEmpty>No game found.</CommandEmpty>
-                          <CommandGroup>
-                            {games.map((game, index) => (
-                              <CommandItem
-                                className={`${
-                                  game.value === field.value ? "font-bold" : ""
-                                } ${
-                                  hoveredGameIndex === index ? "font-bold" : ""
-                                } data-[disabled]:pointer-events-auto`}
-                                value={game.label}
-                                key={game.value}
-                                onMouseEnter={() => setHoveredGameIndex(index)}
-                                onMouseLeave={() => setHoveredGameIndex(null)}
-                                onSelect={() => {
-                                  form.setValue("game", game.value);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    game.value === field.value
-                                      ? "opacity-100"
-                                      : "opacity-0",
-                                  )}
-                                />
-                                {game.label}
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                  <FormDescription>
-                    This will be the game played in this tournament.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="format"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Format *</FormLabel>
-                  <Select>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select a format" {...field} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="single_elimination">
-                        Single Elimination
-                      </SelectItem>
-                      <SelectItem value="double_elimination">
-                        Double Elimination
-                      </SelectItem>
-                      <SelectItem value="round_robin">Round Robin</SelectItem>
-                      <SelectItem value="swiss">Swiss</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="format"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Public *</FormLabel>
-                  <div className="flex items-center space-x-2">
-                    <Label htmlFor="true">Yes</Label>
-                    <Switch />
-                    <Label htmlFor="false">No</Label>
-                  </div>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="cash_prize"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cash Prize (En €)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="Enter the cash prize for the tournament."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="max_teams"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Max Teams *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="1"
-                      placeholder="Enter the max of teams for the tournament."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="team_size"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Team Size *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      step="1"
-                      placeholder="Enter the team size for the tournament."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="dates"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Dates *</FormLabel>
-                  <div className={cn("grid gap-2")}>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          id="date"
-                          variant={"outline"}
-                          className={cn(
-                            "w-[300px] justify-start text-left font-normal",
-                            !date && "text-muted-foreground",
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {date?.from ? (
-                            date.to ? (
-                              <>
-                                {format(date.from, "LLL dd, y")} -{" "}
-                                {format(date.to, "LLL dd, y")}
-                              </>
-                            ) : (
-                              format(date.from, "LLL dd, y")
-                            )
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          initialFocus
-                          mode="range"
-                          defaultMonth={date?.from}
-                          selected={date}
-                          onSelect={setDate}
-                          numberOfMonths={2}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </FormItem>
-              )}
-            />
-
-            <Button type="submit">Create My Team</Button>
-          </form>
-        </Form>
+                      <FormDescription>
+                        This is the cash prize that will be awarded to the
+                        winning team.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col md:flex-row md:gap-10">
+                <FormField
+                  control={form.control}
+                  name="max_teams"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Max Teams</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        This is the maximum number of teams that can join your
+                        tournament.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="max_team_size"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Max Team Size</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        This is the maximum number of players per team.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="min_team_size"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Min Team Size</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        This is the minimum number of players per team.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col md:flex-row md:gap-10">
+                <FormField
+                  control={form.control}
+                  name="start_date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Start Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-[240px] pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground",
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormDescription>
+                        This is the date your tournament will start.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="end_date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>End Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-[240px] pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground",
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormDescription>
+                        This is the date your tournament will end.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="public"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Public</FormLabel>
+                      <FormDescription>
+                        Should everyone be able to join your tournament?
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              <Button type="submit">Create Tournament</Button>
+            </form>
+          </Form>
+        </div>
       </div>
     </main>
   );
