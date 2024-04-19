@@ -4,7 +4,7 @@ import axios from "axios";
 
 export function teamQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`team_${id}`, id],
+    queryKey: [`teams`, { id }],
     queryFn: () => fetchTeam(id),
     placeholderData: keepPreviousData,
   });
@@ -12,7 +12,7 @@ export function teamQueryOptions(id: string) {
 
 export function teamsQueryOptions(query: string, page: number) {
   return queryOptions({
-    queryKey: [`teams`],
+    queryKey: [`teams`, { query, page }],
     queryFn: () => fetchTeams(query, page),
     placeholderData: keepPreviousData,
   });
@@ -20,7 +20,7 @@ export function teamsQueryOptions(query: string, page: number) {
 
 export function teamsCountQueryOptions(query: string) {
   return queryOptions({
-    queryKey: [`teams_count`],
+    queryKey: [`teams_count`, { query }],
     queryFn: () => fetchTeamsCount(query),
     placeholderData: keepPreviousData,
   });
@@ -28,7 +28,7 @@ export function teamsCountQueryOptions(query: string) {
 
 export function teamUsersQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`team_users_${id}`, id],
+    queryKey: [`team_users`, { id }],
     queryFn: () => fetchTeamUsers(id),
     placeholderData: keepPreviousData,
   });
@@ -36,7 +36,7 @@ export function teamUsersQueryOptions(id: string) {
 
 export function teamUsersCountQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`team_users_count_${id}`, id],
+    queryKey: [`team_users_count`, { id }],
     queryFn: () => fetchTeamUsersCount(id),
     placeholderData: keepPreviousData,
   });
@@ -44,7 +44,7 @@ export function teamUsersCountQueryOptions(id: string) {
 
 export function teamTournamentsQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`team_tournaments_${id}`, id],
+    queryKey: [`team_tournaments`, { id }],
     queryFn: () => fetchTeamTournaments(id),
     placeholderData: keepPreviousData,
   });
@@ -52,7 +52,7 @@ export function teamTournamentsQueryOptions(id: string) {
 
 export function teamTournamentsCountQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`team_tournaments_count_${id}`, id],
+    queryKey: [`team_tournaments_count`, { id }],
     queryFn: () => fetchTeamTournamentsCount(id),
     placeholderData: keepPreviousData,
   });

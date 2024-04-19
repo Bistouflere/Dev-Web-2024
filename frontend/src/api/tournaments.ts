@@ -11,7 +11,7 @@ import axios from "axios";
 
 export function tournamentQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`tournament_${id}`, id],
+    queryKey: [`tournaments`, { id }],
     queryFn: () => fetchTournament(id),
     placeholderData: keepPreviousData,
   });
@@ -19,7 +19,7 @@ export function tournamentQueryOptions(id: string) {
 
 export function tournamentsQueryOptions(query: string, page: number) {
   return queryOptions({
-    queryKey: [`tournaments_${query}_${page}`, query, page],
+    queryKey: [`tournaments`, { query, page }],
     queryFn: () => fetchTournaments(query, page),
     placeholderData: keepPreviousData,
   });
@@ -27,7 +27,7 @@ export function tournamentsQueryOptions(query: string, page: number) {
 
 export function tournamentsCountQueryOptions(query: string) {
   return queryOptions({
-    queryKey: [`tournaments_count_${query}`, query],
+    queryKey: [`tournaments_count`, { query }],
     queryFn: () => fetchTournamentsCount(query),
     placeholderData: keepPreviousData,
   });
@@ -35,7 +35,7 @@ export function tournamentsCountQueryOptions(query: string) {
 
 export function tournamentTeamsQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`tournament_teams_${id}`, id],
+    queryKey: [`tournament_teams`, { id }],
     queryFn: () => fetchTournamentTeams(id),
     placeholderData: keepPreviousData,
   });
@@ -43,7 +43,7 @@ export function tournamentTeamsQueryOptions(id: string) {
 
 export function tournamentTeamsCountQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`tournament_teams_count_${id}`, id],
+    queryKey: [`tournament_teams_count`, { id }],
     queryFn: () => fetchTournamentTeamsCount(id),
     placeholderData: keepPreviousData,
   });
@@ -51,7 +51,7 @@ export function tournamentTeamsCountQueryOptions(id: string) {
 
 export function tournamentUsersQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`tournament_users_${id}`, id],
+    queryKey: [`tournament_users`, { id }],
     queryFn: () => fetchTournamentUsers(id),
     placeholderData: keepPreviousData,
   });
@@ -59,7 +59,7 @@ export function tournamentUsersQueryOptions(id: string) {
 
 export function tournamentUsersCountQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`tournament_users_count_${id}`, id],
+    queryKey: [`tournament_users_count`, { id }],
     queryFn: () => fetchTournamentUsersCount(id),
     placeholderData: keepPreviousData,
   });
@@ -67,7 +67,7 @@ export function tournamentUsersCountQueryOptions(id: string) {
 
 export function tournamentPoolsQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`tournament_pools_${id}`, id],
+    queryKey: [`tournament_pools`, { id }],
     queryFn: () => fetchTournamentPools(id),
     placeholderData: keepPreviousData,
   });
@@ -75,7 +75,7 @@ export function tournamentPoolsQueryOptions(id: string) {
 
 export function tournamentPoolCountQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`tournament_pool_count_${id}`, id],
+    queryKey: [`tournament_pool_count`, { id }],
     queryFn: () => fetchTournamentPoolsCount(id),
     placeholderData: keepPreviousData,
   });
@@ -83,7 +83,7 @@ export function tournamentPoolCountQueryOptions(id: string) {
 
 export function tournamentMatchesQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`tournament_matches_${id}`, id],
+    queryKey: [`tournament_matches`, { id }],
     queryFn: () => fetchTournamentMatches(id),
     placeholderData: keepPreviousData,
   });
@@ -91,7 +91,7 @@ export function tournamentMatchesQueryOptions(id: string) {
 
 export function tournamentMatchesCountQueryOptions(id: string) {
   return queryOptions({
-    queryKey: [`tournament_matches_count_${id}`, id],
+    queryKey: [`tournament_matches_count`, { id }],
     queryFn: () => fetchTournamentMatchesCount(id),
     placeholderData: keepPreviousData,
   });

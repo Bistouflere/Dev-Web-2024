@@ -4,7 +4,7 @@ import axios from "axios";
 
 export function userQueryOptions(id: string | null | undefined) {
   return queryOptions({
-    queryKey: [`user_${id}`, id],
+    queryKey: [`users`, { id }],
     queryFn: () => fetchUser(id),
     placeholderData: keepPreviousData,
   });
@@ -12,7 +12,7 @@ export function userQueryOptions(id: string | null | undefined) {
 
 export function usersQueryOptions(query: string, page: number) {
   return queryOptions({
-    queryKey: [`users`],
+    queryKey: [`users`, { query, page }],
     queryFn: () => fetchUsers(query, page),
     placeholderData: keepPreviousData,
   });
@@ -20,7 +20,7 @@ export function usersQueryOptions(query: string, page: number) {
 
 export function usersCountQueryOptions(query: string) {
   return queryOptions({
-    queryKey: [`users_count`],
+    queryKey: [`users_count`, { query }],
     queryFn: () => fetchUsersCount(query),
     placeholderData: keepPreviousData,
   });
@@ -32,7 +32,7 @@ export function userFollowersQueryOptions(
   page: number,
 ) {
   return queryOptions({
-    queryKey: [`user_followers_${id}`, id],
+    queryKey: [`followers`, { id, query, page }],
     queryFn: () => fetchUserFollowers(id, query, page),
     placeholderData: keepPreviousData,
   });
@@ -43,7 +43,7 @@ export function userFollowersCountQueryOptions(
   query: string = "",
 ) {
   return queryOptions({
-    queryKey: [`user_followers_count_${id}`, id],
+    queryKey: [`followers_count`, { id, query }],
     queryFn: () => fetchUserFollowersCount(id, query),
     placeholderData: keepPreviousData,
   });
@@ -55,7 +55,7 @@ export function userFollowingQueryOptions(
   page: number,
 ) {
   return queryOptions({
-    queryKey: [`user_following_${id}`, id],
+    queryKey: [`following`, { id, query, page }],
     queryFn: () => fetchUserFollowing(id, query, page),
     placeholderData: keepPreviousData,
   });
@@ -66,7 +66,7 @@ export function userFollowingCountQueryOptions(
   query: string = "",
 ) {
   return queryOptions({
-    queryKey: [`user_following_count_${id}`, id],
+    queryKey: [`following_count`, { id, query }],
     queryFn: () => fetchUserFollowingCount(id, query),
     placeholderData: keepPreviousData,
   });
@@ -77,11 +77,7 @@ export function isFollowingQueryOptions(
   followedId: string | null | undefined,
 ) {
   return queryOptions({
-    queryKey: [
-      `is_following_${followerId}_${followedId}`,
-      followerId,
-      followedId,
-    ],
+    queryKey: [`is_following`, { followerId, followedId }],
     queryFn: () => isFollowing(followerId, followedId),
     placeholderData: keepPreviousData,
   });
@@ -89,7 +85,7 @@ export function isFollowingQueryOptions(
 
 export function userTeamsQueryOptions(id: string | null | undefined) {
   return queryOptions({
-    queryKey: [`user_teams_${id}`, id],
+    queryKey: [`user_teams`, { id }],
     queryFn: () => fetchUserTeams(id),
     placeholderData: keepPreviousData,
   });
@@ -97,7 +93,7 @@ export function userTeamsQueryOptions(id: string | null | undefined) {
 
 export function userTeamsCountQueryOptions(id: string | null | undefined) {
   return queryOptions({
-    queryKey: [`user_teams_count_${id}`, id],
+    queryKey: [`user_teams_count`, { id }],
     queryFn: () => fetchUserTeamsCount(id),
     placeholderData: keepPreviousData,
   });
@@ -105,7 +101,7 @@ export function userTeamsCountQueryOptions(id: string | null | undefined) {
 
 export function userTournamentsQueryOptions(id: string | null | undefined) {
   return queryOptions({
-    queryKey: [`user_tournaments_${id}`, id],
+    queryKey: [`user_tournaments`, { id }],
     queryFn: () => fetchUserTournaments(id),
     placeholderData: keepPreviousData,
   });
@@ -115,7 +111,7 @@ export function userTournamentsCountQueryOptions(
   id: string | null | undefined,
 ) {
   return queryOptions({
-    queryKey: [`user_tournaments_count_${id}`, id],
+    queryKey: [`user_tournaments_count`, { id }],
     queryFn: () => fetchUserTournamentsCount(id),
     placeholderData: keepPreviousData,
   });
