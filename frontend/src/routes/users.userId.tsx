@@ -14,10 +14,11 @@ import UserTeamsTable from "@/components/users/teams-card";
 import UserTournamentsTable from "@/components/users/tournaments-card";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function UserProfile() {
+  const [loading, setLoading] = useState(false);
   const { searchUserId } = useParams();
   const { userId, getToken } = useAuth();
   const { toast } = useToast();
@@ -65,12 +66,18 @@ export default function UserProfile() {
 
   const handleFollowUser = async () => {
     try {
+      setLoading(true);
       await followUser(searchUserId || "", getToken, invalidateQueries);
       toast({
         title: "Success!",
         description: `You are now following ${user?.username}.`,
       });
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 200);
     } catch (error) {
+      setLoading(false);
       console.error("Error following user:", error);
       toast({
         variant: "destructive",
@@ -84,12 +91,18 @@ export default function UserProfile() {
 
   const handleUnfollowUser = async () => {
     try {
+      setLoading(true);
       await unfollowUser(searchUserId || "", getToken, invalidateQueries);
       toast({
         title: "Success!",
         description: `You are no longer following ${user?.username}.`,
       });
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 200);
     } catch (error) {
+      setLoading(false);
       console.error("Error unfollowing user:", error);
       toast({
         variant: "destructive",
@@ -113,6 +126,7 @@ export default function UserProfile() {
             isFollowing={isFollowing || false}
             handleFollowUser={handleFollowUser}
             handleUnfollowUser={handleUnfollowUser}
+            loading={loading}
           />
           <div className="flex flex-auto flex-col gap-4">
             <UserStatisticsCard user={user} />

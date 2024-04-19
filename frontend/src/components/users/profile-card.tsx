@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User } from "@/types/apiResponses";
 import dayjs from "dayjs";
-import { Heart, HeartOff, UserPlus } from "lucide-react";
+import { Heart, HeartOff, Loader2, UserPlus } from "lucide-react";
 
 export default function UserProfileCard({
   user,
@@ -12,6 +12,7 @@ export default function UserProfileCard({
   isFollowing,
   handleFollowUser,
   handleUnfollowUser,
+  loading,
 }: {
   user: User;
   userId: string | null | undefined;
@@ -20,6 +21,7 @@ export default function UserProfileCard({
   isFollowing: boolean;
   handleFollowUser: () => void;
   handleUnfollowUser: () => void;
+  loading: boolean;
 }) {
   return (
     <div className="flex-none">
@@ -40,12 +42,24 @@ export default function UserProfileCard({
           </div>
           <div className="mt-4 flex justify-center space-x-4">
             {isFollowing ? (
-              <Button
-                onClick={handleUnfollowUser}
-                disabled={!userId || userId === user.id}
-              >
-                <HeartOff className="mr-2 h-5 w-5" />
-                Unfollow
+              loading ? (
+                <Button disabled>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Unfollow
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleUnfollowUser}
+                  disabled={!userId || userId === user.id}
+                >
+                  <HeartOff className="mr-2 h-5 w-5" />
+                  Unfollow
+                </Button>
+              )
+            ) : loading ? (
+              <Button disabled>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Follow
               </Button>
             ) : (
               <Button

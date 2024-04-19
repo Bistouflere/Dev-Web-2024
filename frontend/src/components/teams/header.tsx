@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Team, TeamUser, Tournament } from "@/types/apiResponses";
-import { DoorClosed, UserPlus } from "lucide-react";
+import { DoorClosed, Loader2, UserPlus } from "lucide-react";
 
 export default function TeamHeader({
   userId,
@@ -9,6 +9,7 @@ export default function TeamHeader({
   tournaments,
   handleTeamJoin,
   handleTeamLeave,
+  loading,
 }: {
   userId: string | null | undefined;
   team: Team;
@@ -16,6 +17,7 @@ export default function TeamHeader({
   tournaments: Tournament[];
   handleTeamJoin: () => void;
   handleTeamLeave: () => void;
+  loading: boolean;
 }) {
   return (
     <>
@@ -59,13 +61,25 @@ export default function TeamHeader({
       </div>
       <div className="flex justify-center sm:justify-end">
         {users?.some((u) => u.id === userId) ? (
-          <Button
-            onClick={handleTeamLeave}
-            disabled={!userId}
-            variant="destructive"
-          >
-            <DoorClosed className="mr-2 h-5 w-5" />
-            Leave the team
+          loading ? (
+            <Button disabled variant="destructive">
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              Leave the team
+            </Button>
+          ) : (
+            <Button
+              onClick={handleTeamLeave}
+              disabled={!userId}
+              variant="destructive"
+            >
+              <DoorClosed className="mr-2 h-5 w-5" />
+              Leave the team
+            </Button>
+          )
+        ) : loading ? (
+          <Button disabled>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Join the team
           </Button>
         ) : (
           <Button

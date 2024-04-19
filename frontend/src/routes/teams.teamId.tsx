@@ -18,6 +18,7 @@ import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function TeamProfile() {
+  const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState("overview");
   const { searchTeamId } = useParams();
   const { userId, getToken } = useAuth();
@@ -50,12 +51,18 @@ export default function TeamProfile() {
 
   const handleTeamJoin = async () => {
     try {
+      setLoading(true);
       await joinTeam(searchTeamId || "", getToken, invalidateQueries);
       toast({
         title: "Success!",
         description: `You have joined ${team?.name}.`,
       });
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 200);
     } catch (error) {
+      setLoading(false);
       console.error("Error joining team:", error);
       toast({
         variant: "destructive",
@@ -69,12 +76,18 @@ export default function TeamProfile() {
 
   const handleTeamLeave = async () => {
     try {
+      setLoading(true);
       await leaveTeam(searchTeamId || "", getToken, invalidateQueries);
       toast({
         title: "Success!",
         description: `You have left ${team?.name}.`,
       });
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 200);
     } catch (error) {
+      setLoading(false);
       console.error("Error leaving team:", error);
       toast({
         variant: "destructive",
@@ -97,6 +110,7 @@ export default function TeamProfile() {
             tournaments={tournaments || []}
             handleTeamJoin={handleTeamJoin}
             handleTeamLeave={handleTeamLeave}
+            loading={loading}
           />
           <Tabs
             defaultValue="overview"

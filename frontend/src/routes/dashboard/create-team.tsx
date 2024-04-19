@@ -16,8 +16,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@clerk/clerk-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronRightIcon } from "lucide-react";
-import { useCallback } from "react";
+import { ChevronRightIcon, Loader2 } from "lucide-react";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
@@ -46,6 +46,7 @@ const teamFormSchema = z.object({
 type TeamFormValues = z.infer<typeof teamFormSchema>;
 
 export default function CreateTeamPage() {
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { userId, getToken } = useAuth();
   const { toast } = useToast();
@@ -77,6 +78,7 @@ export default function CreateTeamPage() {
     formData.append("visibility", data.visibility?.toString() ?? "false");
 
     try {
+      setLoading(true);
       const response = await createTeam(formData, getToken, invalidateQueries);
 
       toast({
@@ -84,8 +86,12 @@ export default function CreateTeamPage() {
         description: `The team ${response.name} has been created.`,
       });
 
-      navigate(`/dashboard/teams/${response.id}`);
+      setTimeout(() => {
+        navigate(`/dashboard/teams/${response.id}`);
+        setLoading(false);
+      }, 1000);
     } catch (error) {
+      setLoading(false);
       console.error("Error creating team:", error);
       toast({
         variant: "destructive",
@@ -194,7 +200,14 @@ export default function CreateTeamPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Create Team</Button>
+              {loading ? (
+                <Button type="submit" disabled>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Processing...
+                </Button>
+              ) : (
+                <Button type="submit">Create Tournament</Button>
+              )}
             </form>
           </Form>
         </div>
