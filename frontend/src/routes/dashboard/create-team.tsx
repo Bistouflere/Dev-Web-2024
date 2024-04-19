@@ -206,7 +206,7 @@ export default function CreateTeamPage() {
                   Processing...
                 </Button>
               ) : (
-                <Button type="submit">Create Tournament</Button>
+                <Button type="submit">Create Team</Button>
               )}
             </form>
           </Form>
