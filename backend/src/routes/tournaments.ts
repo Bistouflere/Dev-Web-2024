@@ -1,4 +1,5 @@
 import { query } from "../db/index";
+import { processImage, upload } from "../middleware/upload";
 import { validateTournamentData } from "../validator/tournamentDataValidator";
 import { validateTournamentId } from "../validator/tournamentIdValidator";
 import {
@@ -6,25 +7,6 @@ import {
   RequireAuthProp,
 } from "@clerk/clerk-sdk-node";
 import express, { NextFunction, Request, Response } from "express";
-import multer from "multer";
-import path from "path";
-import slugify from "slugify";
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    const timestamp = new Date().getTime();
-    const randomString = Math.random().toString(36).substring(7);
-    const originalExtension = path.extname(file.originalname);
-    const slug = slugify(`${timestamp}-${randomString}`, { lower: true });
-    const sanitizedFilename = `${slug}${originalExtension}`;
-    cb(null, sanitizedFilename);
-  },
-});
-
-const upload = multer({ storage: storage });
 
 const router = express.Router();
 
@@ -412,9 +394,13 @@ router.post(
       } = req.body;
       const authId = req.auth.userId;
 
+      let imageUrl = `https://madbracket.xyz/images/default`;
+      if (req.file) {
+        imageUrl = `https://madbracket.xyz/images/${await processImage(req.file)}`;
+      }
+
       const authUserSql = "SELECT * FROM users WHERE id = $1;";
       const authUserResult = await query(authUserSql, [authId]);
-
       if (authUserResult.rowCount === 0) {
         return res
           .status(404)
@@ -426,24 +412,18 @@ router.post(
       const existingTournamentResult = await query(existingTournamentSql, [
         name,
       ]);
-
       if (existingTournamentResult.rowCount !== 0) {
-        return res.status(409).json({
-          message: `Tournament with name ${name} already exists`,
-        });
+        return res
+          .status(409)
+          .json({ message: `Tournament with name ${name} already exists` });
       }
-
-      const imageUrl = req.file
-        ? `https://madbracket.xyz/images/${req.file.filename.split(".")[0]}`
-        : `https://madbracket.xyz/images/default`;
 
       const tagsArray = (tags || "")
         .toLowerCase()
         .split(",")
         .map((tag: string) => tag.trim())
         .filter(Boolean);
-
-      const sql = `
+      const insertTournamentSql = `
         INSERT INTO tournaments (
           name,
           description,
@@ -462,8 +442,7 @@ router.post(
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
         RETURNING *;
       `;
-
-      const result = await query(sql, [
+      const result = await query(insertTournamentSql, [
         name,
         description,
         imageUrl,
@@ -478,15 +457,13 @@ router.post(
         start_date,
         end_date,
       ]);
+      const tournamentId = result.rows[0].id;
 
-      const teamId = result.rows[0].id;
-
-      const teamUserSql = `
+      const insertTournamentUserSql = `
         INSERT INTO tournaments_users (tournament_id, user_id, role)
         VALUES ($1, $2, 'owner')
       `;
-
-      await query(teamUserSql, [teamId, authId]);
+      await query(insertTournamentUserSql, [tournamentId, authId]);
 
       res.status(201).json(result.rows[0]);
     } catch (error) {
