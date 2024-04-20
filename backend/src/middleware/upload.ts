@@ -49,5 +49,5 @@ export const processImage = async (file: Express.Multer.File) => {
   // Delete original file
   fs.unlinkSync(file.path);
 
-  return `${fileName}.webp`;
+  return fileName;
 };
