@@ -21,7 +21,7 @@ export default function SentInvitationsPage() {
           </div>
           <ChevronRightIcon className="h-4 w-4" />
           <div className="overflow-hidden text-ellipsis whitespace-nowrap">
-            <Link to="/dashboard/teams">Invitations</Link>
+            <Link to="/dashboard/invitations">Invitations</Link>
           </div>
           <ChevronRightIcon className="h-4 w-4" />
           <div className="font-medium text-foreground">Sent</div>

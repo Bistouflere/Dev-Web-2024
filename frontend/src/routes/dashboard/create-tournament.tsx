@@ -176,7 +176,7 @@ export default function CreateTournamentPage() {
           </div>
           <ChevronRightIcon className="h-4 w-4" />
           <div className="overflow-hidden text-ellipsis whitespace-nowrap">
-            <Link to="/dashboard/teams">Your Tournaments</Link>
+            <Link to="/dashboard/tournaments">Your Tournaments</Link>
           </div>
           <ChevronRightIcon className="h-4 w-4" />
           <div className="font-medium text-foreground">Create</div>
