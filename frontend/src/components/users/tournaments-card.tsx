@@ -1,3 +1,4 @@
+import { userTournamentsQueryOptions } from "@/api/users";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -7,21 +8,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { User, UserTournament } from "@/types/apiResponses";
+import { User } from "@/types/apiResponses";
+import { useQuery } from "@tanstack/react-query";
 import { Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function UserTournamentsTable({
   user,
-  tournaments,
+  searchUserId,
   title,
   filters,
 }: {
   user: User;
-  tournaments: UserTournament[];
+  searchUserId: string | undefined;
   title: string;
   filters: string[];
 }) {
+  const { data: tournaments } = useQuery(
+    userTournamentsQueryOptions(searchUserId),
+  );
+
   return (
     <div className="flex-auto">
       <Card>

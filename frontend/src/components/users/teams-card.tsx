@@ -1,3 +1,4 @@
+import { userTeamsQueryOptions } from "@/api/users";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -7,16 +8,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { User, UserTeam } from "@/types/apiResponses";
+import { User } from "@/types/apiResponses";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 
 export default function UserTeamsTable({
   user,
-  teams,
+  searchUserId,
 }: {
   user: User;
-  teams: UserTeam[];
+  searchUserId: string | undefined;
 }) {
+  const { data: teams } = useQuery(userTeamsQueryOptions(searchUserId));
+
   return (
     <div className="flex-auto">
       <Card>

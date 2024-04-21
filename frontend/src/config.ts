@@ -52,6 +52,15 @@ export const navigationConfig: NavigationConfig = {
       ],
     },
     {
+      title: "Team Invitations",
+      items: [
+        {
+          title: "Your Invitations",
+          path: "/dashboard/invitations",
+        },
+      ],
+    },
+    {
       title: "Tournament Management",
       items: [
         {

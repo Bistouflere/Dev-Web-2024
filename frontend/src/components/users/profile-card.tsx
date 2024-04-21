@@ -1,28 +1,39 @@
+import { UserRecruit } from "./recruit";
+import {
+  isFollowingQueryOptions,
+  userFollowersCountQueryOptions,
+  userFollowingCountQueryOptions,
+} from "@/api/users";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User } from "@/types/apiResponses";
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { Heart, HeartOff, Loader2, UserPlus } from "lucide-react";
+import { Heart, HeartOff, Loader2 } from "lucide-react";
 
 export default function UserProfileCard({
   user,
   userId,
-  userFollowersCount,
-  userFollowingCount,
-  isFollowing,
   handleFollowUser,
   handleUnfollowUser,
   loading,
 }: {
   user: User;
   userId: string | null | undefined;
-  userFollowersCount: number;
-  userFollowingCount: number;
-  isFollowing: boolean;
   handleFollowUser: () => void;
   handleUnfollowUser: () => void;
   loading: boolean;
 }) {
+  const { data: userFollowersCount } = useQuery(
+    userFollowersCountQueryOptions(user.id),
+  );
+  const { data: userFollowingCount } = useQuery(
+    userFollowingCountQueryOptions(user.id),
+  );
+  const { data: isFollowing } = useQuery(
+    isFollowingQueryOptions(userId, user.id),
+  );
+
   return (
     <div className="flex-none">
       <Card>
@@ -70,18 +81,11 @@ export default function UserProfileCard({
                 Follow
               </Button>
             )}
-            <Button
-              variant="secondary"
-              onClick={() => console.log("recruit", user.id)}
-              disabled={!userId || userId === user.id}
-            >
-              <UserPlus className="mr-2 h-5 w-5" />
-              Recruit
-            </Button>
+            <UserRecruit user={user} userId={userId} />
           </div>
           <div className="mt-4">
-            <UserDetail title="Followers" result={userFollowersCount} />
-            <UserDetail title="Following" result={userFollowingCount} />
+            <UserDetail title="Followers" result={userFollowersCount || 0} />
+            <UserDetail title="Following" result={userFollowingCount || 0} />
             <UserDetail
               title="Member Since"
               result={dayjs(user.created_at).format("DD/MM/YYYY")}

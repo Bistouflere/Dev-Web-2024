@@ -127,13 +127,16 @@
             "schema": {
               "type": "object",
               "properties": {
-                "team_name": {
+                "name": {
                   "example": "any"
                 },
-                "team_description": {
+                "description": {
                   "example": "any"
                 },
-                "team_image_url": {
+                "visibility": {
+                  "example": "any"
+                },
+                "file": {
                   "example": "any"
                 }
               }
@@ -149,6 +152,9 @@
           },
           "404": {
             "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
           }
         }
       },
@@ -328,11 +334,58 @@
           }
         ],
         "responses": {
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      },
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "tournamentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "tournamentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
           "200": {
             "description": "OK"
           },
           "400": {
             "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -488,37 +541,37 @@
                 "description": {
                   "example": "any"
                 },
-                "imageUrl": {
+                "game": {
                   "example": "any"
                 },
                 "format": {
                   "example": "any"
                 },
+                "tags": {
+                  "example": "any"
+                },
+                "cash_prize": {
+                  "example": "any"
+                },
+                "max_teams": {
+                  "example": "any"
+                },
+                "max_team_size": {
+                  "example": "any"
+                },
+                "min_team_size": {
+                  "example": "any"
+                },
+                "start_date": {
+                  "example": "any"
+                },
+                "end_date": {
+                  "example": "any"
+                },
                 "visibility": {
                   "example": "any"
                 },
-                "status": {
-                  "example": "any"
-                },
-                "startDate": {
-                  "example": "any"
-                },
-                "endDate": {
-                  "example": "any"
-                },
-                "cashPrize": {
-                  "example": "any"
-                },
-                "maxTeams": {
-                  "example": "any"
-                },
-                "maxTeamSize": {
-                  "example": "any"
-                },
-                "minTeamSize": {
-                  "example": "any"
-                },
-                "gameId": {
+                "file": {
                   "example": "any"
                 }
               }
@@ -528,6 +581,15 @@
         "responses": {
           "201": {
             "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
           }
         }
       },
@@ -861,6 +923,110 @@
             "type": "string"
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/games/": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/invitations/send/{userId}/{teamId}": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        }
+      }
+    },
+    "/api/invitations/accept/{teamId}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/invitations/reject/{teamId}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/invitations/": {
+      "get": {
+        "description": "",
         "responses": {
           "200": {
             "description": "OK"

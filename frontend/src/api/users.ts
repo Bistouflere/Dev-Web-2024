@@ -1,4 +1,10 @@
-import { Count, User, UserTeam, UserTournament } from "@/types/apiResponses";
+import {
+  Count,
+  Invitation,
+  User,
+  UserTeam,
+  UserTournament,
+} from "@/types/apiResponses";
 import { keepPreviousData, queryOptions } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -22,6 +28,17 @@ export function usersCountQueryOptions(query: string) {
   return queryOptions({
     queryKey: [`users_count`, { query }],
     queryFn: () => fetchUsersCount(query),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function userInvitationsQueryOptions(
+  id: string | null | undefined,
+  getToken: () => Promise<string | null>,
+) {
+  return queryOptions({
+    queryKey: [`user_invitations`, { id }],
+    queryFn: () => fetchUserInvitations(id, getToken),
     placeholderData: keepPreviousData,
   });
 }
@@ -144,6 +161,28 @@ export async function fetchUsersCount(query: string): Promise<number> {
     console.log(`/api/users/count?query=${query}`, res.data);
     return res.data.count;
   });
+}
+
+export async function fetchUserInvitations(
+  id: string | null | undefined,
+  getToken: () => Promise<string | null>,
+): Promise<Invitation[]> {
+  if (!id) {
+    throw new Error("User ID is required to fetch user invitations.");
+  }
+
+  const token = await getToken();
+
+  return axios
+    .get<Invitation[]>(`/api/invitations`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => {
+      console.log(`/api/invitations`, res.data);
+      return res.data;
+    });
 }
 
 export async function fetchUserFollowers(

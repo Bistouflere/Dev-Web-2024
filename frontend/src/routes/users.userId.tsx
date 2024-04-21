@@ -1,12 +1,5 @@
 import { followUser, unfollowUser } from "@/api/userActions";
-import {
-  isFollowingQueryOptions,
-  userFollowersCountQueryOptions,
-  userFollowingCountQueryOptions,
-  userQueryOptions,
-  userTeamsQueryOptions,
-  userTournamentsQueryOptions,
-} from "@/api/users";
+import { userQueryOptions } from "@/api/users";
 import { useToast } from "@/components/ui/use-toast";
 import UserProfileCard from "@/components/users/profile-card";
 import UserStatisticsCard from "@/components/users/statistics-card";
@@ -25,20 +18,6 @@ export default function UserProfile() {
   const queryClient = useQueryClient();
 
   const { data: user } = useQuery(userQueryOptions(searchUserId));
-  const { data: userFollowersCount } = useQuery(
-    userFollowersCountQueryOptions(searchUserId),
-  );
-  const { data: userFollowingCount } = useQuery(
-    userFollowingCountQueryOptions(searchUserId),
-  );
-  const { data: isFollowing } = useQuery(
-    isFollowingQueryOptions(userId, searchUserId),
-  );
-
-  const { data: teams } = useQuery(userTeamsQueryOptions(searchUserId));
-  const { data: tournaments } = useQuery(
-    userTournamentsQueryOptions(searchUserId),
-  );
 
   const invalidateQueries = useCallback(() => {
     queryClient.invalidateQueries({
@@ -121,29 +100,26 @@ export default function UserProfile() {
           <UserProfileCard
             user={user}
             userId={userId}
-            userFollowersCount={userFollowersCount || 0}
-            userFollowingCount={userFollowingCount || 0}
-            isFollowing={isFollowing || false}
             handleFollowUser={handleFollowUser}
             handleUnfollowUser={handleUnfollowUser}
             loading={loading}
           />
           <div className="flex flex-auto flex-col gap-4">
             <UserStatisticsCard user={user} />
-            <UserTeamsTable user={user} teams={teams || []} />
+            <UserTeamsTable user={user} searchUserId={searchUserId} />
             <UserTournamentsTable
               user={user}
-              tournaments={tournaments || []}
+              searchUserId={searchUserId}
               title="Tournaments"
               filters={["upcoming", "active"]}
             />
             <UserTournamentsTable
               user={user}
-              tournaments={tournaments || []}
+              searchUserId={searchUserId}
               title="Past Tournaments"
               filters={["completed", "cancelled"]}
             />
-          </div>{" "}
+          </div>
         </div>
       ) : null}
     </div>

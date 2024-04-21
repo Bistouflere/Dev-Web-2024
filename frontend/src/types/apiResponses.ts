@@ -106,3 +106,10 @@ export type Match = {
   pool_created_at: string;
   pool_updated_at: string;
 };
+
+export type Invitation = {
+  team_id: string;
+  team_name: string;
+  inviter_id: string;
+  inviter_username: string;
+};
