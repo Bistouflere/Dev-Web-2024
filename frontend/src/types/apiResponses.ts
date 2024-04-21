@@ -55,11 +55,11 @@ export type Tournament = {
 };
 
 export type UserTournament = {
-  tournament_role: "participant" | "admin";
+  tournament_role: "participant" | "manager" | "owner";
 } & Tournament;
 
 export type TournamentUser = {
-  tournament_role: "participant" | "admin";
+  tournament_role: "participant" | "manager" | "owner";
 } & User;
 
 export type Team = {
@@ -74,11 +74,11 @@ export type Team = {
 };
 
 export type UserTeam = {
-  team_role: "participant" | "admin";
+  team_role: "participant" | "manager" | "owner";
 } & Team;
 
 export type TeamUser = {
-  team_role: "participant" | "admin";
+  team_role: "participant" | "manager" | "owner";
 } & User;
 
 export type Pool = {

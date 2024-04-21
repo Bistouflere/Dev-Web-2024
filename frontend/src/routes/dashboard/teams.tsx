@@ -1,7 +1,13 @@
+import { userTeamsQueryOptions } from "@/api/users";
+import { DashboardTeamList } from "@/components/dashboard/team-list";
+import { useAuth } from "@clerk/clerk-react";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronRightIcon } from "lucide-react";
-import Balancer from "react-wrap-balancer";
 
 export default function TeamPage() {
+  const { userId } = useAuth();
+  const { data: teams } = useQuery(userTeamsQueryOptions(userId));
+
   return (
     <main className="relative py-6 lg:gap-10 lg:py-8">
       <div className="mx-auto w-full min-w-0">
@@ -16,9 +22,10 @@ export default function TeamPage() {
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
             Your Teams
           </h1>
-          <p className="text-lg text-muted-foreground">
-            <Balancer>This is the protected settings page.</Balancer>
+          <p className="pb-2 text-xl text-muted-foreground">
+            Manage your teams and start competing with your friends!
           </p>
+          <DashboardTeamList response={teams || []} />
         </div>
       </div>
     </main>
