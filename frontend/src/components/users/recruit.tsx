@@ -63,6 +63,9 @@ export function UserRecruit({
     queryClient.invalidateQueries({
       queryKey: [`user_invitations`],
     });
+    queryClient.invalidateQueries({
+      queryKey: ["user_sent_invitations"],
+    });
   }, [queryClient]);
 
   const handleRecruit = async (data: z.infer<typeof FormSchema>) => {
