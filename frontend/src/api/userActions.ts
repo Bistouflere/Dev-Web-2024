@@ -230,3 +230,27 @@ export async function rejectInvitation(
     }
   }
 }
+
+export async function cancelInvitation(
+  userId: string,
+  teamId: string,
+  getToken: () => Promise<string | null>,
+  invalidateQueries: () => void,
+) {
+  const token = await getToken();
+
+  try {
+    await axios.delete(`/api/invitations/cancel/${userId}/${teamId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    invalidateQueries();
+    return true;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(error.response?.data.message);
+    } else {
+      throw new Error((error as Error).message);
+    }
+  }
+}

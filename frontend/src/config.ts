@@ -58,6 +58,10 @@ export const navigationConfig: NavigationConfig = {
           title: "Your Invitations",
           path: "/dashboard/invitations",
         },
+        {
+          title: "Sent Invitations",
+          path: "/dashboard/invitations/sent",
+        },
       ],
     },
     {

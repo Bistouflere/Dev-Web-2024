@@ -35,7 +35,7 @@ import { format } from "date-fns";
 import { CalendarIcon, ChevronRightIcon, Loader2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 enum TournamentFormat {
@@ -175,7 +175,11 @@ export default function CreateTournamentPage() {
             Dashboard
           </div>
           <ChevronRightIcon className="h-4 w-4" />
-          <div className="font-medium text-foreground">Create Tournament</div>
+          <div className="overflow-hidden text-ellipsis whitespace-nowrap">
+            <Link to="/dashboard/teams">Your Tournaments</Link>
+          </div>
+          <ChevronRightIcon className="h-4 w-4" />
+          <div className="font-medium text-foreground">Create</div>
         </div>
         <div className="space-y-2">
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">

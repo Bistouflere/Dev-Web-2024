@@ -9,6 +9,7 @@ import FollowersPage from "./routes/dashboard/followers";
 import FollowingPage from "./routes/dashboard/following";
 import DashboardPage from "./routes/dashboard/index";
 import InvitationsPage from "./routes/dashboard/invitations";
+import SentInvitationsPage from "./routes/dashboard/sent-invitations";
 import TeamPage from "./routes/dashboard/teams";
 import TeamDetailPage from "./routes/dashboard/teams.teamId";
 import TournamentPage from "./routes/dashboard/tournaments";
@@ -54,6 +55,10 @@ const router = createBrowserRouter([
           {
             path: "/dashboard/invitations",
             element: <InvitationsPage />,
+          },
+          {
+            path: "/dashboard/invitations/sent",
+            element: <SentInvitationsPage />,
           },
           { path: "/dashboard/tournaments", element: <TournamentPage /> },
           {

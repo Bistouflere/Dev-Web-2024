@@ -1,11 +1,4 @@
 import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import { toast } from "../ui/use-toast";
 import { acceptInvitation, rejectInvitation } from "@/api/userActions";
 import {
@@ -19,7 +12,7 @@ import {
 import { Invitation } from "@/types/apiResponses";
 import { useAuth } from "@clerk/clerk-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, Loader2, MoreHorizontal, X } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -107,66 +100,45 @@ export function DashboardInvitationList({
         <TableRow>
           <TableHead>Team Name</TableHead>
           <TableHead>Inviter Name</TableHead>
-          <TableHead>
-            <span className="sr-only">Actions</span>
+          <TableHead className="text-right">
+            <span className="sr-only">Accept/Reject</span>
           </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {response.map((response) => (
-          <TableRow key={response.team_id}>
+        {response.map((response, index) => (
+          <TableRow key={index}>
             <TableCell className="font-medium">
               <Link to={`/teams/${response.team_id}`}>
                 {response.team_name}
               </Link>
             </TableCell>
             <TableCell className="font-medium">
-              <Link to={`/users/${response.inviter_id}`}>
-                {response.inviter_username}
+              <Link to={`/users/${response.user_id}`}>
+                {response.user_username}
               </Link>
             </TableCell>
-            <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button aria-haspopup="true" size="icon" variant="ghost">
-                    <MoreHorizontal className="h-4 w-4" />
-                    <span className="sr-only">Toggle menu</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuItem
-                    className={
-                      loading ? `cursor-not-allowed` : `cursor-pointer`
-                    }
-                    onClick={() => {
-                      handleAccept(response);
-                    }}
-                  >
-                    {loading ? (
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    ) : (
-                      <Check className="mr-2 h-5 w-5" />
-                    )}
-                    Accept
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className={
-                      loading ? `cursor-not-allowed` : `cursor-pointer`
-                    }
-                    onClick={() => {
-                      handleReject(response);
-                    }}
-                  >
-                    {loading ? (
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    ) : (
-                      <X className="mr-2 h-5 w-5" />
-                    )}
-                    Reject
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <TableCell className="flex justify-end gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  handleAccept(response);
+                }}
+                disabled={loading}
+              >
+                {loading ? <Loader2 /> : <Check />}
+                <span className="sr-only">Accept</span>
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  handleReject(response);
+                }}
+                disabled={loading}
+              >
+                {loading ? <Loader2 /> : <X />}
+                <span className="sr-only">Reject</span>
+              </Button>
             </TableCell>
           </TableRow>
         ))}

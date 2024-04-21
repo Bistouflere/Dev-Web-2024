@@ -110,6 +110,6 @@ export type Match = {
 export type Invitation = {
   team_id: string;
   team_name: string;
-  inviter_id: string;
-  inviter_username: string;
+  user_id: string;
+  user_username: string;
 };

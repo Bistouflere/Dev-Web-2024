@@ -43,6 +43,17 @@ export function userInvitationsQueryOptions(
   });
 }
 
+export function userSentInvitationsQueryOptions(
+  id: string | null | undefined,
+  getToken: () => Promise<string | null>,
+) {
+  return queryOptions({
+    queryKey: [`user_sent_invitations`, { id }],
+    queryFn: () => fetchUserSentInvitations(id, getToken),
+    placeholderData: keepPreviousData,
+  });
+}
+
 export function userFollowersQueryOptions(
   id: string | null | undefined,
   query: string,
@@ -181,6 +192,28 @@ export async function fetchUserInvitations(
     })
     .then((res) => {
       console.log(`/api/invitations`, res.data);
+      return res.data;
+    });
+}
+
+export async function fetchUserSentInvitations(
+  id: string | null | undefined,
+  getToken: () => Promise<string | null>,
+): Promise<Invitation[]> {
+  if (!id) {
+    throw new Error("User ID is required to fetch user sent invitations.");
+  }
+
+  const token = await getToken();
+
+  return axios
+    .get<Invitation[]>(`/api/invitations/sent`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => {
+      console.log(`/api/invitations/sent`, res.data);
       return res.data;
     });
 }
