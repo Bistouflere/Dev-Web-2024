@@ -1,11 +1,9 @@
-import { tournamentPopularQueryOptions } from "@/api/tournaments";
+import LoadingTournamentsCarousel from "@/components/tournaments/loading-popular-carousel";
 import TournamentsCarousel from "@/components/tournaments/popular-carousel";
-import { useQuery } from "@tanstack/react-query";
+import { Suspense } from "react";
 import Balancer from "react-wrap-balancer";
 
 export default function IndexPage() {
-  const { data: tournaments } = useQuery(tournamentPopularQueryOptions());
-
   return (
     <div className="container relative">
       <section className="mx-auto flex max-w-[980px] flex-col items-center gap-2 py-8 md:py-12 md:pb-8 lg:py-24 lg:pb-20">
@@ -18,7 +16,9 @@ export default function IndexPage() {
         </Balancer>
       </section>
       <section>
-        <TournamentsCarousel tournaments={tournaments || []} />
+        <Suspense fallback={<LoadingTournamentsCarousel count={3} />}>
+          <TournamentsCarousel />
+        </Suspense>
       </section>
     </div>
   );

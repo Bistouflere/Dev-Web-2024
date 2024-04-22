@@ -196,6 +196,8 @@ export async function fetchTournamentMatchesCount(id: string): Promise<number> {
 }
 
 export async function fetchTournamentPopular(): Promise<Tournament[]> {
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
+
   return axios.get<Tournament[]>("/api/tournaments/popular").then((res) => {
     console.log("/api/tournaments/popular", res.data);
     return res.data;

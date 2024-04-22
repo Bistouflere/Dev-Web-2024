@@ -1,10 +1,4 @@
-import { tournamentPopularQueryOptions } from "@/api/tournaments";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -12,14 +6,15 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 import { BarChart, DollarSign, Gamepad, Users } from "lucide-react";
-import { Link } from "react-router-dom";
 
-export default function TournamentsCarousel() {
-  const { data: tournaments } = useSuspenseQuery(
-    tournamentPopularQueryOptions(),
-  );
+export default function LoadingTournamentsCarousel({
+  count,
+}: {
+  count: number;
+}) {
+  const skeletons = Array.from({ length: count }, (_, i) => i);
 
   return (
     <Carousel
@@ -30,49 +25,36 @@ export default function TournamentsCarousel() {
       }}
     >
       <CarouselContent className="-ml-1">
-        {tournaments.map((response) => (
-          <CarouselItem className="md:basis-1/2 lg:basis-1/3" key={response.id}>
+        {skeletons.map((_, index) => (
+          <CarouselItem className="md:basis-1/2 lg:basis-1/3" key={index}>
             <Card className="h-full w-full">
               <CardContent className="flex h-full flex-col justify-between">
                 <div className="mt-4 flex flex-row justify-between gap-2">
                   <div>
-                    <CardTitle>{response.name}</CardTitle>
-                    <CardDescription>
-                      {response.description || "No description"}
-                    </CardDescription>{" "}
+                    <Skeleton className="h-10 w-[200px]" />
+                    <Skeleton className="mt-2 h-5 w-[200px]" />
+                    <Skeleton className="mt-2 h-5 w-[150px]" />
                   </div>
-                  <Link
-                    to={`/tournaments/${response.id}`}
-                    className="items-center"
-                  >
-                    <img
-                      src={response.image_url || undefined}
-                      alt={response.name}
-                      className="w-32 rounded-lg object-cover"
-                      loading="lazy"
-                    />
-                  </Link>
+                  <div className="items-center">
+                    <Skeleton className="aspect-square w-32 rounded-lg object-cover" />
+                  </div>
                 </div>
                 <div className="mt-2">
                   <TournamentDetail
                     icon={<Users className="mr-2 h-5 w-5" />}
                     title="Members"
-                    result={response.users_count}
                   />
                   <TournamentDetail
                     icon={<DollarSign className="mr-2 h-5 w-5" />}
                     title="Cash Prize"
-                    result={`$${response.cash_prize || 0}`}
                   />
                   <TournamentDetail
                     icon={<BarChart className="mr-2 h-5 w-5" />}
                     title="Status"
-                    result={response.status}
                   />
                   <TournamentDetail
                     icon={<Gamepad className="mr-2 h-5 w-5" />}
                     title="Game"
-                    result={response.game_name}
                   />
                 </div>
               </CardContent>
@@ -89,11 +71,9 @@ export default function TournamentsCarousel() {
 function TournamentDetail({
   icon,
   title,
-  result,
 }: {
   icon: React.ReactNode;
   title: string;
-  result: string;
 }) {
   return (
     <div className="flex flex-row justify-between">
@@ -101,7 +81,7 @@ function TournamentDetail({
         {icon}
         {title}
       </p>
-      <p className="text-normal font-medium">{result}</p>
+      <Skeleton className="h-5 w-[50px]" />
     </div>
   );
 }
