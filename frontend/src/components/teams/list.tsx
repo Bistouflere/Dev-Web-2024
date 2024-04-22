@@ -43,6 +43,7 @@ export function TeamList({ response }: { response: Team[] }) {
                   className="aspect-square rounded-md object-cover"
                   src={response.image_url || undefined}
                   alt={response.name}
+                  loading="lazy"
                 />
               </Link>
             </TableCell>

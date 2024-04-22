@@ -44,6 +44,7 @@ export function TournamentList({ response }: { response: Tournament[] }) {
                   className="aspect-square rounded-md object-cover"
                   src={response.image_url || undefined}
                   alt={response.name}
+                  loading="lazy"
                 />
               </Link>
             </TableCell>

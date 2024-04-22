@@ -72,6 +72,7 @@ function UserCard({
         className="aspect-square h-10 w-10 rounded-md object-cover sm:h-12 sm:w-12"
         src={user.image_url || undefined}
         alt={user.username}
+        loading="lazy"
       />
       <div className="flex flex-col">
         <span className="text-lg font-semibold">{user.username}</span>

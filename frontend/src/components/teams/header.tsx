@@ -26,6 +26,7 @@ export default function TeamHeader({
           className="aspect-square h-32 w-32 rounded-md object-cover"
           src={team.image_url || undefined}
           alt={team.name}
+          loading="lazy"
         />
         <div className="flex flex-col space-y-2">
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">

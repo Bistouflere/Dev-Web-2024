@@ -72,6 +72,7 @@ function TournamentCard({
         className="aspect-square h-10 w-10 rounded-md object-cover sm:h-12 sm:w-12"
         src={tournament.image_url || undefined}
         alt={tournament.name}
+        loading="lazy"
       />
       <div className="flex flex-col">
         <span className="text-lg font-semibold">{tournament.name}</span>

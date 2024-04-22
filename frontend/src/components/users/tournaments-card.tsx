@@ -63,6 +63,7 @@ export default function UserTournamentsTable({
                               className="aspect-square rounded-md object-cover"
                               src={tournament.image_url || undefined}
                               alt={tournament.name}
+                              loading="lazy"
                             />
                           </Link>
                         </TableCell>

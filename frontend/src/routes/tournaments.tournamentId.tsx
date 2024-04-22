@@ -40,6 +40,7 @@ export default function TournamentProfile() {
                 className="aspect-square h-32 w-32 rounded-md object-cover"
                 alt={data.name}
                 src={data.image_url || undefined}
+                loading="lazy"
               />
             ) : null}
             <div>

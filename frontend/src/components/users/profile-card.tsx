@@ -46,6 +46,7 @@ export default function UserProfileCard({
               className="aspect-square h-24 w-24 rounded-md object-cover"
               src={user.image_url || undefined}
               alt={user.username}
+              loading="lazy"
             />
             <p className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
               {user.username}

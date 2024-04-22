@@ -43,6 +43,7 @@ export function UserList({ response }: { response: User[] }) {
                   className="aspect-square rounded-md object-cover"
                   src={response.image_url || undefined}
                   alt={response.username}
+                  loading="lazy"
                 />
               </Link>
             </TableCell>

@@ -48,6 +48,7 @@ export default function TournamentsCarousel({
                       src={response.image_url || undefined}
                       alt={response.name}
                       className="max-h-40 rounded-lg object-cover"
+                      loading="lazy"
                     />
                   </Link>
                 </div>

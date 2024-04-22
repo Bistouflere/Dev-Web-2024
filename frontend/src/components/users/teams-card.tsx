@@ -50,6 +50,7 @@ export default function UserTeamsTable({
                             className="aspect-square rounded-md object-cover"
                             src={team.image_url || undefined}
                             alt={team.name}
+                            loading="lazy"
                           />
                         </Link>
                       </TableCell>
