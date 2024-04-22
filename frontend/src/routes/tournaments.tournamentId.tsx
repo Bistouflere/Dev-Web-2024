@@ -1,15 +1,34 @@
-import { tournamentQueryOptions } from "@/api/tournaments";
+import {
+  tournamentQueryOptions,
+  tournamentUsersQueryOptions,
+} from "@/api/tournaments";
+import TournamentMembersCard from "@/components/tournaments/members-card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@clerk/clerk-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import dayjs from "dayjs";
+import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function TournamentProfile() {
   const { searchTournamentId } = useParams();
   const { data } = useQuery(tournamentQueryOptions(searchTournamentId || ""));
+  const { data: users } = useQuery(
+    tournamentUsersQueryOptions(searchTournamentId || ""),
+  );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [tab, setTab] = useState("overview");
+  const queryClient = useQueryClient();
   const { getToken } = useAuth();
+  const invalidateQueries = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: [`tournaments`],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [`tournament_users`],
+    });
+  }, [queryClient]);
 
   return (
     <>
@@ -50,6 +69,7 @@ export default function TournamentProfile() {
                         headers: { Authorization: `Bearer ${token}` },
                       },
                     );
+                    invalidateQueries();
                   }}
                 >
                   {" "}
@@ -63,6 +83,7 @@ export default function TournamentProfile() {
                     await axios.delete(`/api/tournaments/${data.id}/users`, {
                       headers: { Authorization: `Bearer ${token}` },
                     });
+                    invalidateQueries();
                   }}
                 >
                   Désinscription du tournoi
@@ -73,6 +94,15 @@ export default function TournamentProfile() {
         </div>
       </div>
       <hr />
+      <div>
+        {data ? (
+          <TournamentMembersCard
+            tournament={data}
+            users={users || []}
+            setTab={setTab}
+          ></TournamentMembersCard>
+        ) : null}
+      </div>
     </>
   );
 }
