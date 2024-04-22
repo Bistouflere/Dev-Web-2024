@@ -8,7 +8,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import dayjs from "dayjs";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useParams } from "react-router-dom";
 
 export default function TournamentProfile() {
@@ -17,8 +17,7 @@ export default function TournamentProfile() {
   const { data: users } = useQuery(
     tournamentUsersQueryOptions(searchTournamentId || ""),
   );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [tab, setTab] = useState("overview");
+  // const [tab, setTab] = useState("overview");
   const queryClient = useQueryClient();
   const { getToken } = useAuth();
   const invalidateQueries = useCallback(() => {
@@ -100,7 +99,7 @@ export default function TournamentProfile() {
           <TournamentMembersCard
             tournament={data}
             users={users || []}
-            setTab={setTab}
+            // setTab={setTab}
           ></TournamentMembersCard>
         ) : null}
       </div>
