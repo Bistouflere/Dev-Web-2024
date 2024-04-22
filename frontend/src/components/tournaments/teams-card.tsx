@@ -6,11 +6,11 @@ import { Link } from "react-router-dom";
 export default function TournamentsTeamCard({
   tournament,
   teams,
-  setTab,
+  // setTab,
 }: {
   tournament: Tournament;
   teams: Team[];
-  setTab: (value: string) => void;
+  // setTab: (value: string) => void;
 }) {
   const { width } = useWindowDimensions();
   const breakpoint = width < 640 ? "sm" : width < 1280 ? "lg" : "xl";
@@ -41,7 +41,7 @@ export default function TournamentsTeamCard({
           {hiddenUsersCount > 0 && (
             <div
               onClick={() => {
-                setTab("tournaments");
+                // setTab("tournaments");
               }}
               className="flex h-20 w-full cursor-pointer items-center gap-2 rounded-lg border bg-secondary p-4 hover:border-primary lg:w-60"
             >
