@@ -106,7 +106,27 @@ router.put(
       const { name, description, visibility } = req.body;
       const authId = req.auth.userId;
 
-      let imageUrl = `https://madbracket.xyz/images/default`;
+      const teamUserRoleSql = `
+        SELECT role FROM teams_users WHERE team_id = $1 AND user_id = $2;
+      `;
+      const teamUserRoleResult = await query(teamUserRoleSql, [teamId, authId]);
+
+      if (teamUserRoleResult.rowCount === 0) {
+        return res
+          .status(403)
+          .json({ message: `You are not authorized to update this team` });
+      }
+
+      const userRole = teamUserRoleResult.rows[0].role;
+
+      if (userRole !== "owner" && userRole !== "manager") {
+        return res
+          .status(403)
+          .json({ message: `You are not authorized to update this team` });
+      }
+
+      let imageUrl: string | null = null;
+
       if (req.file) {
         imageUrl = `https://madbracket.xyz/images/${await processImage(req.file)}`;
       }
@@ -136,19 +156,28 @@ router.put(
           .json({ message: `Team with name ${name} already exists` });
       }
 
-      const updateTeamSql = `
-        UPDATE teams
-        SET name = $1, description = $2, image_url = $3, open = $4
-        WHERE id = $5
-        RETURNING *;
-      `;
-      const result = await query(updateTeamSql, [
-        name,
-        description,
-        imageUrl,
-        visibility,
-        teamId,
-      ]);
+      let updateTeamSql: string;
+      let queryParams: any[];
+
+      if (imageUrl) {
+        updateTeamSql = `
+          UPDATE teams
+          SET name = $1, description = $2, image_url = $3, open = $4
+          WHERE id = $5
+          RETURNING *;
+        `;
+        queryParams = [name, description, imageUrl, visibility, teamId];
+      } else {
+        updateTeamSql = `
+          UPDATE teams
+          SET name = $1, description = $2, open = $3
+          WHERE id = $4
+          RETURNING *;
+        `;
+        queryParams = [name, description, visibility, teamId];
+      }
+
+      const result = await query(updateTeamSql, queryParams);
 
       res.status(200).json(result.rows[0]);
     } catch (error) {
@@ -170,9 +199,7 @@ router.delete(
       const authUserResult = await query(authUserSql, [authId]);
 
       if (authUserResult.rowCount === 0) {
-        return res
-          .status(404)
-          .json({ message: `User with ID ${authId} not found` });
+        return res.status(404).json({ message: `User with your ID not found` });
       }
 
       const teamSql = "SELECT * FROM teams WHERE id = $1;";
@@ -181,31 +208,16 @@ router.delete(
       if (teamResult.rowCount === 0) {
         return res
           .status(404)
-          .json({ message: `Team with ID ${teamId} not found` });
-      }
-
-      const teamUserSql = "SELECT * FROM teams_users WHERE team_id = $1;";
-      const teamUserResult = await query(teamUserSql, [teamId]);
-
-      if (teamUserResult.rowCount === 0) {
-        return res.status(404).json({
-          message: `Team with ID ${teamId} has no members`,
-        });
+          .json({ message: `The team you're trying to delete does not exist` });
       }
 
       const teamOwnerSql =
-        "SELECT * FROM teams_users WHERE team_id = $1 AND role = 'owner';";
-      const teamOwnerResult = await query(teamOwnerSql, [teamId]);
+        "SELECT * FROM teams_users WHERE team_id = $1 AND role = 'owner' AND user_id = $2;";
+      const teamOwnerResult = await query(teamOwnerSql, [teamId, authId]);
 
       if (teamOwnerResult.rowCount === 0) {
-        return res.status(404).json({
-          message: `Team with ID ${teamId} has no owner`,
-        });
-      }
-
-      if (teamOwnerResult.rows[0].user_id !== authId) {
         return res.status(403).json({
-          message: `User with ID ${authId} is not the owner of team with ID ${teamId}`,
+          message: `Only team owners have permission to delete the team`,
         });
       }
 
@@ -215,70 +227,7 @@ router.delete(
       `;
       await query(sql, [teamId]);
 
-      return res.status(200).json({ message: "Team deleted" });
-    } catch (error) {
-      next(error);
-    }
-  },
-);
-
-router.post(
-  "/:teamId/users",
-  ClerkExpressRequireAuth({}),
-  validateTeamId,
-  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
-    const { teamId } = req.params;
-    const authId = req.auth.userId;
-
-    try {
-      const authUserSql = "SELECT * FROM users WHERE id = $1;";
-      const authUserResult = await query(authUserSql, [authId]);
-
-      if (authUserResult.rowCount === 0) {
-        return res
-          .status(404)
-          .json({ message: `User with ID ${authId} not found` });
-      }
-
-      const teamSql = "SELECT * FROM teams WHERE id = $1;";
-      const teamResult = await query(teamSql, [teamId]);
-
-      if (teamResult.rowCount === 0) {
-        return res
-          .status(404)
-          .json({ message: `Team with ID ${teamId} not found` });
-      }
-
-      if (teamResult.rows[0].open === false) {
-        return res.status(403).json({
-          message: `Team with ID ${teamId} is not open for new members`,
-        });
-      }
-
-      const existingTeamUserSql =
-        "SELECT * FROM teams_users WHERE team_id = $1 AND user_id = $2;";
-      const existingTeamUserResult = await query(existingTeamUserSql, [
-        teamId,
-        authId,
-      ]);
-
-      if (
-        existingTeamUserResult.rowCount !== null &&
-        existingTeamUserResult.rowCount > 0
-      ) {
-        return res.status(409).json({
-          message: `User with ID ${authId} is already a member of team with ID ${teamId}`,
-        });
-      }
-
-      const sql = `
-        INSERT INTO teams_users (team_id, user_id, role)
-        VALUES ($1, $2, 'participant')
-      `;
-
-      await query(sql, [teamId, authId]);
-
-      return res.status(201).json({ message: "User added to team" });
+      return res.status(200).json({ message: "Team deleted successfully" });
     } catch (error) {
       next(error);
     }
