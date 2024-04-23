@@ -32,7 +32,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { CalendarIcon, ChevronRightIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, ChevronRightIcon, Loader2, Plus } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
@@ -514,7 +514,10 @@ export default function CreateTournamentPage() {
                   Processing...
                 </Button>
               ) : (
-                <Button type="submit">Create Tournament</Button>
+                <Button type="submit">
+                  <Plus className="mr-2 h-5 w-5" />
+                  Create Tournament
+                </Button>
               )}
             </form>
           </Form>

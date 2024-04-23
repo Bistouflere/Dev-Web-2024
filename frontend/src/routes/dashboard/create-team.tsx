@@ -16,7 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@clerk/clerk-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronRightIcon, Loader2 } from "lucide-react";
+import { ChevronRightIcon, Loader2, Plus } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
@@ -211,7 +211,10 @@ export default function CreateTeamPage() {
                   Processing...
                 </Button>
               ) : (
-                <Button type="submit">Create Team</Button>
+                <Button type="submit">
+                  <Plus className="mr-2 h-5 w-5" />
+                  Create Team
+                </Button>
               )}
             </form>
           </Form>

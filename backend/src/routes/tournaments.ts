@@ -68,6 +68,7 @@ router.get(
       const sql = `
         SELECT
           users.*,
+          tournaments_users.team_id AS team_id,
           tournaments_users.role AS tournament_role
         FROM tournaments_users
         JOIN users ON tournaments_users.user_id = users.id

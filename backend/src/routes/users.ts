@@ -8,51 +8,6 @@ import express, { NextFunction, Request, Response } from "express";
 
 const router = express.Router();
 
-router.get(
-  "/:userId/followers",
-  validatePage,
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { userId } = req.params;
-    const { query: searchQuery, page } = req.query as {
-      query: string;
-      page: string;
-    };
-    const perPage = 10;
-    const offset = (parseInt(page, 10) - 1) * perPage || 0;
-
-    try {
-      const sql = searchQuery
-        ? `
-          SELECT
-            users.*,
-            users_follows.followed_at
-          FROM users_follows
-          JOIN users ON users_follows.follower_id = users.id
-          WHERE users_follows.followed_id = $1 AND users.username ILIKE $2
-          ORDER BY id LIMIT $3 OFFSET $4;
-        `
-        : `
-          SELECT
-            users.*,
-            users_follows.followed_at
-          FROM users_follows
-          JOIN users ON users_follows.follower_id = users.id
-          WHERE users_follows.followed_id = $1
-          ORDER BY id LIMIT $2 OFFSET $3;
-        `;
-      const params = searchQuery
-        ? [userId, `%${searchQuery}%`, perPage, offset]
-        : [userId, perPage, offset];
-
-      const result = await query(sql, params);
-
-      return res.status(200).json(result.rows);
-    } catch (error) {
-      next(error);
-    }
-  },
-);
-
 router.post(
   "/:userId/follow",
   ClerkExpressRequireAuth({}),
@@ -162,26 +117,42 @@ router.delete(
 );
 
 router.get(
+  "/:userId/followers",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.params;
+
+    try {
+      const sql = `
+          SELECT
+            users.*,
+            users_follows.followed_at
+          FROM users_follows
+          JOIN users ON users_follows.follower_id = users.id
+          WHERE users_follows.followed_id = $1;
+        `;
+
+      const result = await query(sql, [userId]);
+
+      return res.status(200).json(result.rows);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
   "/:userId/followers/count",
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
-    const { query: searchQuery } = req.query as { query: string };
 
     try {
-      const sql = searchQuery
-        ? `
+      const sql = `
           SELECT COUNT(*)
           FROM users_follows
-          WHERE followed_id = $1  AND follower_id IN (SELECT id FROM users WHERE username ILIKE $2);
-        `
-        : `
-          SELECT COUNT(*)
-          FROM users_follows
-          WHERE followed_id = $1
+          WHERE followed_id = $1;
         `;
 
-      const params = searchQuery ? [userId, `%${searchQuery}%`] : [userId];
-      const result = await query(sql, params);
+      const result = await query(sql, [userId]);
       const count = parseInt(result.rows[0].count, 10);
 
       return res.status(200).json({
@@ -195,41 +166,20 @@ router.get(
 
 router.get(
   "/:userId/following",
-  validatePage,
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
-    const { query: searchQuery, page } = req.query as {
-      query: string;
-      page: string;
-    };
-    const perPage = 10;
-    const offset = (parseInt(page, 10) - 1) * perPage || 0;
 
     try {
-      const sql = searchQuery
-        ? `
+      const sql = `
           SELECT
             users.*,
             users_follows.followed_at
           FROM users_follows
           JOIN users ON users_follows.followed_id = users.id
-          WHERE users_follows.follower_id = $1 AND users.username ILIKE $2
-          ORDER BY id LIMIT $3 OFFSET $4;
-        `
-        : `
-          SELECT
-            users.*,
-            users_follows.followed_at
-          FROM users_follows
-          JOIN users ON users_follows.followed_id = users.id
-          WHERE users_follows.follower_id = $1
-          ORDER BY id LIMIT $2 OFFSET $3;
+          WHERE users_follows.follower_id = $1;
         `;
-      const params = searchQuery
-        ? [userId, `%${searchQuery}%`, perPage, offset]
-        : [userId, perPage, offset];
 
-      const result = await query(sql, params);
+      const result = await query(sql, [userId]);
 
       return res.status(200).json(result.rows);
     } catch (error) {
@@ -242,23 +192,15 @@ router.get(
   "/:userId/following/count",
   async (req: Request, res: Response, next: NextFunction) => {
     const { userId } = req.params;
-    const { query: searchQuery } = req.query as { query: string };
 
     try {
-      const sql = searchQuery
-        ? `
-          SELECT COUNT(*)
-          FROM users_follows
-          WHERE follower_id = $1 AND followed_id IN (SELECT id FROM users WHERE username ILIKE $2);
-        `
-        : `
+      const sql = `
           SELECT COUNT(*)
           FROM users_follows
           WHERE follower_id = $1;
         `;
 
-      const params = searchQuery ? [userId, `%${searchQuery}%`] : [userId];
-      const result = await query(sql, params);
+      const result = await query(sql, [userId]);
       const count = parseInt(result.rows[0].count, 10);
 
       return res.status(200).json({
@@ -375,6 +317,7 @@ router.get(
               FROM tournaments_teams
               WHERE tournament_id = tournaments.id
           ) AS teams_count,
+          tournaments_users.team_id AS team_id,
           tournaments_users.role AS tournament_role,
           games.name AS game_name,
           games.description AS game_description,
@@ -385,7 +328,7 @@ router.get(
         LEFT JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
         JOIN games ON tournaments.game_id = games.id
         WHERE tournaments_users.user_id = $1
-        GROUP BY tournaments.id, games.id, tournaments_users.role;
+        GROUP BY tournaments.id, games.id, tournaments_users.role, tournaments_users.team_id;
       `;
 
       const result = await query(sql, [userId]);

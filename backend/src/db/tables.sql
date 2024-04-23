@@ -91,6 +91,7 @@ CREATE TABLE tournaments_teams (
 CREATE TABLE tournaments_users (
     tournament_id BIGINT REFERENCES tournaments(id) ON DELETE CASCADE,
     user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+    team_id BIGINT REFERENCES teams(id) ON DELETE SET NULL,
     role team_role NOT NULL DEFAULT 'participant',
     PRIMARY KEY (tournament_id, user_id)
 );

@@ -1,30 +1,35 @@
-import { Button } from "../ui/button";
-import { toast } from "../ui/use-toast";
 import { acceptInvitation, rejectInvitation } from "@/api/userActions";
+import { Button } from "@/components/ui/button";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "@/components/ui/use-toast";
 import { Invitation } from "@/types/apiResponses";
 import { useAuth } from "@clerk/clerk-react";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, Loader2, X } from "lucide-react";
+import { Row } from "@tanstack/react-table";
+import { Check, Loader2, ShieldHalf, User, X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-export function DashboardInvitationList({
-  response,
-}: {
-  response: Invitation[];
-}) {
+interface DataTableRowActionsProps<TData> {
+  row: Row<TData>;
+}
+
+export function DashboardInvitationsTableRowActions({
+  row,
+}: DataTableRowActionsProps<Invitation>) {
   const [loading, setLoading] = useState(false);
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+
+  const invitation = row.original;
 
   const invalidateQueries = useCallback(() => {
     queryClient.invalidateQueries({
@@ -95,54 +100,54 @@ export function DashboardInvitationList({
   };
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Team Name</TableHead>
-          <TableHead>Inviter Name</TableHead>
-          <TableHead className="text-right">
-            <span className="sr-only">Accept/Reject</span>
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {response.map((response, index) => (
-          <TableRow key={index}>
-            <TableCell className="font-medium">
-              <Link to={`/teams/${response.team_id}`}>
-                {response.team_name}
-              </Link>
-            </TableCell>
-            <TableCell className="font-medium">
-              <Link to={`/users/${response.user_id}`}>
-                {response.user_username}
-              </Link>
-            </TableCell>
-            <TableCell className="flex justify-end gap-2">
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  handleAccept(response);
-                }}
-                disabled={loading}
-              >
-                {loading ? <Loader2 /> : <Check />}
-                <span className="sr-only">Accept</span>
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => {
-                  handleReject(response);
-                }}
-                disabled={loading}
-              >
-                {loading ? <Loader2 /> : <X />}
-                <span className="sr-only">Reject</span>
-              </Button>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
+        >
+          <DotsHorizontalIcon className="h-4 w-4" />
+          <span className="sr-only">Open menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[160px]">
+        <Link to={`/teams/${invitation.team_id}`}>
+          <DropdownMenuItem className="hover:cursor-pointer">
+            <ShieldHalf className="mr-2 w-5" />
+            View Team
+          </DropdownMenuItem>
+        </Link>
+        <Link to={`/users/${invitation.user_id}`}>
+          <DropdownMenuItem className="hover:cursor-pointer">
+            <User className="mr-2 w-5" />
+            View User
+          </DropdownMenuItem>
+        </Link>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="hover:cursor-pointer"
+          onClick={() => (loading ? null : handleAccept(invitation))}
+        >
+          {loading ? (
+            <Loader2 className="mr-2 w-5" />
+          ) : (
+            <Check className="mr-2 w-5" />
+          )}
+          Accept
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="hover:cursor-pointer"
+          onClick={() => (loading ? null : handleReject(invitation))}
+        >
+          {loading ? (
+            <Loader2 className="mr-2 w-5" />
+          ) : (
+            <X className="mr-2 w-5" />
+          )}
+          Reject
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

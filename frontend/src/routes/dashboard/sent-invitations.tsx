@@ -1,5 +1,6 @@
 import { userSentInvitationsQueryOptions } from "@/api/users";
-import { DashboardSentInvitationList } from "@/components/dashboard/sent-invitation-list";
+import { columns } from "@/components/dashboard/sent-invitation-table/columns";
+import { DashboardSentInvitationTable } from "@/components/dashboard/sent-invitation-table/table";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRightIcon } from "lucide-react";
@@ -33,7 +34,10 @@ export default function SentInvitationsPage() {
           <p className="pb-2 text-xl text-muted-foreground">
             Manage your sent invitations!
           </p>
-          <DashboardSentInvitationList response={invitations || []} />
+          <DashboardSentInvitationTable
+            columns={columns}
+            data={invitations || []}
+          />
         </div>
       </div>
     </main>

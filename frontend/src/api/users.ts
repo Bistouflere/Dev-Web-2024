@@ -54,14 +54,10 @@ export function userSentInvitationsQueryOptions(
   });
 }
 
-export function userFollowersQueryOptions(
-  id: string | null | undefined,
-  query: string,
-  page: number,
-) {
+export function userFollowersQueryOptions(id: string | null | undefined) {
   return queryOptions({
-    queryKey: [`followers`, { id, query, page }],
-    queryFn: () => fetchUserFollowers(id, query, page),
+    queryKey: [`followers`, { id }],
+    queryFn: () => fetchUserFollowers(id),
     placeholderData: keepPreviousData,
   });
 }
@@ -77,14 +73,10 @@ export function userFollowersCountQueryOptions(
   });
 }
 
-export function userFollowingQueryOptions(
-  id: string | null | undefined,
-  query: string,
-  page: number,
-) {
+export function userFollowingQueryOptions(id: string | null | undefined) {
   return queryOptions({
-    queryKey: [`following`, { id, query, page }],
-    queryFn: () => fetchUserFollowing(id, query, page),
+    queryKey: [`following`, { id }],
+    queryFn: () => fetchUserFollowing(id),
     placeholderData: keepPreviousData,
   });
 }
@@ -220,22 +212,15 @@ export async function fetchUserSentInvitations(
 
 export async function fetchUserFollowers(
   id: string | null | undefined,
-  query: string,
-  page: number,
 ): Promise<User[]> {
   if (!id) {
     throw new Error("User ID is required to fetch user followers.");
   }
 
-  return axios
-    .get<User[]>(`/api/users/${id}/followers?page=${page}&query=${query}`)
-    .then((res) => {
-      console.log(
-        `/api/users/${id}/followers?page=${page}&query=${query}`,
-        res.data,
-      );
-      return res.data;
-    });
+  return axios.get<User[]>(`/api/users/${id}/followers`).then((res) => {
+    console.log(`/api/users/${id}/followers`, res.data);
+    return res.data;
+  });
 }
 
 export async function fetchUserFollowersCount(
@@ -256,22 +241,15 @@ export async function fetchUserFollowersCount(
 
 export async function fetchUserFollowing(
   id: string | null | undefined,
-  query: string,
-  page: number,
 ): Promise<User[]> {
   if (!id) {
     throw new Error("User ID is required to fetch user following.");
   }
 
-  return axios
-    .get<User[]>(`/api/users/${id}/following?page=${page}&query=${query}`)
-    .then((res) => {
-      console.log(
-        `/api/users/${id}/following?page=${page}&query=${query}`,
-        res.data,
-      );
-      return res.data;
-    });
+  return axios.get<User[]>(`/api/users/${id}/following`).then((res) => {
+    console.log(`/api/users/${id}/following`, res.data);
+    return res.data;
+  });
 }
 
 export async function fetchUserFollowingCount(

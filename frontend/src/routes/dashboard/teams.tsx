@@ -1,5 +1,6 @@
 import { userTeamsQueryOptions } from "@/api/users";
-import { DashboardTeamList } from "@/components/dashboard/team-list";
+import { columns } from "@/components/dashboard/team-table/columns";
+import { DashboardTeamTable } from "@/components/dashboard/team-table/table";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRightIcon } from "lucide-react";
@@ -25,7 +26,8 @@ export default function TeamPage() {
           <p className="pb-2 text-xl text-muted-foreground">
             Manage your teams and start competing with your friends!
           </p>
-          <DashboardTeamList response={teams || []} />
+          {/* <DashboardTeamList response={teams || []} /> */}
+          <DashboardTeamTable columns={columns} data={teams || []} />
         </div>
       </div>
     </main>

@@ -1,5 +1,6 @@
 import { userInvitationsQueryOptions } from "@/api/users";
-import { DashboardInvitationList } from "@/components/dashboard/invitation-list";
+import { columns } from "@/components/dashboard/invitation-table/columns";
+import { DashboardInvitationTable } from "@/components/dashboard/invitation-table/table";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRightIcon } from "lucide-react";
@@ -28,7 +29,10 @@ export default function InvitationsPage() {
           <p className="pb-2 text-xl text-muted-foreground">
             Manage your invitations and join a team!
           </p>
-          <DashboardInvitationList response={invitations || []} />
+          <DashboardInvitationTable
+            columns={columns}
+            data={invitations || []}
+          />
         </div>
       </div>
     </main>

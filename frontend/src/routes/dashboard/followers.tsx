@@ -1,35 +1,13 @@
-import {
-  userFollowersCountQueryOptions,
-  userFollowersQueryOptions,
-} from "@/api/users";
-import UrlPagination from "@/components/pagination";
-import { Search } from "@/components/search";
-import { TableLoader } from "@/components/table-loader";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { UserList } from "@/components/users/list";
+import { userFollowersQueryOptions } from "@/api/users";
+import { columns } from "@/components/dashboard/follower-table/columns";
+import { DashboardFollowerTable } from "@/components/dashboard/follower-table/table";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRightIcon } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
-
-const USERS_PER_PAGE = 10;
 
 export default function FollowersPage() {
   const { userId } = useAuth();
-  const [searchParams] = useSearchParams();
-
-  const query = searchParams.get("query") || "";
-  const page = Number(searchParams.get("page")) || 1;
-
-  const countQuery = useQuery(userFollowersCountQueryOptions(userId, query));
-  const usersQuery = useQuery(userFollowersQueryOptions(userId, query, page));
-  const pageCount = Math.ceil(countQuery.data! / USERS_PER_PAGE);
-
-  const startUserIndex = (page - 1) * USERS_PER_PAGE + 1;
-  const endUserIndex = Math.min(
-    startUserIndex + USERS_PER_PAGE - 1,
-    countQuery.data || 0,
-  );
+  const { data: users } = useQuery(userFollowersQueryOptions(userId));
 
   return (
     <main className="relative py-6 lg:gap-10 lg:py-8">
@@ -49,29 +27,7 @@ export default function FollowersPage() {
             Here you can see all of your followers. You can search for them by
             using the search bar below.
           </p>
-          <Search placeholder="Search followers..." />
-          <Card>
-            <CardContent>
-              {countQuery.isLoading ||
-              usersQuery.isLoading ||
-              countQuery.isFetching ||
-              usersQuery.isFetching ? (
-                <TableLoader count={USERS_PER_PAGE} />
-              ) : (
-                <UserList response={usersQuery.data || []} />
-              )}
-            </CardContent>
-            <CardFooter>
-              <div className="text-xs text-muted-foreground">
-                Showing{" "}
-                <strong>
-                  {startUserIndex}-{endUserIndex}
-                </strong>{" "}
-                of <strong>{countQuery.data || 0}</strong> users
-              </div>
-            </CardFooter>
-          </Card>
-          {pageCount > 1 && <UrlPagination totalPages={pageCount} />}
+          <DashboardFollowerTable columns={columns} data={users || []} />
         </div>
       </div>
     </main>

@@ -1,5 +1,6 @@
 import { userTournamentsQueryOptions } from "@/api/users";
-import { DashboardTournamentList } from "@/components/dashboard/tournament-list";
+import { columns } from "@/components/dashboard/tournament-table/columns";
+import { DashboardTournamentTable } from "@/components/dashboard/tournament-table/table";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRightIcon } from "lucide-react";
@@ -25,7 +26,10 @@ export default function TournamentPage() {
           <p className="pb-2 text-xl text-muted-foreground">
             Manage your tournaments and start competing with your friends!
           </p>
-          <DashboardTournamentList response={tournaments || []} />
+          <DashboardTournamentTable
+            columns={columns}
+            data={tournaments || []}
+          />
         </div>
       </div>
     </main>

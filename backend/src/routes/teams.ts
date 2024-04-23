@@ -93,6 +93,69 @@ router.post(
   },
 );
 
+router.post(
+  "/:teamId/users",
+  ClerkExpressRequireAuth({}),
+  validateTeamId,
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { teamId } = req.params;
+    const authId = req.auth.userId;
+
+    try {
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
+      const authUserResult = await query(authUserSql, [authId]);
+
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${authId} not found` });
+      }
+
+      const teamSql = "SELECT * FROM teams WHERE id = $1;";
+      const teamResult = await query(teamSql, [teamId]);
+
+      if (teamResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `Team with ID ${teamId} not found` });
+      }
+
+      if (teamResult.rows[0].open === false) {
+        return res.status(403).json({
+          message: `Team with ID ${teamId} is not open for new members`,
+        });
+      }
+
+      const existingTeamUserSql =
+        "SELECT * FROM teams_users WHERE team_id = $1 AND user_id = $2;";
+      const existingTeamUserResult = await query(existingTeamUserSql, [
+        teamId,
+        authId,
+      ]);
+
+      if (
+        existingTeamUserResult.rowCount !== null &&
+        existingTeamUserResult.rowCount > 0
+      ) {
+        return res.status(409).json({
+          message: `User with ID ${authId} is already a member of team with ID ${teamId}`,
+        });
+      }
+
+      const sql = `
+        INSERT INTO teams_users (team_id, user_id, role)
+        VALUES ($1, $2, 'participant')
+      `;
+
+      await query(sql, [teamId, authId]);
+
+      return res.status(201).json({ message: "User added to team" });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 router.put(
   "/:teamId",
   ClerkExpressRequireAuth({}),

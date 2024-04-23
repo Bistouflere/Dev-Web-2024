@@ -59,6 +59,7 @@ export type UserTournament = {
 } & Tournament;
 
 export type TournamentUser = {
+  team_id: string;
   tournament_role: "participant" | "manager" | "owner";
 } & User;
 
