@@ -65,6 +65,7 @@ export default function CreateTeamPage() {
 
   const invalidateQueries = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: [`teams`] });
+    queryClient.invalidateQueries({ queryKey: [`user_teams`] });
     queryClient.invalidateQueries({
       queryKey: [`team_users_${userId}`],
     });
