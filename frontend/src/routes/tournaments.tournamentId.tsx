@@ -13,6 +13,7 @@ import dayjs from "dayjs";
 import { useCallback } from "react";
 import { useParams } from "react-router-dom";
 
+
 export default function TournamentProfile() {
   const { searchTournamentId } = useParams();
   const { data } = useQuery(tournamentQueryOptions(searchTournamentId || ""));
@@ -33,6 +34,7 @@ export default function TournamentProfile() {
       queryKey: [`tournament_users`],
     });
   }, [queryClient]);
+  
 
   return (
     <div className="container py-4">
