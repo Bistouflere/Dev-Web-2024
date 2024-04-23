@@ -42,6 +42,7 @@ export default function TeamProfile() {
     queryClient.invalidateQueries({
       queryKey: [`user`],
     });
+    queryClient.invalidateQueries({ queryKey: [`user_teams`] });
     queryClient.invalidateQueries({ queryKey: [`team`] });
     queryClient.invalidateQueries({ queryKey: [`teams`] });
     queryClient.invalidateQueries({
