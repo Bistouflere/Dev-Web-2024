@@ -127,8 +127,9 @@ router.put(
           .json({ message: `Team with ID ${teamId} not found` });
       }
 
-      const existingTeamSql = "SELECT * FROM teams WHERE name ILIKE $1;";
-      const existingTeamResult = await query(existingTeamSql, [name]);
+      const existingTeamSql =
+        "SELECT * FROM teams WHERE name ILIKE $1 AND id != $2;";
+      const existingTeamResult = await query(existingTeamSql, [name, teamId]);
       if (existingTeamResult.rowCount !== 0) {
         return res
           .status(409)

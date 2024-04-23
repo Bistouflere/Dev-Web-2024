@@ -66,6 +66,14 @@ export default function TeamDetailPage() {
     isFetching: userIsFetching,
   } = useQuery(teamUsersQueryOptions(searchTeamId || ""));
 
+  const invalidateQueries = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: [`teams`] });
+    queryClient.invalidateQueries({ queryKey: [`user_teams`] });
+    queryClient.invalidateQueries({
+      queryKey: [`team_users_${userId}`],
+    });
+  }, [queryClient, userId]);
+
   useEffect(() => {
     if (!teamIsLoading && !teamIsFetching && !team) {
       navigate("/dashboard/teams");
@@ -108,13 +116,6 @@ export default function TeamDetailPage() {
     mode: "onChange",
     resolver: zodResolver(teamFormSchema),
   });
-
-  const invalidateQueries = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: [`teams`] });
-    queryClient.invalidateQueries({
-      queryKey: [`team_users_${userId}`],
-    });
-  }, [queryClient, userId]);
 
   const onSubmit = async (data: TeamFormValues) => {
     if (
