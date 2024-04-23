@@ -127,6 +127,37 @@ export async function createTeam(
   }
 }
 
+export async function updateTeam(
+  teamId: string,
+  formData: globalThis.FormData,
+  getToken: () => Promise<string | null>,
+  invalidateQueries: () => void,
+) {
+  const token = await getToken();
+
+  try {
+    const response = await axios.put<Promise<Team>>(
+      `/api/teams/${teamId}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+
+    invalidateQueries();
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(error.response?.data.message);
+    } else {
+      throw new Error((error as Error).message);
+    }
+  }
+}
+
 export async function createTournament(
   formData: globalThis.FormData,
   getToken: () => Promise<string | null>,

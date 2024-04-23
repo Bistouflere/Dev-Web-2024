@@ -93,6 +93,61 @@ router.post(
   },
 );
 
+router.put(
+  "/:teamId",
+  ClerkExpressRequireAuth({}),
+  upload.single("file"),
+  validateTeamData,
+  validateTeamId,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { teamId } = req.params;
+
+    try {
+      const { name, description, visibility } = req.body;
+      const authId = req.auth.userId;
+
+      let imageUrl = `https://madbracket.xyz/images/default`;
+      if (req.file) {
+        imageUrl = `https://madbracket.xyz/images/${await processImage(req.file)}`;
+      }
+
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
+      const authUserResult = await query(authUserSql, [authId]);
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${authId} not found` });
+      }
+
+      const teamSql = "SELECT * FROM teams WHERE id = $1;";
+      const teamResult = await query(teamSql, [teamId]);
+      if (teamResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `Team with ID ${teamId} not found` });
+      }
+
+      const updateTeamSql = `
+        UPDATE teams
+        SET name = $1, description = $2, image_url = $3, open = $4
+        WHERE id = $5
+        RETURNING *;
+      `;
+      const result = await query(updateTeamSql, [
+        name,
+        description,
+        imageUrl,
+        visibility,
+        teamId,
+      ]);
+
+      res.status(200).json(result.rows[0]);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 router.post(
   "/:teamId/users",
   ClerkExpressRequireAuth({}),
