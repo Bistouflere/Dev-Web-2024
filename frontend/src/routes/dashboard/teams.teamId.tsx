@@ -1,5 +1,5 @@
 import { teamQueryOptions, teamUsersQueryOptions } from "@/api/teams";
-import { updateTeam } from "@/api/userActions";
+import { deleteTeam, updateTeam } from "@/api/userActions";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -168,6 +168,36 @@ export default function TeamDetailPage() {
     }
   };
 
+  async function handleDeleteTeam() {
+    if (!team) return;
+
+    if (!window.confirm("Are you sure you want to delete this team?")) return;
+
+    try {
+      setLoading(true);
+      await deleteTeam(team.id, getToken, invalidateQueries);
+      toast({
+        title: "Success!",
+        description: `${team.name} has been deleted.`,
+      });
+
+      setTimeout(() => {
+        navigate("/dashboard/teams");
+        setLoading(false);
+      }, 1000);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error deleting team:", error);
+      toast({
+        variant: "destructive",
+        title: "Oops!",
+        description:
+          (error as Error).message ||
+          `An error occurred while deleting your team.`,
+      });
+    }
+  }
+
   return (
     <main className="relative py-6 lg:gap-10 lg:py-8">
       <div className="mx-auto w-full min-w-0">
@@ -285,6 +315,26 @@ export default function TeamDetailPage() {
                   </Button>
                 ) : (
                   <Button type="submit">Edit Team</Button>
+                )}
+                {loading ? (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    disabled
+                    className="ml-2"
+                  >
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Processing...
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="ml-2"
+                    onClick={() => handleDeleteTeam()}
+                  >
+                    Delete Team
+                  </Button>
                 )}
               </form>
             </Form>

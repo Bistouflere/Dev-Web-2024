@@ -158,6 +158,29 @@ export async function updateTeam(
   }
 }
 
+export async function deleteTeam(
+  teamId: string,
+  getToken: () => Promise<string | null>,
+  invalidateQueries: () => void,
+) {
+  const token = await getToken();
+
+  try {
+    await axios.delete(`/api/teams/${teamId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    invalidateQueries();
+    return true;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(error.response?.data.message);
+    } else {
+      throw new Error((error as Error).message);
+    }
+  }
+}
+
 export async function createTournament(
   formData: globalThis.FormData,
   getToken: () => Promise<string | null>,

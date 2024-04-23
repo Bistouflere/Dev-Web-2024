@@ -127,6 +127,14 @@ router.put(
           .json({ message: `Team with ID ${teamId} not found` });
       }
 
+      const existingTeamSql = "SELECT * FROM teams WHERE name ILIKE $1;";
+      const existingTeamResult = await query(existingTeamSql, [name]);
+      if (existingTeamResult.rowCount !== 0) {
+        return res
+          .status(409)
+          .json({ message: `Team with name ${name} already exists` });
+      }
+
       const updateTeamSql = `
         UPDATE teams
         SET name = $1, description = $2, image_url = $3, open = $4
@@ -142,6 +150,71 @@ router.put(
       ]);
 
       res.status(200).json(result.rows[0]);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.delete(
+  "/:teamId",
+  ClerkExpressRequireAuth({}),
+  validateTeamId,
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { teamId } = req.params;
+    const authId = req.auth.userId;
+
+    try {
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
+      const authUserResult = await query(authUserSql, [authId]);
+
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${authId} not found` });
+      }
+
+      const teamSql = "SELECT * FROM teams WHERE id = $1;";
+      const teamResult = await query(teamSql, [teamId]);
+
+      if (teamResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `Team with ID ${teamId} not found` });
+      }
+
+      const teamUserSql = "SELECT * FROM teams_users WHERE team_id = $1;";
+      const teamUserResult = await query(teamUserSql, [teamId]);
+
+      if (teamUserResult.rowCount === 0) {
+        return res.status(404).json({
+          message: `Team with ID ${teamId} has no members`,
+        });
+      }
+
+      const teamOwnerSql =
+        "SELECT * FROM teams_users WHERE team_id = $1 AND role = 'owner';";
+      const teamOwnerResult = await query(teamOwnerSql, [teamId]);
+
+      if (teamOwnerResult.rowCount === 0) {
+        return res.status(404).json({
+          message: `Team with ID ${teamId} has no owner`,
+        });
+      }
+
+      if (teamOwnerResult.rows[0].user_id !== authId) {
+        return res.status(403).json({
+          message: `User with ID ${authId} is not the owner of team with ID ${teamId}`,
+        });
+      }
+
+      const sql = `
+        DELETE FROM teams
+        WHERE id = $1
+      `;
+      await query(sql, [teamId]);
+
+      return res.status(200).json({ message: "Team deleted" });
     } catch (error) {
       next(error);
     }
