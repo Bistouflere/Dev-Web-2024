@@ -101,6 +101,56 @@ export async function leaveTeam(
   }
 }
 
+export async function joinTournament(
+  userId: string,
+  getToken: () => Promise<string | null>,
+  invalidateQueries: () => void,
+) {
+  const token = await getToken();
+
+  try {
+    await axios.post(
+      `/api/tournaments/${userId}/users`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+
+    invalidateQueries();
+    return true;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(error.response?.data.message);
+    } else {
+      throw new Error((error as Error).message);
+    }
+  }
+}
+
+export async function leaveTournament(
+  userId: string,
+  getToken: () => Promise<string | null>,
+  invalidateQueries: () => void,
+) {
+  const token = await getToken();
+
+  try {
+    await axios.delete(`/api/tournaments/${userId}/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    invalidateQueries();
+    return true;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(error.response?.data.message);
+    } else {
+      throw new Error((error as Error).message);
+    }
+  }
+}
+
 export async function createTeam(
   formData: globalThis.FormData,
   getToken: () => Promise<string | null>,

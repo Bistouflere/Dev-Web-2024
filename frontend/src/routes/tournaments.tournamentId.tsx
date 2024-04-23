@@ -3,18 +3,20 @@ import {
   tournamentTeamsQueryOptions,
   tournamentUsersQueryOptions,
 } from "@/api/tournaments";
+import { joinTournament, leaveTournament } from "@/api/userActions";
+import TournamentHeader from "@/components/tournaments/header";
 import TournamentMembersCard from "@/components/tournaments/members-card";
 import TournamentsTeamCard from "@/components/tournaments/teams-card";
-import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import dayjs from "dayjs";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 
 
 export default function TournamentProfile() {
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
   const { searchTournamentId } = useParams();
   const { data } = useQuery(tournamentQueryOptions(searchTournamentId || ""));
   const { data: users } = useQuery(
@@ -23,9 +25,8 @@ export default function TournamentProfile() {
   const { data: team } = useQuery(
     tournamentTeamsQueryOptions(searchTournamentId || ""),
   );
-  // const [tab, setTab] = useState("overview");
   const queryClient = useQueryClient();
-  const { getToken } = useAuth();
+  const { userId, getToken } = useAuth();
   const invalidateQueries = useCallback(() => {
     queryClient.invalidateQueries({
       queryKey: [`tournaments`],
@@ -36,83 +37,99 @@ export default function TournamentProfile() {
   }, [queryClient]);
   
 
+  const handleTournamentJoin = async () => {
+    try {
+      setLoading(true);
+      await joinTournament(
+        searchTournamentId || "",
+        getToken,
+        invalidateQueries,
+      );
+      toast({
+        title: "Success!",
+        description: `You have joined ${data?.name}.`,
+      });
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 200);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error joining team:", error);
+      toast({
+        variant: "destructive",
+        title: "Oops!",
+        description:
+          (error as Error).message ||
+          `An error occurred while joining ${data?.name}.`,
+      });
+    }
+  };
+
+  const handleTournamentLeave = async () => {
+    try {
+      setLoading(true);
+      await leaveTournament(
+        searchTournamentId || "",
+        getToken,
+        invalidateQueries,
+      );
+      toast({
+        title: "Success!",
+        description: `You have left ${data?.name}.`,
+      });
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 200);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error leaving team:", error);
+      toast({
+        variant: "destructive",
+        title: "Oops!",
+        description:
+          (error as Error).message ||
+          `An error occurred while leaving ${data?.name}.`,
+      });
+    }
+  };
+
   return (
     <div className="container py-4">
       <div className="flex flex-col gap-4">
         <div className="flex gap-7">
           {data ? (
-            <img
-              className="aspect-square h-32 w-32 rounded-md object-cover"
-              alt={data.name}
-              src={data.image_url || undefined}
-            />
-          ) : null}
-          <div>
-            <p>prize : {data ? `${data.cash_prize || 0}` : "loading"}</p>
-            <p>status : {data ? data.status : "loading"}</p>
-            <p>format : {data ? data.format : "loading"}</p>
-            <p>max team : {data ? data.max_team || "unlimited" : "loading"}</p>
-            <p>max team size : {data ? data.max_team_size : "loading"}</p>
-            <p>min team size : {data ? data.min_team_size : "loading"}</p>
-            <p>
-              start date :{" "}
-              {data ? dayjs(data.start_date).format("DD/MM/YYYY") : "loading"}
-            </p>
-          </div>
-          <div className=" justify-end">
-            {data ? (
-              <Button
-                className="flex justify-center sm:justify-end"
-                onClick={async () => {
-                  const token = await getToken();
-                  await axios.post(
-                    `/api/tournaments/${data.id}/users`,
-                    {},
-                    {
-                      headers: { Authorization: `Bearer ${token}` },
-                    },
-                  );
-                  invalidateQueries();
-                }}
-              >
-                {" "}
-                inscription tournoi{" "}
-              </Button>
-            ) : null}
-            {data ? (
-              <Button
-                onClick={async () => {
-                  const token = await getToken();
-                  await axios.delete(`/api/tournaments/${data.id}/users`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                  });
-                  invalidateQueries();
-                }}
-              >
-                Désinscription du tournoi
-              </Button>
-            ) : null}
-          </div>
-        </div>{" "}
-        <hr />
-        <div>
-          {data ? (
-            <TournamentMembersCard
-              tournament={data}
-              users={users || []}
-              //setTab={setTab}
-            ></TournamentMembersCard>
-          ) : null}
-        </div>
-        <div>
-          {data ? (
-            <TournamentsTeamCard
+            <TournamentHeader
+              userId={userId}
               tournament={data}
               teams={team || []}
-              // setTab={setTab}
-            ></TournamentsTeamCard>
+              users={users || []}
+              handleTournamentJoin={handleTournamentJoin}
+              handleTournamentLeave={handleTournamentLeave}
+              loading={loading}
+            />
           ) : null}
         </div>
+      </div>{" "}
+      <hr />
+      <div>
+        {data ? (
+          <TournamentMembersCard
+            tournament={data}
+            users={users || []}
+            //setTab={setTab}
+          ></TournamentMembersCard>
+        ) : null}
+      </div>
+      <div>
+        {data ? (
+          <TournamentsTeamCard
+            tournament={data}
+            teams={team || []}
+            // setTab={setTab}
+          ></TournamentsTeamCard>
+        ) : null}
       </div>
     </div>
   );
