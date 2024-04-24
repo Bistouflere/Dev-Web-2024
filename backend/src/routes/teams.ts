@@ -331,6 +331,12 @@ router.delete(
         });
       }
 
+      if (existingTeamUserResult.rows[0].role === "owner") {
+        return res.status(403).json({
+          message: `Team owners cannot be removed from the team`,
+        });
+      }
+
       const sql = `
         DELETE FROM teams_users
         WHERE team_id = $1 AND user_id = $2

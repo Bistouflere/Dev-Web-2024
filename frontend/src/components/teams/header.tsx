@@ -70,7 +70,12 @@ export default function TeamHeader({
           ) : (
             <Button
               onClick={handleTeamLeave}
-              disabled={!userId}
+              disabled={
+                !userId ||
+                users.some((u) => {
+                  return u.id === userId && u.team_role === "owner";
+                })
+              }
               variant="destructive"
             >
               <DoorClosed className="mr-2 h-5 w-5" />
