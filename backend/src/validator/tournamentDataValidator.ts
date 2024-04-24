@@ -36,8 +36,11 @@ const tournamentData = z.object({
     return !isNaN(parseFloat(value)) && parseFloat(value) >= 0;
   }, "Cash prize must be a positive number."),
   max_teams: z.string().refine((value) => {
-    return !isNaN(parseFloat(value)) && parseFloat(value) >= 0;
-  }, "Max teams must be a positive number."),
+    const intValue = parseInt(value);
+    return (
+      !isNaN(intValue) && intValue > 0 && (intValue & (intValue - 1)) === 0
+    );
+  }, "Max teams must be a positive power of 2."),
   max_team_size: z.string().refine((value) => {
     return !isNaN(parseFloat(value)) && parseFloat(value) >= 0;
   }, "Max team size must be a positive number."),

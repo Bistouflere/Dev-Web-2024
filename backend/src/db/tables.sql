@@ -8,13 +8,11 @@ $$ LANGUAGE plpgsql;
 
 CREATE TYPE user_role AS ENUM ('admin', 'user');
 CREATE TYPE team_role AS ENUM ('owner', 'manager', 'participant');
-CREATE TYPE tournament_type AS ENUM ('single_elimination', 'double_elimination', 'round_robin');
+CREATE TYPE tournament_type AS ENUM ('single_elimination', 'double_elimination');
 -- single_elimination : each teams eliminated after losing a match; number of teams must be a power of 2
 -- double_elimination : each team has to lose twice to be eliminated; requires a loser's bracket
--- round_robin : each team plays every other team; team with most wins is the winner
 CREATE TYPE tournament_visibility AS ENUM ('public', 'private');
 CREATE TYPE tournament_status AS ENUM ('upcoming', 'active', 'completed', 'cancelled');
-CREATE TYPE match_status AS ENUM ('upcoming', 'active', 'completed', 'cancelled');
 
 CREATE TABLE users (
   id TEXT UNIQUE NOT NULL,
@@ -73,13 +71,35 @@ CREATE TABLE tournaments (
     status tournament_status NOT NULL DEFAULT 'upcoming',
     tags TEXT[],
     cash_prize DECIMAL(16, 2),
-    max_teams INT NOT NULL DEFAULT 16, -- 16 teams
-    max_team_size INT NOT NULL DEFAULT 7, -- 5 players + 2 subs for a 5v5 game
-    min_team_size INT NOT NULL DEFAULT 5, -- 5 players for a 5v5 game
+    max_teams INT NOT NULL DEFAULT 16,
+    max_team_size INT NOT NULL DEFAULT 7,
+    min_team_size INT NOT NULL DEFAULT 5,
     start_date TIMESTAMP,
     end_date TIMESTAMP,
+    tree JSONB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE tournament_matches (
+    id BIGSERIAL PRIMARY KEY,
+    tournament_id BIGINT REFERENCES tournaments(id) ON DELETE CASCADE,
+    round_number INT NOT NULL,
+    match_number INT NOT NULL,
+    name TEXT NOT NULL,
+    start_time TIMESTAMP,
+    state TEXT NOT NULL DEFAULT 'scheduled', -- 'scheduled', 'ongoing', 'completed'
+    winner_id BIGINT REFERENCES teams(id),
+    CONSTRAINT unique_match_per_tournament UNIQUE (tournament_id, round_number, match_number)
+);
+
+CREATE TABLE match_participants (
+    id BIGSERIAL PRIMARY KEY,
+    match_id BIGINT REFERENCES tournament_matches(id) ON DELETE CASCADE,
+    team_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,
+    result_text TEXT, -- 'WON', 'LOST', etc.
+    is_winner BOOLEAN NOT NULL DEFAULT false,
+    status TEXT -- 'PLAYED', 'NO_SHOW', 'WALK_OVER', 'NO_PARTY'
 );
 
 CREATE TABLE tournaments_teams (
@@ -91,43 +111,9 @@ CREATE TABLE tournaments_teams (
 CREATE TABLE tournaments_users (
     tournament_id BIGINT REFERENCES tournaments(id) ON DELETE CASCADE,
     user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
-    team_id BIGINT REFERENCES teams(id) ON DELETE SET NULL,
+    team_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,
     role team_role NOT NULL DEFAULT 'participant',
     PRIMARY KEY (tournament_id, user_id)
-);
-
-CREATE TABLE pools (
-    id BIGSERIAL PRIMARY KEY,
-    tournament_id BIGINT REFERENCES tournaments(id) ON DELETE CASCADE,
-    name TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
-CREATE TABLE matches (
-    id BIGSERIAL PRIMARY KEY,
-    tournament_id BIGINT REFERENCES tournaments(id) ON DELETE CASCADE,
-    pool_id BIGINT REFERENCES pools(id) ON DELETE CASCADE,
-    team1_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,
-    team2_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,
-    start_time TIMESTAMP,
-    actual_start_time TIMESTAMP,
-    end_time TIMESTAMP,
-    status match_status NOT NULL DEFAULT 'upcoming',
-    winner_id BIGINT REFERENCES teams(id) ON DELETE SET NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
-CREATE TABLE match_scores (
-    id BIGSERIAL PRIMARY KEY,
-    match_id BIGINT REFERENCES matches(id) ON DELETE CASCADE,
-    team_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,
-    reporting_team_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,
-    score_team1 INT NOT NULL DEFAULT 0,
-    score_team2 INT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE teams_invitations (

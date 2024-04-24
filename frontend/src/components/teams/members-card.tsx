@@ -31,6 +31,11 @@ export default function TeamMembersCard({
           <CardTitle>{team.name}'s Members</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-4">
+          {visibleUsers.length === 0 && (
+            <div className="flex h-20 w-full items-center gap-2 rounded-lg border bg-secondary p-4 lg:w-60">
+              <span className="text-lg font-semibold">No members yet</span>
+            </div>
+          )}
           {visibleUsers.map((user, index) => (
             <UserCard
               key={user.id}

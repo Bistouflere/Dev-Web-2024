@@ -1,5 +1,6 @@
 import { query } from "../db/index";
 import { processImage, upload } from "../middleware/upload";
+import { validateTeamId } from "../validator/teamIdValidator";
 import { validateTournamentData } from "../validator/tournamentDataValidator";
 import { validateTournamentId } from "../validator/tournamentIdValidator";
 import {
@@ -318,6 +319,80 @@ router.post(
   },
 );
 
+router.post(
+  "/:tournamentId/teams/:teamId",
+  ClerkExpressRequireAuth({}),
+  validateTournamentId,
+  validateTeamId,
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { tournamentId, teamId } = req.params;
+    const authId = req.auth.userId;
+
+    try {
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
+      const authUserResult = await query(authUserSql, [authId]);
+
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${authId} not found` });
+      }
+
+      const tournamentSql = "SELECT * FROM tournaments WHERE id = $1;";
+      const tournamentResult = await query(tournamentSql, [tournamentId]);
+
+      if (tournamentResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `Tournament with ID ${tournamentId} not found` });
+      }
+
+      const teamSql = "SELECT * FROM teams WHERE id = $1;";
+      const teamResult = await query(teamSql, [teamId]);
+
+      if (teamResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `Team with ID ${teamId} not found` });
+      }
+
+      const isTeamOwnerSql = `SELECT * FROM teams_users WHERE team_id = $1 AND user_id = $2 AND role = 'owner' OR role = 'manager';`;
+      const isTeamOwnerResult = await query(isTeamOwnerSql, [teamId, authId]);
+
+      if (isTeamOwnerResult.rowCount === 0) {
+        return res.status(403).json({
+          message: `User with ID ${authId} is not an owner or manager of team with ID ${teamId}`,
+        });
+      }
+
+      const existingTournamentTeamSql = `SELECT * FROM tournaments_teams WHERE tournament_id = $1 AND team_id = $2;`;
+      const existingTournamentTeamResult = await query(
+        existingTournamentTeamSql,
+        [tournamentId, teamId],
+      );
+
+      if (
+        existingTournamentTeamResult.rowCount !== null &&
+        existingTournamentTeamResult.rowCount > 0
+      ) {
+        return res.status(409).json({
+          message: `Team with ID ${teamId} is already a participant of tournament with ID ${tournamentId}`,
+        });
+      }
+
+      const sql = `
+        INSERT INTO tournaments_teams (tournament_id, team_id)
+        VALUES ($1, $2)
+      `;
+      await query(sql, [tournamentId, teamId]);
+
+      return res.status(201).json({ message: "Team added to tournament" });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 router.get(
   "/:tournamentId/users",
   validateTournamentId,
@@ -325,6 +400,7 @@ router.get(
     const { tournamentId } = req.params;
   },
 );
+
 router.delete(
   "/:tournamentId/users",
   ClerkExpressRequireAuth({}),

@@ -6,11 +6,11 @@ import { Link } from "react-router-dom";
 export default function TournamentsTeamCard({
   tournament,
   teams,
-  // setTab,
+  setTab,
 }: {
   tournament: Tournament;
   teams: Team[];
-  // setTab: (value: string) => void;
+  setTab: (value: string) => void;
 }) {
   const { width } = useWindowDimensions();
   const breakpoint = width < 640 ? "sm" : width < 1280 ? "lg" : "xl";
@@ -21,8 +21,8 @@ export default function TournamentsTeamCard({
     xl: 9,
   };
 
-  const visibleUsers = teams.slice(0, userDisplayCount[breakpoint]);
-  const hiddenUsersCount = teams.length - visibleUsers.length;
+  const visibleTeams = teams.slice(0, userDisplayCount[breakpoint]);
+  const hiddenUsersCount = teams.length - visibleTeams.length;
 
   return (
     <div className="flex-auto">
@@ -31,7 +31,12 @@ export default function TournamentsTeamCard({
           <CardTitle>{tournament.name}'s Teams</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-4">
-          {visibleUsers.map((tournament, index) => (
+          {visibleTeams.length === 0 && (
+            <div className="flex h-20 w-full items-center gap-2 rounded-lg border bg-secondary p-4 lg:w-60">
+              <span className="text-lg font-semibold">No teams yet</span>
+            </div>
+          )}
+          {visibleTeams.map((tournament, index) => (
             <TeamCard
               key={tournament.id}
               team={tournament}
@@ -41,7 +46,7 @@ export default function TournamentsTeamCard({
           {hiddenUsersCount > 0 && (
             <div
               onClick={() => {
-                // setTab("tournaments");
+                setTab("teams");
               }}
               className="flex h-20 w-full cursor-pointer items-center gap-2 rounded-lg border bg-secondary p-4 hover:border-primary lg:w-60"
             >

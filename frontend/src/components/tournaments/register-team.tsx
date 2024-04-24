@@ -1,9 +1,12 @@
-import { inviteUser } from "@/api/userActions";
+import { toast } from "../ui/use-toast";
+import { tournamentTeamsQueryOptions } from "@/api/tournaments";
+import { addTeamToTournament } from "@/api/userActions";
 import { userTeamsQueryOptions } from "@/api/users";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -24,14 +27,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "@/components/ui/use-toast";
-import { User } from "@/types/apiResponses";
 import { useAuth } from "@clerk/clerk-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, ShieldPlus } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useParams } from "react-router-dom";
 import { z } from "zod";
 
 const FormSchema = z.object({
@@ -40,40 +42,55 @@ const FormSchema = z.object({
   }),
 });
 
-export function UserRecruit({
-  user,
-  userId,
-}: {
-  user: User;
-  userId: string | null | undefined;
-}) {
-  const [loading, setLoading] = useState(false);
-  const { getToken } = useAuth();
+export function TournamentTeamRegister() {
+  const { searchTournamentId } = useParams();
+  const { userId, getToken } = useAuth();
   const queryClient = useQueryClient();
+  const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
   });
 
+  const { data: tournamentTeams } = useQuery(
+    tournamentTeamsQueryOptions(searchTournamentId || ""),
+  );
+  const { data: userTeams } = useQuery(userTeamsQueryOptions(userId));
+
+  const registerableTeams = userTeams?.filter(
+    (userTeam) =>
+      !tournamentTeams?.some(
+        (tournamentTeam) => tournamentTeam.id === userTeam.id,
+      ) && userTeam.team_role !== "participant",
+  );
+
   const invalidateQueries = useCallback(() => {
     queryClient.invalidateQueries({
-      queryKey: [`user_teams`],
+      queryKey: [`teams`],
     });
     queryClient.invalidateQueries({
-      queryKey: [`user_invitations`],
+      queryKey: [`team_tournaments`],
     });
     queryClient.invalidateQueries({
-      queryKey: ["user_sent_invitations"],
+      queryKey: [`tournaments`],
+    });
+    queryClient.invalidateQueries({
+      queryKey: [`tournament_teams`],
     });
   }, [queryClient]);
 
-  const handleRecruit = async (data: z.infer<typeof FormSchema>) => {
+  const handleRegister = async (data: z.infer<typeof FormSchema>) => {
     try {
       setLoading(true);
-      await inviteUser(user.id, data.team_id, getToken, invalidateQueries);
+      await addTeamToTournament(
+        data.team_id,
+        searchTournamentId || "",
+        getToken,
+        invalidateQueries,
+      );
       toast({
         title: "Success!",
-        description: `You have sent a recruitment request to ${user?.username}.`,
+        description: `You have successfully registered your team for the tournament.`,
       });
 
       setTimeout(() => {
@@ -81,46 +98,38 @@ export function UserRecruit({
       }, 200);
     } catch (error) {
       setLoading(false);
-      console.error("Error recruiting user:", error);
+      console.error("Error registering team:", error);
       toast({
         variant: "destructive",
         title: "Oops!",
         description:
           (error as Error).message ||
-          `An error occurred while recruiting ${user?.username}.`,
+          `An error occurred while registering your team for the tournament.`,
       });
     }
   };
 
-  const { data: recruiterTeams } = useQuery(userTeamsQueryOptions(userId));
-  const { data: userTeams } = useQuery(userTeamsQueryOptions(user.id));
-
-  const recruiterManageableTeams = recruiterTeams?.filter(
-    (team) => team.team_role !== "participant",
-  );
-
-  const userRecrutableTeams = recruiterManageableTeams?.filter(
-    (team) => !userTeams?.some((userTeam) => userTeam.id === team.id),
-  );
-
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="secondary" disabled={!userId || userId === user.id}>
-          <UserPlus className="mr-2 h-5 w-5" />
-          Recruit
+        <Button disabled={!userId}>
+          <ShieldPlus className="mr-2 h-5 w-5" />
+          Register Team
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            Which team would you like to recruit{" "}
-            <span className="text-destructive">{user.username}</span> to?
+            Which team would you like to register for the tournament?
           </DialogTitle>
+          <DialogDescription>
+            You can then add or remove members to this tournament by visiting
+            your team dashboard.
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleRecruit)}
+            onSubmit={form.handleSubmit(handleRegister)}
             className="space-y-6"
           >
             <FormField
@@ -139,22 +148,23 @@ export function UserRecruit({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {userRecrutableTeams?.length ? (
-                        userRecrutableTeams?.map((team) => (
+                      {registerableTeams?.length ? (
+                        registerableTeams?.map((team) => (
                           <SelectItem key={team.id} value={team.id}>
                             {team.name}
                           </SelectItem>
                         ))
                       ) : (
                         <SelectItem value="disabled" disabled>
-                          You do not have any teams to recruit this user to.
+                          You do not have any teams to register for this
+                          tournament.
                         </SelectItem>
                       )}
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    You can only recruit a user to a team you are the owner or
-                    manager of.
+                    You can only register a team you are the owner or manager
+                    of.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -163,12 +173,12 @@ export function UserRecruit({
             {loading ? (
               <Button disabled>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Recruit
+                Register Team
               </Button>
             ) : (
               <Button type="submit">
-                <UserPlus className="mr-2 h-5 w-5" />
-                Recruit
+                <ShieldPlus className="mr-2 h-5 w-5" />
+                Register Team
               </Button>
             )}
           </form>

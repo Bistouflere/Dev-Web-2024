@@ -3,134 +3,86 @@ import {
   tournamentTeamsQueryOptions,
   tournamentUsersQueryOptions,
 } from "@/api/tournaments";
-import { joinTournament, leaveTournament } from "@/api/userActions";
 import TournamentHeader from "@/components/tournaments/header";
 import TournamentMembersCard from "@/components/tournaments/members-card";
 import TournamentsTeamCard from "@/components/tournaments/teams-card";
-import { useToast } from "@/components/ui/use-toast";
+import { columns as teamsColumns } from "@/components/tournaments/tournament-team-table/columns";
+import { TournamentTeamTable } from "@/components/tournaments/tournament-team-table/table";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { columns as membersColumns } from "@/components/users/tournament-members-table/columns";
+import { TournamentMembersTable } from "@/components/users/tournament-members-table/table";
 import { useAuth } from "@clerk/clerk-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { TabsContent } from "@radix-ui/react-tabs";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 
-
 export default function TournamentProfile() {
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const [tab, setTab] = useState("overview");
   const { searchTournamentId } = useParams();
-  const { data } = useQuery(tournamentQueryOptions(searchTournamentId || ""));
+  const { userId } = useAuth();
+
+  const onTabChange = (value: string) => {
+    setTab(value);
+  };
+
+  const { data: tournament } = useQuery(
+    tournamentQueryOptions(searchTournamentId || ""),
+  );
   const { data: users } = useQuery(
     tournamentUsersQueryOptions(searchTournamentId || ""),
   );
-  const { data: team } = useQuery(
+  const { data: teams } = useQuery(
     tournamentTeamsQueryOptions(searchTournamentId || ""),
   );
-  const queryClient = useQueryClient();
-  const { userId, getToken } = useAuth();
-  const invalidateQueries = useCallback(() => {
-    queryClient.invalidateQueries({
-      queryKey: [`tournaments`],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [`tournament_users`],
-    });
-  }, [queryClient]);
-  
-
-  const handleTournamentJoin = async () => {
-    try {
-      setLoading(true);
-      await joinTournament(
-        searchTournamentId || "",
-        getToken,
-        invalidateQueries,
-      );
-      toast({
-        title: "Success!",
-        description: `You have joined ${data?.name}.`,
-      });
-
-      setTimeout(() => {
-        setLoading(false);
-      }, 200);
-    } catch (error) {
-      setLoading(false);
-      console.error("Error joining team:", error);
-      toast({
-        variant: "destructive",
-        title: "Oops!",
-        description:
-          (error as Error).message ||
-          `An error occurred while joining ${data?.name}.`,
-      });
-    }
-  };
-
-  const handleTournamentLeave = async () => {
-    try {
-      setLoading(true);
-      await leaveTournament(
-        searchTournamentId || "",
-        getToken,
-        invalidateQueries,
-      );
-      toast({
-        title: "Success!",
-        description: `You have left ${data?.name}.`,
-      });
-
-      setTimeout(() => {
-        setLoading(false);
-      }, 200);
-    } catch (error) {
-      setLoading(false);
-      console.error("Error leaving team:", error);
-      toast({
-        variant: "destructive",
-        title: "Oops!",
-        description:
-          (error as Error).message ||
-          `An error occurred while leaving ${data?.name}.`,
-      });
-    }
-  };
 
   return (
     <div className="container py-4">
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-7">
-          {data ? (
-            <TournamentHeader
-              userId={userId}
-              tournament={data}
-              teams={team || []}
-              users={users || []}
-              handleTournamentJoin={handleTournamentJoin}
-              handleTournamentLeave={handleTournamentLeave}
-              loading={loading}
-            />
-          ) : null}
-        </div>
-      </div>{" "}
-      <hr />
-      <div>
-        {data ? (
-          <TournamentMembersCard
-            tournament={data}
+      {tournament && (
+        <div className="flex flex-col gap-4">
+          <TournamentHeader
+            userId={userId}
+            tournament={tournament}
+            teams={teams || []}
             users={users || []}
-            //setTab={setTab}
-          ></TournamentMembersCard>
-        ) : null}
-      </div>
-      <div>
-        {data ? (
-          <TournamentsTeamCard
-            tournament={data}
-            teams={team || []}
-            // setTab={setTab}
-          ></TournamentsTeamCard>
-        ) : null}
-      </div>
+          />
+          <Tabs
+            defaultValue="overview"
+            value={tab}
+            onValueChange={onTabChange}
+            className="mt-4"
+          >
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="members">Members</TabsTrigger>
+              <TabsTrigger value="teams">Teams</TabsTrigger>
+              <TabsTrigger value="bracket">Bracket</TabsTrigger>
+            </TabsList>
+            <TabsContent value="overview" className="mt-4 flex flex-col gap-4">
+              <TournamentMembersCard
+                tournament={tournament}
+                users={users || []}
+                setTab={setTab}
+              />
+              <TournamentsTeamCard
+                tournament={tournament}
+                teams={teams || []}
+                setTab={setTab}
+              />
+            </TabsContent>
+            <TabsContent value="members">
+              <TournamentMembersTable
+                columns={membersColumns}
+                data={users || []}
+              />
+            </TabsContent>
+            <TabsContent value="teams">
+              <TournamentTeamTable columns={teamsColumns} data={teams || []} />
+            </TabsContent>
+            <TabsContent value="bracket"></TabsContent>
+          </Tabs>
+        </div>
+      )}
     </div>
   );
 }

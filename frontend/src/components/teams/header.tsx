@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Team, TeamUser, Tournament } from "@/types/apiResponses";
-import { DoorClosed, Loader2, UserPlus } from "lucide-react";
+import { DoorClosed, Loader2, Pencil, UserPlus } from "lucide-react";
+import { Link } from "react-router-dom";
+import Balancer from "react-wrap-balancer";
 
 export default function TeamHeader({
   userId,
@@ -49,18 +51,31 @@ export default function TeamHeader({
               </span>
             </div>
           </div>
-          <p className="text-xl text-muted-foreground">
+          <Balancer className="text-xl text-muted-foreground">
             {team.description || "No description"}
-          </p>
+          </Balancer>
           <p className="leading-7 [&:not(:first-child)]:mt-6">
             Recruitment for this team are currently{" "}
-            <span className="text-lg font-semibold uppercase">
+            <span className="text-lg font-semibold">
               {team.open ? "open" : "closed"}
             </span>
+            .
           </p>
         </div>
       </div>
       <div className="flex justify-center sm:justify-end">
+        {users.some((u) => {
+          return (
+            u.id === userId &&
+            (u.team_role === "owner" || u.team_role === "manager")
+          );
+        }) && (
+          <Link to={`/dashboard/teams/${team.id}`}>
+            <Button className="mr-2">
+              <Pencil className="mr-2 h-5 w-5" /> Edit team
+            </Button>
+          </Link>
+        )}
         {users?.some((u) => u.id === userId) ? (
           loading ? (
             <Button disabled variant="destructive">

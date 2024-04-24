@@ -6,12 +6,14 @@ import {
 import { joinTeam, leaveTeam } from "@/api/userActions";
 import TeamHeader from "@/components/teams/header";
 import TeamMembersCard from "@/components/teams/members-card";
-import { TeamMembersList } from "@/components/teams/members-list";
 import TeamStatisticsCard from "@/components/teams/statistics-card";
+import { columns as tournamentsColumns } from "@/components/teams/team-tournament-table/columns";
+import { TeamTournamentTable } from "@/components/teams/team-tournament-table/table";
 import TeamTournamentsCard from "@/components/teams/tournaments-card";
-import { TeamTournamentsList } from "@/components/teams/tournaments-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { columns as membersColumns } from "@/components/users/team-members-table/columns";
+import { TeamMembersTable } from "@/components/users/team-members-table/table";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
@@ -102,7 +104,7 @@ export default function TeamProfile() {
 
   return (
     <div className="container py-4">
-      {team ? (
+      {team && (
         <div className="flex flex-col gap-4">
           <TeamHeader
             userId={userId}
@@ -138,16 +140,19 @@ export default function TeamProfile() {
                 setTab={setTab}
               />
             </TabsContent>
-            <TabsContent value="match_played"></TabsContent>
             <TabsContent value="members">
-              <TeamMembersList response={users || []} />
+              <TeamMembersTable columns={membersColumns} data={users || []} />
             </TabsContent>
             <TabsContent value="tournaments">
-              <TeamTournamentsList response={tournaments || []} />
+              <TeamTournamentTable
+                columns={tournamentsColumns}
+                data={tournaments || []}
+              />
             </TabsContent>
+            <TabsContent value="match_played"></TabsContent>
           </Tabs>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

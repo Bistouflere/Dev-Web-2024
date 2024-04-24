@@ -71,8 +71,11 @@ const tournamentFormSchema = z.object({
     return !isNaN(parseFloat(value)) && parseFloat(value) >= 0;
   }, "Cash prize must be a positive number."),
   max_teams: z.string().refine((value) => {
-    return !isNaN(parseFloat(value)) && parseFloat(value) >= 0;
-  }, "Max teams must be a positive number."),
+    const intValue = parseInt(value);
+    return (
+      !isNaN(intValue) && intValue > 0 && (intValue & (intValue - 1)) === 0
+    );
+  }, "Max teams must be a positive power of 2."),
   max_team_size: z.string().refine((value) => {
     return !isNaN(parseFloat(value)) && parseFloat(value) >= 0;
   }, "Max team size must be a positive number."),
@@ -357,7 +360,7 @@ export default function CreateTournamentPage() {
                   name="max_teams"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Max Teams (Required)</FormLabel>
+                      <FormLabel>Max Teams x^2 (Required)</FormLabel>
                       <FormControl>
                         <Input type="number" {...field} />
                       </FormControl>

@@ -21,8 +21,8 @@ export default function TeamTournamentsCard({
     xl: 9,
   };
 
-  const visibleUsers = tournaments.slice(0, userDisplayCount[breakpoint]);
-  const hiddenUsersCount = tournaments.length - visibleUsers.length;
+  const visibleTournaments = tournaments.slice(0, userDisplayCount[breakpoint]);
+  const hiddenUsersCount = tournaments.length - visibleTournaments.length;
 
   return (
     <div className="flex-auto">
@@ -31,7 +31,12 @@ export default function TeamTournamentsCard({
           <CardTitle>{team.name}'s Tournaments</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-4">
-          {visibleUsers.map((tournament, index) => (
+          {visibleTournaments.length === 0 && (
+            <div className="flex h-20 w-full items-center gap-2 rounded-lg border bg-secondary p-4 lg:w-60">
+              <span className="text-lg font-semibold">No tournaments yet</span>
+            </div>
+          )}
+          {visibleTournaments.map((tournament, index) => (
             <TournamentCard
               key={tournament.id}
               tournament={tournament}
