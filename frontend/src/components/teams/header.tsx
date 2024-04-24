@@ -65,10 +65,7 @@ export default function TeamHeader({
       </div>
       <div className="flex justify-center sm:justify-end">
         {users.some((u) => {
-          return (
-            u.id === userId &&
-            (u.team_role === "owner" || u.team_role === "manager")
-          );
+          return u.id === userId && u.team_role !== "participant";
         }) && (
           <Link to={`/dashboard/teams/${team.id}`}>
             <Button className="mr-2">

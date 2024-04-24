@@ -68,13 +68,10 @@ export default function TournamentHeader({
       </div>
       <div className="flex justify-center sm:justify-end">
         {users.some((u) => {
-          return (
-            u.id === userId &&
-            (u.tournament_role === "owner" || u.tournament_role === "manager")
-          );
+          return u.id === userId && u.tournament_role !== "participant";
         }) && (
           <Link to={`/dashboard/tournaments/${tournament.id}`}>
-            <Button className="mr-2">
+            <Button className="mr-2" variant="secondary">
               <Pencil className="mr-2 h-5 w-5" /> Edit tournament
             </Button>
           </Link>
