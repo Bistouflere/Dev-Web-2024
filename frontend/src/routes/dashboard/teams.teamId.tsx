@@ -69,12 +69,6 @@ export default function TeamDetailPage() {
         </div>
         {team && users && (
           <div className="space-y-2">
-            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
-              {team.name}
-            </h1>
-            <p className="pb-2 text-xl text-muted-foreground">
-              On this page, edit, delete, and manage your team.
-            </p>
             <Tabs defaultValue="settings" className="mt-4">
               <TabsList>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
