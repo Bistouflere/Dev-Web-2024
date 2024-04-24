@@ -10,10 +10,10 @@ export function teamQueryOptions(id: string) {
   });
 }
 
-export function teamsQueryOptions(query: string, page: number) {
+export function teamsQueryOptions() {
   return queryOptions({
-    queryKey: [`teams`, { query, page }],
-    queryFn: () => fetchTeams(query, page),
+    queryKey: [`teams`],
+    queryFn: () => fetchTeams(),
     placeholderData: keepPreviousData,
   });
 }
@@ -65,13 +65,11 @@ export async function fetchTeam(id: string): Promise<Team> {
   });
 }
 
-export async function fetchTeams(query: string, page: number): Promise<Team[]> {
-  return axios
-    .get<Team[]>(`/api/teams?page=${page}&query=${query}`)
-    .then((res) => {
-      console.log(`/api/teams?page=${page}&query=${query}`, res.data);
-      return res.data;
-    });
+export async function fetchTeams(): Promise<Team[]> {
+  return axios.get<Team[]>(`/api/teams`).then((res) => {
+    console.log(`/api/teams`, res.data);
+    return res.data;
+  });
 }
 
 export async function fetchTeamsCount(query: string): Promise<number> {

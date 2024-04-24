@@ -404,21 +404,9 @@ router.get(
 );
 
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
-  const { query: searchQuery, page } = req.query as {
-    query: string;
-    page: string;
-  };
-  const perPage = 10;
-  const offset = (parseInt(page, 10) - 1) * perPage || 0;
-
   try {
-    const sql = searchQuery
-      ? "SELECT * FROM users WHERE username ILIKE $1 ORDER BY id LIMIT $2 OFFSET $3;"
-      : "SELECT * FROM users ORDER BY id LIMIT $1 OFFSET $2;";
-    const params = searchQuery
-      ? [`%${searchQuery}%`, perPage, offset]
-      : [perPage, offset];
-    const result = await query(sql, params);
+    const sql = "SELECT * FROM users;";
+    const result = await query(sql);
 
     return res.status(200).json(result.rows);
   } catch (error) {

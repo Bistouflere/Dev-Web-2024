@@ -1,59 +1,38 @@
 import { DataTableFacetedFilter } from "../../tables/data-table-faceted-filter";
-import { tournament_roles, tournament_status } from "./columns";
-import { gamesQueryOptions } from "@/api/games";
+import { role } from "./columns";
 import { DataTableViewOptions } from "@/components/tables/data-table-view-options";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Cross2Icon } from "@radix-ui/react-icons";
-import { useQuery } from "@tanstack/react-query";
 import { Table } from "@tanstack/react-table";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
 
-export function DashboardTournamentTableToolbar<TData>({
+export function UserTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-
-  const { data: games } = useQuery(gamesQueryOptions());
-  const games_options =
-    games?.map((game) => ({
-      label: game.name,
-      value: game.name,
-    })) ?? [];
 
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
         <Input
-          placeholder="Filter names..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          placeholder="Filter usernames..."
+          value={
+            (table.getColumn("username")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn("username")?.setFilterValue(event.target.value)
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("tournament_role") && (
+        {table.getColumn("role") && (
           <DataTableFacetedFilter
-            column={table.getColumn("tournament_role")}
+            column={table.getColumn("role")}
             title="Role"
-            options={tournament_roles}
-          />
-        )}
-        {table.getColumn("game_name") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("game_name")}
-            title="Game"
-            options={games_options}
-          />
-        )}
-        {table.getColumn("status") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("status")}
-            title="Status"
-            options={tournament_status}
+            options={role}
           />
         )}
         {isFiltered && (

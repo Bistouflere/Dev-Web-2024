@@ -16,10 +16,10 @@ export function userQueryOptions(id: string | null | undefined) {
   });
 }
 
-export function usersQueryOptions(query: string, page: number) {
+export function usersQueryOptions() {
   return queryOptions({
-    queryKey: [`users`, { query, page }],
-    queryFn: () => fetchUsers(query, page),
+    queryKey: [`users`],
+    queryFn: () => fetchUsers(),
     placeholderData: keepPreviousData,
   });
 }
@@ -150,13 +150,11 @@ export async function fetchUser(id: string | null | undefined): Promise<User> {
   return user;
 }
 
-export async function fetchUsers(query: string, page: number): Promise<User[]> {
-  return axios
-    .get<User[]>(`/api/users?page=${page}&query=${query}`)
-    .then((res) => {
-      console.log(`/api/users?page=${page}&query=${query}`, res.data);
-      return res.data;
-    });
+export async function fetchUsers(): Promise<User[]> {
+  return axios.get<User[]>(`/api/users`).then((res) => {
+    console.log(`/api/users`, res.data);
+    return res.data;
+  });
 }
 
 export async function fetchUsersCount(query: string): Promise<number> {

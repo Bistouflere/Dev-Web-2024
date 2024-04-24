@@ -468,42 +468,17 @@ router.get(
 );
 
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
-  const { query: searchQuery, page } = req.query as {
-    query: string;
-    page: string;
-  };
-  const perPage = 10;
-  const offset = (parseInt(page, 10) - 1) * perPage || 0;
-
   try {
-    const sql = searchQuery
-      ? `
-        SELECT
-          teams.*,
-          COUNT(DISTINCT(teams_users.user_id)) AS users_count
-        FROM teams
-        LEFT JOIN teams_users ON teams.id = teams_users.team_id
-        WHERE teams.name ILIKE $1
-        GROUP BY teams.id
-        ORDER BY teams.id
-        LIMIT $2
-        OFFSET $3;
-      `
-      : `
+    const sql = `
         SELECT
           teams.*,
           COUNT(DISTINCT(teams_users.user_id)) AS users_count
         FROM teams
         LEFT JOIN teams_users ON teams.id = teams_users.team_id
         GROUP BY teams.id
-        ORDER BY teams.id
-        LIMIT $1
-        OFFSET $2;
+        ORDER BY teams.id;
       `;
-    const params = searchQuery
-      ? [`%${searchQuery}%`, perPage, offset]
-      : [perPage, offset];
-    const result = await query(sql, params);
+    const result = await query(sql);
 
     return res.status(200).json(result.rows);
   } catch (error) {

@@ -474,16 +474,8 @@ router.post(
 );
 
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
-  const { query: searchQuery, page } = req.query as {
-    query: string;
-    page: string;
-  };
-  const perPage = 10;
-  const offset = (parseInt(page, 10) - 1) * perPage || 0;
-
   try {
-    const sql = searchQuery
-      ? `
+    const sql = `
         SELECT 
           tournaments.*,
           COUNT(DISTINCT(tournaments_users.user_id)) AS users_count,
@@ -497,33 +489,10 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
         LEFT JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
         LEFT JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
         JOIN games ON tournaments.game_id = games.id
-        WHERE tournaments.name ILIKE $1
-        GROUP BY tournaments.id, games.id
-        LIMIT $2
-        OFFSET $3;
-      `
-      : `
-        SELECT 
-          tournaments.*,
-          COUNT(DISTINCT(tournaments_users.user_id)) AS users_count,
-          COUNT(DISTINCT(tournaments_teams.team_id)) AS teams_count,
-          games.name AS game_name,
-          games.description AS game_description,
-          games.image_url AS game_image_url,
-          games.created_at AS game_created_at,
-          games.updated_at AS game_updated_at
-        FROM tournaments
-        LEFT JOIN tournaments_users ON tournaments.id = tournaments_users.tournament_id
-        LEFT JOIN tournaments_teams ON tournaments.id = tournaments_teams.tournament_id
-        JOIN games ON tournaments.game_id = games.id
-        GROUP BY tournaments.id, games.id
-        LIMIT $1
-        OFFSET $2;
+        GROUP BY tournaments.id, games.id;
       `;
-    const params = searchQuery
-      ? [`%${searchQuery}%`, perPage, offset]
-      : [perPage, offset];
-    const result = await query(sql, params);
+
+    const result = await query(sql);
 
     return res.status(200).json(result.rows);
   } catch (error) {

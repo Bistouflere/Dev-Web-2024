@@ -1,7 +1,7 @@
-import { DashboardTournamentTableRowActions } from "@/components/dashboard/tournament-table/row-actions";
 import { DataTableColumnHeader } from "@/components/tables/data-table-column-header";
+import { TournamentTableRowActions } from "@/components/tournaments/tournament-table/row-actions";
 import { Checkbox } from "@/components/ui/checkbox";
-import { UserTournament } from "@/types/apiResponses";
+import { Tournament } from "@/types/apiResponses";
 import {
   CheckCircledIcon,
   CircleIcon,
@@ -9,25 +9,7 @@ import {
   StopwatchIcon,
 } from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
-import { CrownIcon, UsersIcon, WrenchIcon } from "lucide-react";
-
-export const tournament_roles = [
-  {
-    value: "owner",
-    label: "Owner",
-    icon: CrownIcon,
-  },
-  {
-    value: "manager",
-    label: "Manager",
-    icon: WrenchIcon,
-  },
-  {
-    value: "participant",
-    label: "Participant",
-    icon: UsersIcon,
-  },
-];
+import { UsersIcon } from "lucide-react";
 
 export const tournament_status = [
   {
@@ -52,7 +34,7 @@ export const tournament_status = [
   },
 ];
 
-export const columns: ColumnDef<UserTournament>[] = [
+export const columns: ColumnDef<Tournament>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -172,34 +154,7 @@ export const columns: ColumnDef<UserTournament>[] = [
     },
   },
   {
-    accessorKey: "tournament_role",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Role" />
-    ),
-    cell: ({ row }) => {
-      const roles = tournament_roles.find(
-        (role) => role.value === row.getValue("tournament_role"),
-      );
-
-      if (!roles) {
-        return null;
-      }
-
-      return (
-        <div className="flex w-[100px] items-center">
-          {roles.icon && (
-            <roles.icon className="mr-2 h-4 w-4 text-muted-foreground" />
-          )}
-          <span>{roles.label}</span>
-        </div>
-      );
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
-  },
-  {
     id: "actions",
-    cell: ({ row }) => <DashboardTournamentTableRowActions row={row} />,
+    cell: ({ row }) => <TournamentTableRowActions row={row} />,
   },
 ];

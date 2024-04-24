@@ -17,10 +17,10 @@ export function tournamentQueryOptions(id: string) {
   });
 }
 
-export function tournamentsQueryOptions(query: string, page: number) {
+export function tournamentsQueryOptions() {
   return queryOptions({
-    queryKey: [`tournaments`, { query, page }],
-    queryFn: () => fetchTournaments(query, page),
+    queryKey: [`tournaments`],
+    queryFn: () => fetchTournaments(),
     placeholderData: keepPreviousData,
   });
 }
@@ -112,16 +112,11 @@ export async function fetchTournament(id: string): Promise<Tournament> {
   });
 }
 
-export async function fetchTournaments(
-  query: string,
-  page: number,
-): Promise<Tournament[]> {
-  return axios
-    .get<Tournament[]>(`/api/tournaments?page=${page}&query=${query}`)
-    .then((res) => {
-      console.log(`/api/tournaments?page=${page}&query=${query}`, res.data);
-      return res.data;
-    });
+export async function fetchTournaments(): Promise<Tournament[]> {
+  return axios.get<Tournament[]>(`/api/tournaments`).then((res) => {
+    console.log(`/api/tournaments`, res.data);
+    return res.data;
+  });
 }
 
 export async function fetchTournamentsCount(query: string): Promise<number> {

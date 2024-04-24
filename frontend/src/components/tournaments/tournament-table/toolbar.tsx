@@ -1,5 +1,5 @@
 import { DataTableFacetedFilter } from "../../tables/data-table-faceted-filter";
-import { tournament_roles, tournament_status } from "./columns";
+import { tournament_status } from "./columns";
 import { gamesQueryOptions } from "@/api/games";
 import { DataTableViewOptions } from "@/components/tables/data-table-view-options";
 import { Button } from "@/components/ui/button";
@@ -7,15 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Table } from "@tanstack/react-table";
+import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
 }
 
-export function DashboardTournamentTableToolbar<TData>({
+export function TournamentTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
+  const navigate = useNavigate();
 
   const { data: games } = useQuery(gamesQueryOptions());
   const games_options =
@@ -35,13 +38,6 @@ export function DashboardTournamentTableToolbar<TData>({
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("tournament_role") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("tournament_role")}
-            title="Role"
-            options={tournament_roles}
-          />
-        )}
         {table.getColumn("game_name") && (
           <DataTableFacetedFilter
             column={table.getColumn("game_name")}
@@ -67,6 +63,13 @@ export function DashboardTournamentTableToolbar<TData>({
           </Button>
         )}
       </div>
+      <Button
+        className="ml-auto mr-2 hidden h-8 sm:flex"
+        onClick={() => navigate("/dashboard/teams/create")}
+      >
+        Create Tournament
+        <Plus className="ml-2 h-4 w-4" />
+      </Button>
       <DataTableViewOptions table={table} />
     </div>
   );

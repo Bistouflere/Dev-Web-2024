@@ -1,30 +1,11 @@
-import { teamsCountQueryOptions, teamsQueryOptions } from "@/api/teams";
-import UrlPagination from "@/components/pagination";
-import { Search } from "@/components/search";
-import { TableLoader } from "@/components/table-loader";
-import { TeamList } from "@/components/teams/list";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { teamsQueryOptions } from "@/api/teams";
+import { columns } from "@/components/teams/team-table/columns";
+import { TeamTable } from "@/components/teams/team-table/table";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
 import Balancer from "react-wrap-balancer";
 
-const USERS_PER_PAGE = 10;
-
 export default function TeamsPage() {
-  const [searchParams] = useSearchParams();
-
-  const query = searchParams.get("query") || "";
-  const page = Number(searchParams.get("page")) || 1;
-
-  const countQuery = useQuery(teamsCountQueryOptions(query));
-  const usersQuery = useQuery(teamsQueryOptions(query, page));
-  const pageCount = Math.ceil(countQuery.data! / USERS_PER_PAGE);
-
-  const startUserIndex = (page - 1) * USERS_PER_PAGE + 1;
-  const endUserIndex = Math.min(
-    startUserIndex + USERS_PER_PAGE - 1,
-    countQuery.data || 0,
-  );
+  const { data: teams } = useQuery(teamsQueryOptions());
 
   return (
     <div className="container relative">
@@ -37,33 +18,7 @@ export default function TeamsPage() {
           search for teams by their name, game, or organizer.
         </Balancer>
       </section>
-      <Search
-        placeholder="Search teams..."
-        button_placeholder="Create Team"
-        button_path="/dashboard/teams/create"
-      />
-      <Card>
-        <CardContent>
-          {countQuery.isLoading ||
-          usersQuery.isLoading ||
-          countQuery.isFetching ||
-          usersQuery.isFetching ? (
-            <TableLoader count={USERS_PER_PAGE} />
-          ) : (
-            <TeamList response={usersQuery.data || []} />
-          )}
-        </CardContent>
-        <CardFooter>
-          <div className="text-xs text-muted-foreground">
-            Showing{" "}
-            <strong>
-              {startUserIndex}-{endUserIndex}
-            </strong>{" "}
-            of <strong>{countQuery.data || 0}</strong> users
-          </div>
-        </CardFooter>
-      </Card>
-      {pageCount > 1 && <UrlPagination totalPages={pageCount} />}
+      <TeamTable columns={columns} data={teams || []} />
     </div>
   );
 }

@@ -1,30 +1,11 @@
-import { usersCountQueryOptions, usersQueryOptions } from "@/api/users";
-import UrlPagination from "@/components/pagination";
-import { Search } from "@/components/search";
-import { TableLoader } from "@/components/table-loader";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { UserList } from "@/components/users/list";
+import { usersQueryOptions } from "@/api/users";
+import { columns } from "@/components/users/user-table/columns";
+import { UserTable } from "@/components/users/user-table/table";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
 import Balancer from "react-wrap-balancer";
 
-const USERS_PER_PAGE = 10;
-
 export default function UsersPage() {
-  const [searchParams] = useSearchParams();
-
-  const query = searchParams.get("query") || "";
-  const page = Number(searchParams.get("page")) || 1;
-
-  const countQuery = useQuery(usersCountQueryOptions(query));
-  const usersQuery = useQuery(usersQueryOptions(query, page));
-  const pageCount = Math.ceil(countQuery.data! / USERS_PER_PAGE);
-
-  const startUserIndex = (page - 1) * USERS_PER_PAGE + 1;
-  const endUserIndex = Math.min(
-    startUserIndex + USERS_PER_PAGE - 1,
-    countQuery.data || 0,
-  );
+  const { data: users } = useQuery(usersQueryOptions());
 
   return (
     <div className="container relative">
@@ -37,29 +18,7 @@ export default function UsersPage() {
           can search for users by their username, email, or name.
         </Balancer>
       </section>
-      <Search placeholder="Search users..." />
-      <Card>
-        <CardContent>
-          {countQuery.isLoading ||
-          usersQuery.isLoading ||
-          countQuery.isFetching ||
-          usersQuery.isFetching ? (
-            <TableLoader count={USERS_PER_PAGE} />
-          ) : (
-            <UserList response={usersQuery.data || []} />
-          )}
-        </CardContent>
-        <CardFooter>
-          <div className="text-xs text-muted-foreground">
-            Showing{" "}
-            <strong>
-              {startUserIndex}-{endUserIndex}
-            </strong>{" "}
-            of <strong>{countQuery.data || 0}</strong> users
-          </div>
-        </CardFooter>
-      </Card>
-      {pageCount > 1 && <UrlPagination totalPages={pageCount} />}
+      <UserTable columns={columns} data={users || []} />
     </div>
   );
 }
