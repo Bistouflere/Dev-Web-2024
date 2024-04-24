@@ -10,6 +10,7 @@ import {
 } from "@radix-ui/react-icons";
 import { ColumnDef } from "@tanstack/react-table";
 import { CrownIcon, UsersIcon, WrenchIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const tournament_roles = [
   {
@@ -88,14 +89,17 @@ export const columns: ColumnDef<UserTournament>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className="hidden sm:table-cell">
+        <Link
+          to={`/tournaments/${row.original.id}`}
+          className="hidden sm:table-cell"
+        >
           <img
             className="aspect-square w-16 rounded-md object-cover"
             src={row.getValue("image_url") || undefined}
             alt={row.getValue("name")}
             loading="lazy"
           />
-        </div>
+        </Link>
       );
     },
   },
@@ -106,11 +110,11 @@ export const columns: ColumnDef<UserTournament>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className="flex space-x-2">
+        <Link to={`/tournaments/${row.original.id}`} className="flex space-x-2">
           <span className="max-w-[500px] truncate font-medium">
             {row.getValue("name")}
           </span>
-        </div>
+        </Link>
       );
     },
   },

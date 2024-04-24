@@ -4,6 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { User } from "@/types/apiResponses";
 import { ColumnDef } from "@tanstack/react-table";
 import { UsersIcon, WrenchIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const role = [
   {
@@ -54,14 +55,14 @@ export const columns: ColumnDef<User>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className="hidden sm:table-cell">
+        <Link to={`/users/${row.original.id}`} className="hidden sm:table-cell">
           <img
             className="aspect-square w-16 rounded-md object-cover"
             src={row.getValue("image_url") || undefined}
             alt={row.getValue("username")}
             loading="lazy"
           />
-        </div>
+        </Link>
       );
     },
   },
@@ -72,11 +73,11 @@ export const columns: ColumnDef<User>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className="flex space-x-2">
+        <Link to={`/users/${row.original.id}`} className="flex space-x-2">
           <span className="max-w-[500px] truncate font-medium">
             {row.getValue("username")}
           </span>
-        </div>
+        </Link>
       );
     },
   },

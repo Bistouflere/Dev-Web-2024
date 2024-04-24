@@ -4,6 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { UserTeam } from "@/types/apiResponses";
 import { ColumnDef } from "@tanstack/react-table";
 import { CrownIcon, UsersIcon, WrenchIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const team_roles = [
   {
@@ -59,14 +60,14 @@ export const columns: ColumnDef<UserTeam>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className="hidden sm:table-cell">
+        <Link to={`/teams/${row.original.id}`} className="hidden sm:table-cell">
           <img
             className="aspect-square w-16 rounded-md object-cover"
             src={row.getValue("image_url") || undefined}
             alt={row.getValue("name")}
             loading="lazy"
           />
-        </div>
+        </Link>
       );
     },
   },
@@ -77,11 +78,11 @@ export const columns: ColumnDef<UserTeam>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className="flex space-x-2">
+        <Link to={`/teams/${row.original.id}`} className="flex space-x-2">
           <span className="max-w-[500px] truncate font-medium">
             {row.getValue("name")}
           </span>
-        </div>
+        </Link>
       );
     },
   },
