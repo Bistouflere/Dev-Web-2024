@@ -100,6 +100,22 @@ export const columns: ColumnDef<UserTournament>[] = [
     },
   },
   {
+    accessorKey: "game_name",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Game" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex w-[100px] items-center">
+          <span>{row.getValue("game_name")}</span>
+        </div>
+      );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
+  },
+  {
     accessorKey: "tournament_role",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Role" />
