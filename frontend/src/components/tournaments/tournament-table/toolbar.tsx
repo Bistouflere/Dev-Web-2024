@@ -8,7 +8,7 @@ import { Cross2Icon } from "@radix-ui/react-icons";
 import { useQuery } from "@tanstack/react-query";
 import { Table } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -18,7 +18,6 @@ export function TournamentTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
-  const navigate = useNavigate();
 
   const { data: games } = useQuery(gamesQueryOptions());
   const games_options =
@@ -63,13 +62,12 @@ export function TournamentTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <Button
-        className="ml-auto mr-2 hidden h-8 sm:flex"
-        onClick={() => navigate("/dashboard/teams/create")}
-      >
-        Create Tournament
-        <Plus className="ml-2 h-4 w-4" />
-      </Button>
+      <Link to="/dashboard/tournaments/create">
+        <Button className="ml-auto mr-2 hidden h-8 sm:flex">
+          Create Tournament
+          <Plus className="ml-2 h-4 w-4" />
+        </Button>
+      </Link>
       <DataTableViewOptions table={table} />
     </div>
   );

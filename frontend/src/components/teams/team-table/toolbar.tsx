@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { Table } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -15,7 +15,6 @@ interface DataTableToolbarProps<TData> {
 export function TeamTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
-  const navigate = useNavigate();
   const isFiltered = table.getState().columnFilters.length > 0;
 
   return (
@@ -47,13 +46,12 @@ export function TeamTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <Button
-        className="ml-auto mr-2 hidden h-8 sm:flex"
-        onClick={() => navigate("/dashboard/teams/create")}
-      >
-        Create Team
-        <Plus className="ml-2 h-4 w-4" />
-      </Button>
+      <Link to="/dashboard/teams/create">
+        <Button className="ml-auto mr-2 hidden h-8 sm:flex">
+          Create Team
+          <Plus className="ml-2 h-4 w-4" />
+        </Button>
+      </Link>
       <DataTableViewOptions table={table} />
     </div>
   );
