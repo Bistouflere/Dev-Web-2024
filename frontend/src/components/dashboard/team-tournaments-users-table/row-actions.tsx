@@ -1,25 +1,19 @@
-import { team_roles } from "./columns";
-import { removeUserFromTeam } from "@/api/userActions";
+import { removeUserFromTournament } from "@/api/userActions";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
-import { TeamUser } from "@/types/apiResponses";
+import { TournamentUser } from "@/types/apiResponses";
 import { useAuth } from "@clerk/clerk-react";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Row } from "@tanstack/react-table";
-import { Copy, Flag, Trash, User } from "lucide-react";
+import { Copy, User, X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -27,10 +21,10 @@ interface DataTableRowActionsProps<TData> {
   row: Row<TData>;
 }
 
-export function DashboardTeamMembersTableRowActions({
+export function DashboardTeamTournamentUsersTableRowActions({
   row,
-}: DataTableRowActionsProps<TeamUser>) {
-  const { searchTeamId } = useParams();
+}: DataTableRowActionsProps<TournamentUser>) {
+  const { searchTeamId, searchTournamentId } = useParams();
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
@@ -40,11 +34,12 @@ export function DashboardTeamMembersTableRowActions({
     queryClient.invalidateQueries();
   }, [queryClient]);
 
-  const handleRemove = async () => {
+  const handleUnregister = async () => {
     try {
       setLoading(true);
-      await removeUserFromTeam(
+      await removeUserFromTournament(
         user.id,
+        searchTournamentId || "",
         searchTeamId || "",
         getToken,
         invalidateQueries,
@@ -52,7 +47,7 @@ export function DashboardTeamMembersTableRowActions({
 
       toast({
         title: "Success!",
-        description: `You have successfully removed ${user.username} from the team.`,
+        description: `You have successfully removed ${user.username} from the tournament.`,
       });
 
       setTimeout(() => {
@@ -66,7 +61,7 @@ export function DashboardTeamMembersTableRowActions({
         title: "Oops!",
         description:
           (error as Error).message ||
-          `An error occurred while removing ${user.username} from the team.`,
+          `An error occurred while removing ${user.username} from the tournament.`,
       });
     }
   };
@@ -96,34 +91,14 @@ export function DashboardTeamMembersTableRowActions({
             View User
           </DropdownMenuItem>
         </Link>
-        <DropdownMenuSeparator />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="hover:cursor-pointer">
-            <Flag className="mr-2 w-5" />
-            Role
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuRadioGroup value={user.team_role}>
-              {team_roles.map((role) => (
-                <DropdownMenuRadioItem
-                  className="hover:cursor-pointer"
-                  key={role.label}
-                  value={role.value}
-                >
-                  {role.label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-        <DropdownMenuSeparator />
+        <Separator />
         <DropdownMenuItem
-          disabled={loading}
           className="hover:cursor-pointer"
-          onClick={() => handleRemove()}
+          disabled={loading}
+          onClick={() => handleUnregister()}
         >
-          <Trash className="mr-2 w-5" />
-          Remove
+          <X className="mr-2 w-5" />
+          Remove User
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

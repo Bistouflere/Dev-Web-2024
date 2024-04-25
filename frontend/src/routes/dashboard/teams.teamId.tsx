@@ -1,7 +1,13 @@
-import { teamQueryOptions, teamUsersQueryOptions } from "@/api/teams";
-import { columns } from "@/components/dashboard/team-members-table/columns";
+import {
+  teamQueryOptions,
+  teamTournamentsQueryOptions,
+  teamUsersQueryOptions,
+} from "@/api/teams";
+import { columns as membersColumns } from "@/components/dashboard/team-members-table/columns";
 import { DashboardTeamMembersTable } from "@/components/dashboard/team-members-table/table";
 import { DashboardTeamSettings } from "@/components/dashboard/team-settings";
+import { columns as tournamentsColumns } from "@/components/dashboard/team-tournaments-table/columns";
+import { DashboardTeamTournamentTable } from "@/components/dashboard/team-tournaments-table/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +31,10 @@ export default function TeamDetailPage() {
     isLoading: usersLoading,
     isFetching: userIsFetching,
   } = useQuery(teamUsersQueryOptions(searchTeamId || ""));
+
+  const { data: tournaments } = useQuery(
+    teamTournamentsQueryOptions(searchTeamId || ""),
+  );
 
   useEffect(() => {
     if (!teamIsLoading && !teamIsFetching && !team) {
@@ -82,9 +92,17 @@ export default function TeamDetailPage() {
                 <DashboardTeamSettings />
               </TabsContent>
               <TabsContent value="members">
-                <DashboardTeamMembersTable columns={columns} data={users} />
+                <DashboardTeamMembersTable
+                  columns={membersColumns}
+                  data={users}
+                />
               </TabsContent>
-              <TabsContent value="tournaments"></TabsContent>
+              <TabsContent value="tournaments">
+                <DashboardTeamTournamentTable
+                  columns={tournamentsColumns}
+                  data={tournaments || []}
+                />
+              </TabsContent>
             </Tabs>
           </div>
         )}

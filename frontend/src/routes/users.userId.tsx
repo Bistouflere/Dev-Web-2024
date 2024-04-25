@@ -20,27 +20,7 @@ export default function UserProfile() {
   const { data: user } = useQuery(userQueryOptions(searchUserId));
 
   const invalidateQueries = useCallback(() => {
-    queryClient.invalidateQueries({
-      queryKey: [`users`],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [`user`],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [`followers_count`],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [`following_count`],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [`is_following`],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [`followers`],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [`following`],
-    });
+    queryClient.invalidateQueries();
   }, [queryClient]);
 
   const handleFollowUser = async () => {

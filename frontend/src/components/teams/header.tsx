@@ -68,7 +68,7 @@ export default function TeamHeader({
           return u.id === userId && u.team_role !== "participant";
         }) && (
           <Link to={`/dashboard/teams/${team.id}`}>
-            <Button className="mr-2">
+            <Button className="mr-2" variant="secondary">
               <Pencil className="mr-2 h-5 w-5" /> Edit team
             </Button>
           </Link>

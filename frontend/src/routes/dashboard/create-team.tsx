@@ -48,7 +48,7 @@ type TeamFormValues = z.infer<typeof teamFormSchema>;
 export default function CreateTeamPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { userId, getToken } = useAuth();
+  const { getToken } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -64,12 +64,8 @@ export default function CreateTeamPage() {
   });
 
   const invalidateQueries = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: [`teams`] });
-    queryClient.invalidateQueries({ queryKey: [`user_teams`] });
-    queryClient.invalidateQueries({
-      queryKey: [`team_users_${userId}`],
-    });
-  }, [queryClient, userId]);
+    queryClient.invalidateQueries();
+  }, [queryClient]);
 
   const onSubmit = async (data: TeamFormValues) => {
     const formData = new FormData();

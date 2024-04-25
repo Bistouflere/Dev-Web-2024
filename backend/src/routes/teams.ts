@@ -2,6 +2,7 @@ import { query } from "../db/index";
 import { processImage, upload } from "../middleware/upload";
 import { validateTeamData } from "../validator/teamDataValidator";
 import { validateTeamId } from "../validator/teamIdValidator";
+import { validateTournamentId } from "../validator/tournamentIdValidator";
 import {
   ClerkExpressRequireAuth,
   RequireAuthProp,
@@ -298,6 +299,82 @@ router.delete(
 );
 
 router.delete(
+  "/:teamId/users/:userId",
+  ClerkExpressRequireAuth({}),
+  validateTeamId,
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { teamId, userId } = req.params;
+    const teamOwnerId = req.auth.userId;
+
+    try {
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
+      const authUserResult = await query(authUserSql, [teamOwnerId]);
+
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${teamOwnerId} not found` });
+      }
+
+      const teamSql = "SELECT * FROM teams WHERE id = $1;";
+      const teamResult = await query(teamSql, [teamId]);
+
+      if (teamResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `Team with ID ${teamId} not found` });
+      }
+
+      const userSql = "SELECT * FROM users WHERE id = $1;";
+      const userResult = await query(userSql, [userId]);
+
+      if (userResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${userId} not found` });
+      }
+
+      const isTeamOwnerSql = `SELECT * FROM teams_users WHERE team_id = $1 AND user_id = $2 AND role = 'owner' OR role = 'manager';`;
+      const isTeamOwnerResult = await query(isTeamOwnerSql, [
+        teamId,
+        teamOwnerId,
+      ]);
+
+      if (isTeamOwnerResult.rowCount === 0) {
+        return res.status(403).json({
+          message: `User with ID ${teamOwnerId} is not an owner or manager of team with ID ${teamId}`,
+        });
+      }
+
+      const existingTeamUserSql = `SELECT * FROM teams_users WHERE team_id = $1 AND user_id = $2;`;
+      const existingTeamUserResult = await query(existingTeamUserSql, [
+        teamId,
+        userId,
+      ]);
+
+      if (existingTeamUserResult.rowCount === 0) {
+        return res.status(404).json({
+          message: `User with ID ${userId} is not a member of team with ID ${teamId}`,
+        });
+      }
+
+      if (existingTeamUserResult.rows[0].role === "owner") {
+        return res.status(403).json({
+          message: `Team owners cannot be removed from the team`,
+        });
+      }
+
+      const sql = `DELETE FROM teams_users WHERE team_id = $1 AND user_id = $2;`;
+      await query(sql, [teamId, userId]);
+
+      return res.status(200).json({ message: "User removed from team" });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.delete(
   "/:teamId/users",
   ClerkExpressRequireAuth({}),
   validateTeamId,
@@ -342,6 +419,13 @@ router.delete(
         WHERE team_id = $1 AND user_id = $2
       `;
       await query(sql, [teamId, authId]);
+
+      const removeTournamentUser = `
+        DELETE FROM tournaments_users
+        WHERE team_id = $1 AND user_id = $2
+      `;
+
+      await query(removeTournamentUser, [teamId, authId]);
 
       return res.status(200).json({ message: "User removed from team" });
     } catch (error) {
@@ -396,6 +480,34 @@ router.get(
       `;
 
       const result = await query(sql, [teamId]);
+
+      return res.status(200).json(result.rows);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.get(
+  "/:teamId/tournaments/:tournamentId/users",
+  validateTeamId,
+  validateTournamentId,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { teamId, tournamentId } = req.params;
+
+    try {
+      const sql = `
+        SELECT
+          users.*,
+          tournaments_users.role AS tournament_role
+        FROM users
+        JOIN tournaments_users ON users.id = tournaments_users.user_id
+        WHERE tournaments_users.tournament_id = $1
+        AND tournaments_users.team_id = $2
+        ORDER BY tournaments_users.role;
+      `;
+
+      const result = await query(sql, [tournamentId, teamId]);
 
       return res.status(200).json(result.rows);
     } catch (error) {

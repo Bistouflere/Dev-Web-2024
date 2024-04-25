@@ -92,7 +92,7 @@ type TournamentFormValues = z.infer<typeof tournamentFormSchema>;
 export default function CreateTournamentPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { userId, getToken } = useAuth();
+  const { getToken } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -117,11 +117,8 @@ export default function CreateTournamentPage() {
   });
 
   const invalidateQueries = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: [`tournaments`] });
-    queryClient.invalidateQueries({
-      queryKey: [`tournaments_users_${userId}`],
-    });
-  }, [queryClient, userId]);
+    queryClient.invalidateQueries();
+  }, [queryClient]);
 
   const onSubmit = async (data: TournamentFormValues) => {
     const formData = new FormData();

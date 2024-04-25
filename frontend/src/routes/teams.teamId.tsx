@@ -38,18 +38,7 @@ export default function TeamProfile() {
   );
 
   const invalidateQueries = useCallback(() => {
-    queryClient.invalidateQueries({
-      queryKey: [`users`],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [`user`],
-    });
-    queryClient.invalidateQueries({ queryKey: [`user_teams`] });
-    queryClient.invalidateQueries({ queryKey: [`team`] });
-    queryClient.invalidateQueries({ queryKey: [`teams`] });
-    queryClient.invalidateQueries({
-      queryKey: [`team_users`],
-    });
+    queryClient.invalidateQueries();
   }, [queryClient]);
 
   const handleTeamJoin = async () => {

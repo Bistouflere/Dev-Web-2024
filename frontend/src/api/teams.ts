@@ -1,4 +1,10 @@
-import { Count, Team, TeamUser, Tournament } from "@/types/apiResponses";
+import {
+  Count,
+  Team,
+  TeamUser,
+  Tournament,
+  TournamentUser,
+} from "@/types/apiResponses";
 import { keepPreviousData, queryOptions } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -58,6 +64,17 @@ export function teamTournamentsCountQueryOptions(id: string) {
   });
 }
 
+export function teamTournamentUsersQueryOptions(
+  id: string,
+  tournamentId: string,
+) {
+  return queryOptions({
+    queryKey: [`team_tournament_users`, { id, tournamentId }],
+    queryFn: () => fetchTeamTournamentUsers(id, tournamentId),
+    placeholderData: keepPreviousData,
+  });
+}
+
 export async function fetchTeam(id: string): Promise<Team> {
   return axios.get<Team>(`/api/teams/${id}`).then((res) => {
     console.log(`/api/teams/${id}`, res.data);
@@ -105,4 +122,19 @@ export async function fetchTeamTournamentsCount(id: string): Promise<number> {
     console.log(`/api/teams/${id}/tournaments/count`, res.data);
     return res.data.count;
   });
+}
+
+export async function fetchTeamTournamentUsers(
+  id: string,
+  tournamentId: string,
+): Promise<TournamentUser[]> {
+  return axios
+    .get<TournamentUser[]>(`/api/teams/${id}/tournaments/${tournamentId}/users`)
+    .then((res) => {
+      console.log(
+        `/api/teams/${id}/tournaments/${tournamentId}/users`,
+        res.data,
+      );
+      return res.data;
+    });
 }
