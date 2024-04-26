@@ -73,55 +73,63 @@ export default function TournamentProfile() {
   });
 
   return (
-    <div className="container py-4">
-      {tournament && (
-        <div className="flex flex-col gap-4">
-          <TournamentHeader
-            userId={userId}
-            tournament={tournament}
-            teams={teams || []}
-            users={users || []}
-          />
-          <Tabs
-            defaultValue="overview"
-            value={tab}
-            onValueChange={onTabChange}
-            className="mt-4"
-          >
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="bracket">Bracket</TabsTrigger>
-              <TabsTrigger value="members">Members</TabsTrigger>
-              <TabsTrigger value="teams">Teams</TabsTrigger>
-            </TabsList>
-            <TabsContent value="bracket"></TabsContent>
-            <TabsContent value="overview" className="mt-4 flex flex-col gap-4">
-              <TournamentMembersCard
-                tournament={tournament}
-                users={users || []}
-                setTab={setTab}
-              />
-              <TournamentsTeamCard
-                tournament={tournament}
-                teams={teams || []}
-                setTab={setTab}
-              />
-            </TabsContent>
-            <TabsContent value="members">
-              <TournamentMembersTable
-                columns={membersColumns}
-                data={users || []}
-              />
-            </TabsContent>
-            <TabsContent value="teams">
-              <TournamentTeamTable columns={teamsColumns} data={teams || []} />
-            </TabsContent>
-          </Tabs>
-          <div
-            className={cn("brackets-viewer", tab === "bracket" ? "" : "hidden")}
-          ></div>
-        </div>
-      )}
-    </div>
+    <>
+      <div className="container py-4">
+        {tournament && (
+          <div className="flex flex-col gap-4">
+            <TournamentHeader
+              userId={userId}
+              tournament={tournament}
+              teams={teams || []}
+              users={users || []}
+            />
+            <Tabs
+              defaultValue="overview"
+              value={tab}
+              onValueChange={onTabChange}
+              className="mt-4"
+            >
+              <TabsList>
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="bracket">Bracket</TabsTrigger>
+                <TabsTrigger value="members">Members</TabsTrigger>
+                <TabsTrigger value="teams">Teams</TabsTrigger>
+              </TabsList>
+              <TabsContent value="bracket"></TabsContent>
+              <TabsContent
+                value="overview"
+                className="mt-4 flex flex-col gap-4"
+              >
+                <TournamentMembersCard
+                  tournament={tournament}
+                  users={users || []}
+                  setTab={setTab}
+                />
+                <TournamentsTeamCard
+                  tournament={tournament}
+                  teams={teams || []}
+                  setTab={setTab}
+                />
+              </TabsContent>
+              <TabsContent value="members">
+                <TournamentMembersTable
+                  columns={membersColumns}
+                  data={users || []}
+                />
+              </TabsContent>
+              <TabsContent value="teams">
+                <TournamentTeamTable
+                  columns={teamsColumns}
+                  data={teams || []}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
+        <div
+          className={cn("brackets-viewer", tab === "bracket" ? "" : "hidden")}
+        ></div>
+      </div>
+    </>
   );
 }

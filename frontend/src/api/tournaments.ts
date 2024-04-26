@@ -1,11 +1,4 @@
-import {
-  Count,
-  Match,
-  Pool,
-  Team,
-  Tournament,
-  TournamentUser,
-} from "@/types/apiResponses";
+import { Count, Team, Tournament, TournamentUser } from "@/types/apiResponses";
 import { keepPreviousData, queryOptions } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -65,26 +58,10 @@ export function tournamentUsersCountQueryOptions(id: string) {
   });
 }
 
-export function tournamentPoolsQueryOptions(id: string) {
-  return queryOptions({
-    queryKey: [`tournament_pools`, { id }],
-    queryFn: () => fetchTournamentPools(id),
-    placeholderData: keepPreviousData,
-  });
-}
-
 export function tournamentPoolCountQueryOptions(id: string) {
   return queryOptions({
     queryKey: [`tournament_pool_count`, { id }],
     queryFn: () => fetchTournamentPoolsCount(id),
-    placeholderData: keepPreviousData,
-  });
-}
-
-export function tournamentMatchesQueryOptions(id: string) {
-  return queryOptions({
-    queryKey: [`tournament_matches`, { id }],
-    queryFn: () => fetchTournamentMatches(id),
     placeholderData: keepPreviousData,
   });
 }
@@ -160,24 +137,10 @@ export async function fetchTournamentUsersCount(id: string): Promise<number> {
   });
 }
 
-export async function fetchTournamentPools(id: string): Promise<Pool[]> {
-  return axios.get<Pool[]>(`/api/tournaments/${id}/pools`).then((res) => {
-    console.log(`/api/tournaments/${id}/pools`, res.data);
-    return res.data;
-  });
-}
-
 export async function fetchTournamentPoolsCount(id: string): Promise<number> {
   return axios.get<Count>(`/api/tournaments/${id}/pools/count`).then((res) => {
     console.log(`/api/tournaments/${id}/pools/count`, res.data);
     return res.data.count;
-  });
-}
-
-export async function fetchTournamentMatches(id: string): Promise<Match[]> {
-  return axios.get<Match[]>(`/api/tournaments/${id}/matches`).then((res) => {
-    console.log(`/api/tournaments/${id}/matches`, res.data);
-    return res.data;
   });
 }
 
