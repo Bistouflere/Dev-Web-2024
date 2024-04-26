@@ -3,10 +3,13 @@ import { processImage, upload } from "../middleware/upload";
 import { validateTeamId } from "../validator/teamIdValidator";
 import { validateTournamentData } from "../validator/tournamentDataValidator";
 import { validateTournamentId } from "../validator/tournamentIdValidator";
+import { validateTournamentStatus } from "../validator/tournamentStatusValidator";
 import {
   ClerkExpressRequireAuth,
   RequireAuthProp,
 } from "@clerk/clerk-sdk-node";
+import { BracketsManager } from "brackets-manager";
+import { InMemoryDatabase } from "brackets-memory-db";
 import express, { NextFunction, Request, Response } from "express";
 
 const router = express.Router();
@@ -592,6 +595,117 @@ router.delete(
   },
 );
 
+router.patch(
+  "/:tournamentId/status/:tournamentStatus",
+  ClerkExpressRequireAuth({}),
+  validateTournamentId,
+  validateTournamentStatus,
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { tournamentId, tournamentStatus } = req.params;
+    const ownerId = req.auth.userId;
+    const status = tournamentStatus.toLowerCase();
+
+    try {
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
+      const authUserResult = await query(authUserSql, [ownerId]);
+
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${ownerId} not found` });
+      }
+
+      const tournamentSql = "SELECT * FROM tournaments WHERE id = $1;";
+      const tournamentResult = await query(tournamentSql, [tournamentId]);
+
+      if (tournamentResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `Tournament with ID ${tournamentId} not found` });
+      }
+
+      const isOwnerSql = `SELECT * FROM tournaments_users WHERE tournament_id = $1 AND user_id = $2 AND role = 'owner' or role = 'manager';`;
+      const isOwnerResult = await query(isOwnerSql, [tournamentId, ownerId]);
+
+      if (isOwnerResult.rowCount === 0) {
+        return res.status(403).json({
+          message: `User with ID ${ownerId} is not an owner or manager of tournament with ID ${tournamentId}`,
+        });
+      }
+
+      switch (status) {
+        case "upcoming":
+          break;
+        case "active": {
+          const tournamentTeamsSql = `
+            SELECT 
+              teams.id,
+              teams.name
+            FROM tournaments_teams
+            JOIN teams ON tournaments_teams.team_id = teams.id
+            WHERE tournaments_teams.tournament_id = $1;
+          `;
+          const tournamentTeamsResult = await query(tournamentTeamsSql, [
+            tournamentId,
+          ]);
+
+          if (tournamentTeamsResult.rowCount === 0) {
+            return res.status(400).json({
+              message: `Tournament with ID ${tournamentId} has no teams`,
+            });
+          }
+
+          const teams = tournamentTeamsResult.rows.map(
+            (team: { id: string; tournament_id: string; name: string }) => {
+              return {
+                id: team.id,
+                name: team.name,
+                tournament_id: tournamentId,
+              };
+            },
+          );
+
+          const tournament = tournamentResult.rows[0];
+          const storage = new InMemoryDatabase();
+          const manager = new BracketsManager(storage);
+
+          await manager.create.stage({
+            tournamentId: tournamentId,
+            name: tournament.name,
+            type: tournament.format,
+            seeding: teams,
+            settings: {
+              size: tournament.max_teams,
+              grandFinal: "double",
+            },
+          });
+
+          const data = await manager.get.tournamentData(tournamentId);
+
+          const updateTournamentDataSql = `
+              UPDATE tournaments
+              SET data = $1, status = $2
+              WHERE id = $3;
+            `;
+          await query(updateTournamentDataSql, [data, status, tournamentId]);
+
+          return res.status(200).json({ message: "Tournament started" });
+        }
+        case "completed":
+          break;
+        case "cancelled":
+          break;
+        default:
+          return res.status(400).json({
+            message: `tournamentStatus must be one of 'upcoming', 'active', 'completed', or 'cancelled'`,
+          });
+      }
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 router.post(
   "/",
   ClerkExpressRequireAuth({}),
@@ -644,6 +758,7 @@ router.post(
         .split(",")
         .map((tag: string) => tag.trim())
         .filter(Boolean);
+
       const insertTournamentSql = `
         INSERT INTO tournaments (
           name,
@@ -678,13 +793,12 @@ router.post(
         start_date,
         end_date,
       ]);
-      const tournamentId = result.rows[0].id;
 
       const insertTournamentUserSql = `
         INSERT INTO tournaments_users (tournament_id, user_id, role)
         VALUES ($1, $2, 'owner')
       `;
-      await query(insertTournamentUserSql, [tournamentId, authId]);
+      await query(insertTournamentUserSql, [result.rows[0].id, authId]);
 
       res.status(201).json(result.rows[0]);
     } catch (error) {

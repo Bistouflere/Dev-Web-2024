@@ -1,3 +1,12 @@
+import {
+  Group,
+  Match,
+  MatchGame,
+  Participant,
+  Round,
+  Stage,
+} from "brackets-model";
+
 export type Count = {
   count: number;
 };
@@ -27,6 +36,15 @@ export type Game = {
   updated_at: string;
 };
 
+export type TournamentData = {
+  group: Group[];
+  match: Match[];
+  round: Round[];
+  stage: Stage[];
+  match_game: MatchGame[];
+  participant: Participant[];
+};
+
 export type Tournament = {
   id: string;
   name: string;
@@ -37,6 +55,7 @@ export type Tournament = {
   visibility: "public" | "private";
   status: "upcoming" | "active" | "completed" | "cancelled";
   tags: string[];
+  data: TournamentData;
   cash_prize: number | null;
   max_teams: number;
   max_team_size: number;
@@ -81,32 +100,6 @@ export type UserTeam = {
 export type TeamUser = {
   team_role: "participant" | "manager" | "owner";
 } & User;
-
-export type Pool = {
-  id: string;
-  tournament_id: string;
-  name: string;
-  created_at: string;
-  updated_at: string;
-};
-
-export type Match = {
-  id: string;
-  tournament_id: string;
-  pool_id: string;
-  team1_id: string;
-  team2_id: string;
-  start_time: string | null;
-  actual_start_time: string | null;
-  end_time: string | null;
-  status: "pending" | "active" | "completed" | "cancelled";
-  winner_id: string | null;
-  created_at: string;
-  updated_at: string;
-  pool_name: string;
-  pool_created_at: string;
-  pool_updated_at: string;
-};
 
 export type Invitation = {
   team_id: string;

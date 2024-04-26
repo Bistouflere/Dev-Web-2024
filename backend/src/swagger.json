@@ -111,6 +111,9 @@
           "400": {
             "description": "Bad Request"
           },
+          "403": {
+            "description": "Forbidden"
+          },
           "404": {
             "description": "Not Found"
           }
@@ -160,21 +163,137 @@
       },
       "get": {
         "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/teams/{teamId}": {
+      "put": {
+        "description": "",
         "parameters": [
           {
-            "name": "query",
-            "in": "query",
+            "name": "teamId",
+            "in": "path",
+            "required": true,
             "type": "string"
           },
           {
-            "name": "page",
-            "in": "query",
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "example": "any"
+                },
+                "description": {
+                  "example": "any"
+                },
+                "visibility": {
+                  "example": "any"
+                },
+                "file": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/teams/{teamId}/users/{userId}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -206,6 +325,33 @@
         "parameters": [
           {
             "name": "teamId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/teams/{teamId}/tournaments/{tournamentId}/users": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "tournamentId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -255,27 +401,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/teams/{teamId}": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "teamId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
           }
         }
       }
@@ -334,58 +459,11 @@
           }
         ],
         "responses": {
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      },
-      "post": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "tournamentId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "403": {
-            "description": "Forbidden"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "409": {
-            "description": "Conflict"
-          }
-        }
-      },
-      "delete": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "tournamentId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
           "200": {
             "description": "OK"
           },
           "400": {
             "description": "Bad Request"
-          },
-          "404": {
-            "description": "Not Found"
           }
         }
       }
@@ -525,6 +603,182 @@
         }
       }
     },
+    "/api/tournaments/{tournamentId}/teams/{teamId}/users/{userId}": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "tournamentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "tournamentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/tournaments/{tournamentId}/teams/{teamId}": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "tournamentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "tournamentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/tournaments/{tournamentId}/status/{tournamentStatus}": {
+      "patch": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "tournamentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "tournamentStatus",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/api/tournaments/": {
       "post": {
         "description": "",
@@ -595,52 +849,9 @@
       },
       "get": {
         "description": "",
-        "parameters": [
-          {
-            "name": "query",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "type": "string"
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/users/{userId}/followers": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "query",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
           }
         }
       }
@@ -694,7 +905,7 @@
         }
       }
     },
-    "/api/users/{userId}/followers/count": {
+    "/api/users/{userId}/followers": {
       "get": {
         "description": "",
         "parameters": [
@@ -703,10 +914,23 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/users/{userId}/followers/count": {
+      "get": {
+        "description": "",
+        "parameters": [
           {
-            "name": "query",
-            "in": "query",
+            "name": "userId",
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],
@@ -726,24 +950,11 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "query",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
           }
         }
       }
@@ -756,11 +967,6 @@
             "name": "userId",
             "in": "path",
             "required": true,
-            "type": "string"
-          },
-          {
-            "name": "query",
-            "in": "query",
             "type": "string"
           }
         ],
@@ -911,18 +1117,6 @@
     "/api/users/": {
       "get": {
         "description": "",
-        "parameters": [
-          {
-            "name": "query",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "type": "string"
-          }
-        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -996,6 +1190,9 @@
           },
           "404": {
             "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
           }
         }
       }
@@ -1020,6 +1217,49 @@
           },
           "404": {
             "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/invitations/cancel/{userId}/{teamId}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "teamId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/api/invitations/sent": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }

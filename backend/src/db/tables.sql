@@ -76,30 +76,9 @@ CREATE TABLE tournaments (
     min_team_size INT NOT NULL DEFAULT 5,
     start_date TIMESTAMP,
     end_date TIMESTAMP,
-    tree JSONB,
+    data JSONB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
-CREATE TABLE tournament_matches (
-    id BIGSERIAL PRIMARY KEY,
-    tournament_id BIGINT REFERENCES tournaments(id) ON DELETE CASCADE,
-    round_number INT NOT NULL,
-    match_number INT NOT NULL,
-    name TEXT NOT NULL,
-    start_time TIMESTAMP,
-    state TEXT NOT NULL DEFAULT 'scheduled', -- 'scheduled', 'ongoing', 'completed'
-    winner_id BIGINT REFERENCES teams(id),
-    CONSTRAINT unique_match_per_tournament UNIQUE (tournament_id, round_number, match_number)
-);
-
-CREATE TABLE match_participants (
-    id BIGSERIAL PRIMARY KEY,
-    match_id BIGINT REFERENCES tournament_matches(id) ON DELETE CASCADE,
-    team_id BIGINT REFERENCES teams(id) ON DELETE CASCADE,
-    result_text TEXT, -- 'WON', 'LOST', etc.
-    is_winner BOOLEAN NOT NULL DEFAULT false,
-    status TEXT -- 'PLAYED', 'NO_SHOW', 'WALK_OVER', 'NO_PARTY'
 );
 
 CREATE TABLE tournaments_teams (
@@ -129,9 +108,6 @@ CREATE TRIGGER updated_at_users BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNC
 CREATE TRIGGER updated_at_teams BEFORE UPDATE ON teams FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER updated_at_games BEFORE UPDATE ON games FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER updated_at_tournaments BEFORE UPDATE ON tournaments FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER updated_at_pools BEFORE UPDATE ON pools FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER updated_at_matches BEFORE UPDATE ON matches FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-CREATE TRIGGER updated_at_match_scores BEFORE UPDATE ON match_scores FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 INSERT INTO users (id, username, image_url, email_address) VALUES 
 ('user_2ewoAgaj7Zk1uQhFtdO9r6Prv70', 'owhestia', 'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZGlzY29yZC9pbWdfMmV3b0FqSlZtczBkbHJPU1Z4eFMyVXhpMFJnIn0', 'owhestia@gmail.com'), 
