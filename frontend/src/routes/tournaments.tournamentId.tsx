@@ -55,7 +55,7 @@ export default function TournamentProfile() {
   );
 
   async function render() {
-    if (tournament?.data && tournament?.data.participant.length >= 2) {
+    if (tournament?.data && tournament?.data.participant.length >= 1) {
       window.bracketsViewer.render(
         {
           stages: tournament?.data.stage,

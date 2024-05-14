@@ -595,7 +595,7 @@ router.delete(
   },
 );
 
-router.patch(
+router.put(
   "/:tournamentId/status/:tournamentStatus",
   ClerkExpressRequireAuth({}),
   validateTournamentId,
@@ -826,9 +826,6 @@ router.put(
         format,
         tags,
         cash_prize,
-        max_teams,
-        max_team_size,
-        min_team_size,
         start_date,
         end_date,
         visibility,
@@ -916,9 +913,6 @@ router.put(
               visibility = $6,
               tags = $7,
               cash_prize = $8,
-              max_teams = $9,
-              max_team_size = $10,
-              min_team_size = $11,
               start_date = $12,
               end_date = $13
           WHERE id = $14
@@ -933,9 +927,6 @@ router.put(
           visibility_name,
           tagsArray,
           cash_prize,
-          max_teams,
-          max_team_size,
-          min_team_size,
           start_date,
           end_date,
           tournamentId,
@@ -966,9 +957,6 @@ router.put(
           visibility_name,
           tagsArray,
           cash_prize,
-          max_teams,
-          max_team_size,
-          min_team_size,
           start_date,
           end_date,
           tournamentId,

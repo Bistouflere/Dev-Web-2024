@@ -375,6 +375,36 @@ export async function updateTournament(
   }
 }
 
+export async function updateTournamentStatus(
+  tournamentId: string,
+  status: string,
+  getToken: () => Promise<string | null>,
+  invalidateQueries: () => void,
+) {
+  const token = await getToken();
+
+  try {
+    const response = await axios.put<Promise<Tournament>>(
+      `/api/tournaments/${tournamentId}/status/${status}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    invalidateQueries();
+    return response.data;
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      throw new Error(error.response?.data.message);
+    } else {
+      throw new Error((error as Error).message);
+    }
+  }
+}
+
 export async function deleteTournament(
   tournamentId: string,
   getToken: () => Promise<string | null>,

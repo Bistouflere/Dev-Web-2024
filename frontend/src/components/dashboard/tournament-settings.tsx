@@ -1,6 +1,10 @@
 import { gamesQueryOptions } from "@/api/games";
 import { tournamentQueryOptions } from "@/api/tournaments";
-import { deleteTournament, updateTournament } from "@/api/userActions";
+import {
+  deleteTournament,
+  updateTournament,
+  updateTournamentStatus,
+} from "@/api/userActions";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,7 +37,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Loader2, Pencil, Trash } from "lucide-react";
+import { Loader2, Pencil, Play, Trash, X } from "lucide-react";
 import { CalendarIcon } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -269,6 +273,38 @@ export function DashboardTournamentSettings() {
     }
   }
 
+  async function handleTournamentStatus(status: "active" | "cancelled") {
+    setLoading(true);
+
+    try {
+      await updateTournamentStatus(
+        tournament.id,
+        status,
+        getToken,
+        invalidateQueries,
+      );
+      toast({
+        title: "Success!",
+        description: `${tournament.name} is now ${status}.`,
+      });
+
+      setTimeout(() => {
+        setLoading(false);
+        navigate(`/dashboard/tournaments/${tournament.id}`);
+      }, 1000);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error updating tournament status:", error);
+      toast({
+        variant: "destructive",
+        title: "Oops!",
+        description:
+          (error as Error).message ||
+          `An error occurred while updating your tournament status.`,
+      });
+    }
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -430,57 +466,6 @@ export function DashboardTournamentSettings() {
         <div className="flex flex-col md:flex-row md:gap-10">
           <FormField
             control={form.control}
-            name="max_teams"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Max Teams x^2 (Required)</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-                <FormDescription>
-                  This is the maximum number of teams that can join your
-                  tournament.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="max_team_size"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Max Team Size (Required)</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-                <FormDescription>
-                  This is the maximum number of players per team.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="min_team_size"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Min Team Size (Required)</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-                <FormDescription>
-                  This is the minimum number of players per team.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="flex flex-col md:flex-row md:gap-10">
-          <FormField
-            control={form.control}
             name="start_date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
@@ -584,7 +569,7 @@ export function DashboardTournamentSettings() {
             </FormItem>
           )}
         />
-        <div className="flex justify-between">
+        <div className="flex flex-col justify-between gap-2 sm:flex-row">
           {loading ? (
             <Button type="submit" disabled>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -596,27 +581,60 @@ export function DashboardTournamentSettings() {
               Edit Tournament
             </Button>
           )}
-          {loading ? (
-            <Button
-              type="button"
-              variant="destructive"
-              disabled
-              className="ml-2"
-            >
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Processing...
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="destructive"
-              className="ml-2"
-              onClick={() => handleDeleteTournament()}
-            >
-              <Trash className="mr-2 h-5 w-5" />
-              Delete Tournament
-            </Button>
-          )}
+          <div className="flex flex-col justify-between gap-2 sm:flex-row">
+            {loading ? (
+              <Button
+                type="button"
+                variant="secondary"
+                disabled
+                className="sm:ml-2"
+              >
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processing...
+              </Button>
+            ) : tournament.status === "upcoming" ? (
+              <Button
+                type="button"
+                variant="secondary"
+                className="sm:ml-2"
+                onClick={() => handleTournamentStatus("active")}
+              >
+                <Play className="mr-2 h-5 w-5" />
+                Start Tournament
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="secondary"
+                className="sm:ml-2"
+                onClick={() => handleTournamentStatus("cancelled")}
+              >
+                <X className="mr-2 h-5 w-5" />
+                Cancel Tournament
+              </Button>
+            )}
+            {loading ? (
+              <Button
+                type="button"
+                variant="destructive"
+                disabled
+                className="sm:ml-2"
+              >
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processing...
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="destructive"
+                className="sm:ml-2"
+                onClick={() => handleDeleteTournament()}
+              >
+                <Trash className="mr-2 h-5 w-5" />
+                Delete Tournament
+              </Button>
+            )}
+          </div>
         </div>
       </form>
     </Form>
