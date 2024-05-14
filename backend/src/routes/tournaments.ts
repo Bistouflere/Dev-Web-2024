@@ -759,6 +759,8 @@ router.post(
         .map((tag: string) => tag.trim())
         .filter(Boolean);
 
+      const visibility_name = visibility === "true" ? "public" : "private";
+
       const insertTournamentSql = `
         INSERT INTO tournaments (
           name,
@@ -784,7 +786,7 @@ router.post(
         imageUrl,
         game,
         format,
-        visibility ? "public" : "private",
+        visibility_name,
         tagsArray,
         cash_prize,
         max_teams,
@@ -801,6 +803,230 @@ router.post(
       await query(insertTournamentUserSql, [result.rows[0].id, authId]);
 
       res.status(201).json(result.rows[0]);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.put(
+  "/:tournamentId",
+  ClerkExpressRequireAuth({}),
+  upload.single("file"),
+  validateTournamentData,
+  validateTournamentId,
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { tournamentId } = req.params;
+
+    try {
+      const {
+        name,
+        description,
+        game,
+        format,
+        tags,
+        cash_prize,
+        max_teams,
+        max_team_size,
+        min_team_size,
+        start_date,
+        end_date,
+        visibility,
+      } = req.body;
+      const authId = req.auth.userId;
+
+      const tournamentUserRolesSql = `
+        SELECT * FROM tournaments_users WHERE tournament_id = $1 AND user_id = $2;
+      `;
+      const tournamentUserRolesResult = await query(tournamentUserRolesSql, [
+        tournamentId,
+        authId,
+      ]);
+
+      if (tournamentUserRolesResult.rowCount === 0) {
+        return res.status(403).json({
+          message: `You are not authorized to update this tournament`,
+        });
+      }
+
+      const userRole = tournamentUserRolesResult.rows[0].role;
+
+      if (userRole !== "owner" && userRole !== "manager") {
+        return res.status(403).json({
+          message: `You are not authorized to update this tournament`,
+        });
+      }
+
+      let imageUrl: string | null = null;
+
+      if (req.file) {
+        imageUrl = `https://madbracket.xyz/images/${await processImage(req.file)}`;
+      }
+
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
+      const authUserResult = await query(authUserSql, [authId]);
+
+      if (authUserResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `User with ID ${authId} not found` });
+      }
+
+      const tournamentSql = "SELECT * FROM tournaments WHERE id = $1;";
+      const tournamentResult = await query(tournamentSql, [tournamentId]);
+
+      if (tournamentResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `Tournament with ID ${tournamentId} not found` });
+      }
+
+      const existingTournamentSql =
+        "SELECT * FROM tournaments WHERE name ILIKE $1 AND id != $2;";
+      const existingTournamentResult = await query(existingTournamentSql, [
+        name,
+        tournamentId,
+      ]);
+
+      if (existingTournamentResult.rowCount !== 0) {
+        return res
+          .status(409)
+          .json({ message: `Tournament with name ${name} already exists` });
+      }
+
+      let updateTournamentSql: string;
+      let queryParams: any[];
+
+      const tagsArray = (tags || "")
+        .toLowerCase()
+        .split(",")
+        .map((tag: string) => tag.trim())
+        .filter(Boolean);
+
+      const visibility_name = visibility === "true" ? "public" : "private";
+
+      if (imageUrl) {
+        updateTournamentSql = `
+          UPDATE tournaments
+          SET name = $1,
+              description = $2,
+              image_url = $3,
+              game_id = $4,
+              format = $5,
+              visibility = $6,
+              tags = $7,
+              cash_prize = $8,
+              max_teams = $9,
+              max_team_size = $10,
+              min_team_size = $11,
+              start_date = $12,
+              end_date = $13
+          WHERE id = $14
+          RETURNING *;
+        `;
+        queryParams = [
+          name,
+          description,
+          imageUrl,
+          game,
+          format,
+          visibility_name,
+          tagsArray,
+          cash_prize,
+          max_teams,
+          max_team_size,
+          min_team_size,
+          start_date,
+          end_date,
+          tournamentId,
+        ];
+      } else {
+        updateTournamentSql = `
+          UPDATE tournaments
+          SET name = $1,
+              description = $2,
+              game_id = $3,
+              format = $4,
+              visibility = $5,
+              tags = $6,
+              cash_prize = $7,
+              max_teams = $8,
+              max_team_size = $9,
+              min_team_size = $10,
+              start_date = $11,
+              end_date = $12
+          WHERE id = $13
+          RETURNING *;
+        `;
+        queryParams = [
+          name,
+          description,
+          game,
+          format,
+          visibility_name,
+          tagsArray,
+          cash_prize,
+          max_teams,
+          max_team_size,
+          min_team_size,
+          start_date,
+          end_date,
+          tournamentId,
+        ];
+      }
+
+      const result = await query(updateTournamentSql, queryParams);
+
+      res.status(200).json(result.rows[0]);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+router.delete(
+  "/:tournamentId",
+  ClerkExpressRequireAuth({}),
+  validateTournamentId,
+  async (req: RequireAuthProp<Request>, res: Response, next: NextFunction) => {
+    const { tournamentId } = req.params;
+    const authId = req.auth.userId;
+
+    try {
+      const authUserSql = "SELECT * FROM users WHERE id = $1;";
+      const authUserResult = await query(authUserSql, [authId]);
+
+      if (authUserResult.rowCount === 0) {
+        return res.status(404).json({ message: `User with your ID not found` });
+      }
+
+      const tournamentSql = "SELECT * FROM tournaments WHERE id = $1;";
+      const tournamentResult = await query(tournamentSql, [tournamentId]);
+
+      if (tournamentResult.rowCount === 0) {
+        return res
+          .status(404)
+          .json({ message: `Tournament with ID ${tournamentId} not found` });
+      }
+
+      const isOwnerSql = `SELECT * FROM tournaments_users WHERE tournament_id = $1 AND user_id = $2 AND role = 'owner';`;
+      const isOwnerResult = await query(isOwnerSql, [tournamentId, authId]);
+
+      if (isOwnerResult.rowCount === 0) {
+        return res.status(403).json({
+          message: `You are not authorized to delete this tournament`,
+        });
+      }
+
+      const sql = `
+        DELETE FROM tournaments
+        WHERE id = $1;
+      `;
+      await query(sql, [tournamentId]);
+
+      return res
+        .status(200)
+        .json({ message: "Tournament deleted successfully" });
     } catch (error) {
       next(error);
     }

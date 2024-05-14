@@ -1,13 +1,12 @@
 import {
-  teamQueryOptions,
-  teamTournamentsQueryOptions,
-  teamUsersQueryOptions,
-} from "@/api/teams";
-import { columns as membersColumns } from "@/components/dashboard/team-members-table/columns";
-import { DashboardTeamMembersTable } from "@/components/dashboard/team-members-table/table";
-import { DashboardTeamSettings } from "@/components/dashboard/team-settings";
-import { columns as tournamentsColumns } from "@/components/dashboard/team-tournaments-table/columns";
-import { DashboardTeamTournamentTable } from "@/components/dashboard/team-tournaments-table/table";
+  tournamentQueryOptions, // tournamentTeamsQueryOptions,
+  tournamentUsersQueryOptions,
+} from "@/api/tournaments";
+// import { columns as membersColumns } from "@/components/dashboard/team-members-table/columns";
+// import { DashboardTeamMembersTable } from "@/components/dashboard/team-members-table/table";
+import { DashboardTournamentSettings } from "@/components/dashboard/tournament-settings";
+// import { columns as tournamentsColumns } from "@/components/dashboard/team-tournaments-table/columns";
+// import { DashboardTeamTournamentTable } from "@/components/dashboard/team-tournaments-table/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
@@ -15,47 +14,47 @@ import { ChevronRightIcon } from "lucide-react";
 import { Suspense, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-export default function TeamDetailPage() {
-  const { searchTeamId } = useParams();
+export default function TournamentDetailPage() {
+  const { searchTournamentId } = useParams();
   const navigate = useNavigate();
   const { userId } = useAuth();
 
   const {
-    data: team,
-    isLoading: teamIsLoading,
-    isFetching: teamIsFetching,
-  } = useQuery(teamQueryOptions(searchTeamId || ""));
+    data: tournament,
+    isLoading: tournamentIsLoading,
+    isFetching: tournamentIsFetching,
+  } = useQuery(tournamentQueryOptions(searchTournamentId || ""));
 
   const {
     data: users,
     isLoading: usersLoading,
     isFetching: userIsFetching,
-  } = useQuery(teamUsersQueryOptions(searchTeamId || ""));
+  } = useQuery(tournamentUsersQueryOptions(searchTournamentId || ""));
 
-  const { data: tournaments } = useQuery(
-    teamTournamentsQueryOptions(searchTeamId || ""),
-  );
+  // const { data: teams } = useQuery(
+  //   tournamentTeamsQueryOptions(searchTournamentId || ""),
+  // );
 
   useEffect(() => {
-    if (!teamIsLoading && !teamIsFetching && !team) {
-      navigate("/dashboard/teams");
+    if (!tournamentIsLoading && !tournamentIsFetching && !tournament) {
+      navigate("/dashboard/tournaments");
     }
 
     if (!usersLoading && !userIsFetching && !users) {
-      navigate("/dashboard/teams");
+      navigate("/dashboard/tournaments");
     }
 
-    if (team && users) {
+    if (tournament && users) {
       const isOwnerOrManager = users.some(
-        (user) => user.id === userId && user.team_role !== "participant",
+        (user) => user.id === userId && user.tournament_role !== "participant",
       );
 
-      if (!isOwnerOrManager) navigate("/dashboard/teams");
+      if (!isOwnerOrManager) navigate("/dashboard/tournaments");
     }
   }, [
-    team,
-    teamIsLoading,
-    teamIsFetching,
+    tournament,
+    tournamentIsLoading,
+    tournamentIsFetching,
     users,
     usersLoading,
     userIsFetching,
@@ -72,38 +71,40 @@ export default function TeamDetailPage() {
           </div>
           <ChevronRightIcon className="h-4 w-4" />
           <div className="overflow-hidden text-ellipsis whitespace-nowrap">
-            <Link to="/dashboard/teams">Your Teams</Link>
+            <Link to="/dashboard/tournaments">Your Tournaments</Link>
           </div>
           <ChevronRightIcon className="h-4 w-4" />
-          <div className="font-medium text-foreground">{searchTeamId}</div>
+          <div className="font-medium text-foreground">
+            {searchTournamentId}
+          </div>
         </div>
-        {team && users && (
+        {tournament && users && (
           <div className="space-y-2">
             <Tabs defaultValue="settings" className="mt-4">
               <TabsList>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
                 <TabsTrigger value="members">Members</TabsTrigger>
-                <TabsTrigger value="tournaments">Tournaments</TabsTrigger>
+                <TabsTrigger value="tournaments">Teams</TabsTrigger>
               </TabsList>
               <TabsContent
                 value="settings"
                 className="mt-4 flex flex-col gap-4"
               >
                 <Suspense fallback={<div>Loading...</div>}>
-                  <DashboardTeamSettings />
+                  <DashboardTournamentSettings />
                 </Suspense>
               </TabsContent>
               <TabsContent value="members">
-                <DashboardTeamMembersTable
+                {/* <DashboardTeamMembersTable
                   columns={membersColumns}
                   data={users}
-                />
+                /> */}
               </TabsContent>
               <TabsContent value="tournaments">
-                <DashboardTeamTournamentTable
+                {/* <DashboardTeamTournamentTable
                   columns={tournamentsColumns}
-                  data={tournaments || []}
-                />
+                  data={teams || []}
+                /> */}
               </TabsContent>
             </Tabs>
           </div>

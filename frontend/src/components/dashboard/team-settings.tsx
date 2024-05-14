@@ -50,19 +50,15 @@ export function DashboardTeamSettings() {
   const { searchTeamId } = useParams();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { userId, getToken } = useAuth();
+  const { getToken } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: team } = useSuspenseQuery(teamQueryOptions(searchTeamId || ""));
 
   const invalidateQueries = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: [`teams`] });
-    queryClient.invalidateQueries({ queryKey: [`user_teams`] });
-    queryClient.invalidateQueries({
-      queryKey: [`team_users_${userId}`],
-    });
-  }, [queryClient, userId]);
+    queryClient.invalidateQueries();
+  }, [queryClient]);
 
   const form = useForm<TeamFormValues>({
     defaultValues: {
