@@ -913,11 +913,12 @@ router.put(
               visibility = $6,
               tags = $7,
               cash_prize = $8,
-              start_date = $12,
-              end_date = $13
-          WHERE id = $14
+              start_date = $9,
+              end_date = $10
+          WHERE id = $11
           RETURNING *;
         `;
+
         queryParams = [
           name,
           description,
@@ -941,14 +942,12 @@ router.put(
               visibility = $5,
               tags = $6,
               cash_prize = $7,
-              max_teams = $8,
-              max_team_size = $9,
-              min_team_size = $10,
-              start_date = $11,
-              end_date = $12
-          WHERE id = $13
+              start_date = $8,
+              end_date = $9
+          WHERE id = $10
           RETURNING *;
         `;
+
         queryParams = [
           name,
           description,

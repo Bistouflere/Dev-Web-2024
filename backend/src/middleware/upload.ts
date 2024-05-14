@@ -13,7 +13,7 @@ const generateUniqueFilename = () => {
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, "/var/www/madbracket.xyz/html/images/");
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);

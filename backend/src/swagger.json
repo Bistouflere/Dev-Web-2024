@@ -5,11 +5,9 @@
     "description": "API Documentation",
     "version": "1.0.0"
   },
-  "host": "localhost:3000",
+  "host": "madbracket.xyz",
   "basePath": "/",
-  "schemes": [
-    "http"
-  ],
+  "schemes": ["https"],
   "paths": {
     "/api/webhooks/": {
       "post": {
@@ -601,6 +599,107 @@
             "description": "Not Found"
           }
         }
+      },
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "tournamentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "example": "any"
+                },
+                "description": {
+                  "example": "any"
+                },
+                "game": {
+                  "example": "any"
+                },
+                "format": {
+                  "example": "any"
+                },
+                "tags": {
+                  "example": "any"
+                },
+                "cash_prize": {
+                  "example": "any"
+                },
+                "start_date": {
+                  "example": "any"
+                },
+                "end_date": {
+                  "example": "any"
+                },
+                "visibility": {
+                  "example": "any"
+                },
+                "file": {
+                  "example": "any"
+                },
+                "max_teams": {
+                  "example": "any"
+                },
+                "max_team_size": {
+                  "example": "any"
+                },
+                "min_team_size": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        }
+      },
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "tournamentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
       }
     },
     "/api/tournaments/{tournamentId}/teams/{teamId}/users/{userId}": {
@@ -750,7 +849,7 @@
       }
     },
     "/api/tournaments/{tournamentId}/status/{tournamentStatus}": {
-      "patch": {
+      "put": {
         "description": "",
         "parameters": [
           {
@@ -767,6 +866,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "400": {
             "description": "Bad Request"
           },
