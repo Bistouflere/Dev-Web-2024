@@ -59,7 +59,9 @@ export default function TournamentHeader({
           <p className="leading-7 [&:not(:first-child)]:mt-6">
             This tournament is currently{" "}
             <span className="text-lg font-semibold">
-              {tournament.visibility ? "open" : "closed"}
+              {tournament.visibility && tournament.status === "upcoming"
+                ? "open"
+                : "closed"}
             </span>{" "}
             and is{" "}
             <span className="text-lg font-semibold">{tournament.status}</span>.
@@ -76,7 +78,7 @@ export default function TournamentHeader({
             </Button>
           </Link>
         )}
-        <TournamentTeamRegister />
+        <TournamentTeamRegister tournament={tournament} />
       </div>
       <hr />
     </>

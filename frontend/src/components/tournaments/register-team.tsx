@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tournament } from "@/types/apiResponses";
 import { useAuth } from "@clerk/clerk-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -42,7 +43,7 @@ const FormSchema = z.object({
   }),
 });
 
-export function TournamentTeamRegister() {
+export function TournamentTeamRegister({ tournament}: { tournament: Tournament}) {
   const { searchTournamentId } = useParams();
   const { userId, getToken } = useAuth();
   const queryClient = useQueryClient();
@@ -65,18 +66,7 @@ export function TournamentTeamRegister() {
   );
 
   const invalidateQueries = useCallback(() => {
-    queryClient.invalidateQueries({
-      queryKey: [`teams`],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [`team_tournaments`],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [`tournaments`],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [`tournament_teams`],
-    });
+    queryClient.invalidateQueries();
   }, [queryClient]);
 
   const handleRegister = async (data: z.infer<typeof FormSchema>) => {
@@ -112,7 +102,7 @@ export function TournamentTeamRegister() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button disabled={!userId}>
+        <Button disabled={!userId || tournament.status !== "upcoming"}>
           <ShieldPlus className="mr-2 h-5 w-5" />
           Register Team
         </Button>
