@@ -164,7 +164,7 @@ router.get(
             users.image_url, 
             users.role, 
             users.created_at, 
-            users.updated_at
+            users.updated_at,
             users_follows.followed_at
           FROM users_follows
           JOIN users ON users_follows.follower_id = users.id
@@ -217,7 +217,7 @@ router.get(
             users.image_url, 
             users.role, 
             users.created_at, 
-            users.updated_at
+            users.updated_at,
             users_follows.followed_at
           FROM users_follows
           JOIN users ON users_follows.followed_id = users.id

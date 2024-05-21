@@ -71,7 +71,13 @@ router.get(
     try {
       const sql = `
         SELECT
-          users.*,
+          users.id, 
+          users.username,  
+          users.image_url, 
+          users.role, 
+          users.created_at, 
+          users.updated_at,
+          users_follows.followed_at,
           tournaments_users.team_id AS team_id,
           tournaments_users.role AS tournament_role
         FROM tournaments_users
