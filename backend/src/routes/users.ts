@@ -1,5 +1,4 @@
 import { query } from "../db/index";
-import { validatePage } from "../validator/pageValidator";
 import {
   ClerkExpressRequireAuth,
   RequireAuthProp,
@@ -16,7 +15,16 @@ router.post(
     const followerId = req.auth.userId;
 
     try {
-      const followingSql = "SELECT * FROM users WHERE id = $1;";
+      const followingSql = `
+        SELECT
+          id, 
+          username, 
+          image_url, 
+          role, 
+          created_at, 
+          updated_at 
+        FROM users 
+        WHERE id = $1;`;
       const followingResult = await query(followingSql, [userId]);
 
       if (followingResult.rows.length === 0) {
@@ -25,7 +33,16 @@ router.post(
           .json({ message: `User with ID ${userId} not found` });
       }
 
-      const followerSql = "SELECT * FROM users WHERE id = $1;";
+      const followerSql = `
+        SELECT
+          id, 
+          username, 
+          image_url, 
+          role, 
+          created_at, 
+          updated_at 
+        FROM users 
+        WHERE id = $1;`;
       const followerResult = await query(followerSql, [followerId]);
 
       if (followerResult.rows.length === 0) {
@@ -72,7 +89,16 @@ router.delete(
     const followerId = req.auth.userId;
 
     try {
-      const followingSql = "SELECT * FROM users WHERE id = $1;";
+      const followingSql = `
+        SELECT
+          id, 
+          username, 
+          image_url, 
+          role, 
+          created_at, 
+          updated_at 
+        FROM users 
+        WHERE id = $1;`;
       const followingResult = await query(followingSql, [userId]);
 
       if (followingResult.rows.length === 0) {
@@ -81,7 +107,16 @@ router.delete(
           .json({ message: `User with ID ${userId} not found` });
       }
 
-      const followerSql = "SELECT * FROM users WHERE id = $1;";
+      const followerSql = `
+        SELECT
+          id, 
+          username, 
+          image_url, 
+          role, 
+          created_at, 
+          updated_at 
+        FROM users 
+        WHERE id = $1;`;
       const followerResult = await query(followerSql, [followerId]);
 
       if (followerResult.rows.length === 0) {
@@ -124,7 +159,12 @@ router.get(
     try {
       const sql = `
           SELECT
-            users.*,
+            users.id, 
+            users.username,  
+            users.image_url, 
+            users.role, 
+            users.created_at, 
+            users.updated_at
             users_follows.followed_at
           FROM users_follows
           JOIN users ON users_follows.follower_id = users.id
@@ -172,7 +212,12 @@ router.get(
     try {
       const sql = `
           SELECT
-            users.*,
+            users.id, 
+            users.username,  
+            users.image_url, 
+            users.role, 
+            users.created_at, 
+            users.updated_at
             users_follows.followed_at
           FROM users_follows
           JOIN users ON users_follows.followed_id = users.id
@@ -387,7 +432,16 @@ router.get(
     const { userId } = req.params;
 
     try {
-      const sql = "SELECT * FROM users WHERE id = $1;";
+      const sql = `
+        SELECT 
+          id, 
+          username, 
+          image_url, 
+          role, 
+          created_at, 
+          updated_at 
+        FROM users 
+        WHERE id = $1;`;
       const result = await query(sql, [userId]);
 
       if (result.rows.length === 0) {
@@ -405,7 +459,17 @@ router.get(
 
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const sql = "SELECT * FROM users;";
+    const sql = `
+      SELECT 
+        id, 
+        username, 
+        first_name, 
+        last_name, 
+        image_url, 
+        role, 
+        created_at, 
+        updated_at
+      FROM users;`;
     const result = await query(sql);
 
     return res.status(200).json(result.rows);
