@@ -462,9 +462,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
     const sql = `
       SELECT 
         id, 
-        username, 
-        first_name, 
-        last_name, 
+        username,  
         image_url, 
         role, 
         created_at, 
