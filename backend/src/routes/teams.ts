@@ -504,7 +504,6 @@ router.get(
           users.role, 
           users.created_at, 
           users.updated_at,
-          users_follows.followed_at,
           tournaments_users.role AS tournament_role
         FROM users
         JOIN tournaments_users ON users.id = tournaments_users.user_id
