@@ -1,3 +1,4 @@
+import { LOG_ENABLED } from "@/config";
 import {
   Count,
   Invitation,
@@ -141,25 +142,23 @@ export async function fetchUser(id: string | null | undefined): Promise<User> {
   if (!id) {
     throw new Error("User ID is required to fetch user data.");
   }
-
   const user = await axios
     .get<User>(`/api/users/${id}`)
     .then((res) => res.data);
-
-  console.log(`/api/users/${id}`, user);
+  if (LOG_ENABLED) console.log(`/api/users/${id}`, user);
   return user;
 }
 
 export async function fetchUsers(): Promise<User[]> {
   return axios.get<User[]>(`/api/users`).then((res) => {
-    console.log(`/api/users`, res.data);
+    if (LOG_ENABLED) console.log(`/api/users`, res.data);
     return res.data;
   });
 }
 
 export async function fetchUsersCount(query: string): Promise<number> {
   return axios.get<Count>(`/api/users/count?query=${query}`).then((res) => {
-    console.log(`/api/users/count?query=${query}`, res.data);
+    if (LOG_ENABLED) console.log(`/api/users/count?query=${query}`, res.data);
     return res.data.count;
   });
 }
@@ -181,7 +180,7 @@ export async function fetchUserInvitations(
       },
     })
     .then((res) => {
-      console.log(`/api/invitations`, res.data);
+      if (LOG_ENABLED) console.log(`/api/invitations`, res.data);
       return res.data;
     });
 }
@@ -203,7 +202,7 @@ export async function fetchUserSentInvitations(
       },
     })
     .then((res) => {
-      console.log(`/api/invitations/sent`, res.data);
+      if (LOG_ENABLED) console.log(`/api/invitations/sent`, res.data);
       return res.data;
     });
 }
@@ -216,7 +215,7 @@ export async function fetchUserFollowers(
   }
 
   return axios.get<User[]>(`/api/users/${id}/followers`).then((res) => {
-    console.log(`/api/users/${id}/followers`, res.data);
+    if (LOG_ENABLED) console.log(`/api/users/${id}/followers`, res.data);
     return res.data;
   });
 }
@@ -232,7 +231,11 @@ export async function fetchUserFollowersCount(
   return axios
     .get<Count>(`/api/users/${id}/followers/count?query=${query}`)
     .then((res) => {
-      console.log(`/api/users/${id}/followers/count?query=${query}`, res.data);
+      if (LOG_ENABLED)
+        console.log(
+          `/api/users/${id}/followers/count?query=${query}`,
+          res.data,
+        );
       return res.data.count;
     });
 }
@@ -245,7 +248,7 @@ export async function fetchUserFollowing(
   }
 
   return axios.get<User[]>(`/api/users/${id}/following`).then((res) => {
-    console.log(`/api/users/${id}/following`, res.data);
+    if (LOG_ENABLED) console.log(`/api/users/${id}/following`, res.data);
     return res.data;
   });
 }
@@ -261,7 +264,11 @@ export async function fetchUserFollowingCount(
   return axios
     .get<Count>(`/api/users/${id}/following/count?query=${query}`)
     .then((res) => {
-      console.log(`/api/users/${id}/following/count?query=${query}`, res.data);
+      if (LOG_ENABLED)
+        console.log(
+          `/api/users/${id}/following/count?query=${query}`,
+          res.data,
+        );
       return res.data.count;
     });
 }
@@ -279,7 +286,11 @@ export async function isFollowing(
       Record<string, boolean>
     >(`/api/users/${followerId}/following/${followedId}`)
     .then((res) => {
-      console.log(`/api/users/${followerId}/following/${followedId}`, res.data);
+      if (LOG_ENABLED)
+        console.log(
+          `/api/users/${followerId}/following/${followedId}`,
+          res.data,
+        );
       return res.data.isFollowing;
     });
 }
@@ -292,7 +303,7 @@ export async function fetchUserTeams(
   }
 
   return axios.get<UserTeam[]>(`/api/users/${id}/teams`).then((res) => {
-    console.log(`/api/users/${id}/teams`, res.data);
+    if (LOG_ENABLED) console.log(`/api/users/${id}/teams`, res.data);
     return res.data;
   });
 }
@@ -305,7 +316,7 @@ export async function fetchUserTeamsCount(
   }
 
   return axios.get<Count>(`/api/users/${id}/teams/count`).then((res) => {
-    console.log(`/api/users/${id}/teams/count`, res.data);
+    if (LOG_ENABLED) console.log(`/api/users/${id}/teams/count`, res.data);
     return res.data.count;
   });
 }
@@ -316,7 +327,7 @@ export async function fetchUserTournaments(
   return axios
     .get<UserTournament[]>(`/api/users/${id}/tournaments`)
     .then((res) => {
-      console.log(`/api/users/${id}/tournaments`, res.data);
+      if (LOG_ENABLED) console.log(`/api/users/${id}/tournaments`, res.data);
       return res.data;
     });
 }
@@ -329,7 +340,8 @@ export async function fetchUserTournamentsCount(
   }
 
   return axios.get<Count>(`/api/users/${id}/tournaments/count`).then((res) => {
-    console.log(`/api/users/${id}/tournaments/count`, res.data);
+    if (LOG_ENABLED)
+      console.log(`/api/users/${id}/tournaments/count`, res.data);
     return res.data.count;
   });
 }

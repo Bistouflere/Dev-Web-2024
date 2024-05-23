@@ -1,3 +1,4 @@
+import { LOG_ENABLED } from "@/config";
 import {
   Count,
   Team,
@@ -77,49 +78,50 @@ export function teamTournamentUsersQueryOptions(
 
 export async function fetchTeam(id: string): Promise<Team> {
   return axios.get<Team>(`/api/teams/${id}`).then((res) => {
-    console.log(`/api/teams/${id}`, res.data);
+    if (LOG_ENABLED) console.log(`/api/teams/${id}`, res.data);
     return res.data;
   });
 }
 
 export async function fetchTeams(): Promise<Team[]> {
   return axios.get<Team[]>(`/api/teams`).then((res) => {
-    console.log(`/api/teams`, res.data);
+    if (LOG_ENABLED) console.log(`/api/teams`, res.data);
     return res.data;
   });
 }
 
 export async function fetchTeamsCount(query: string): Promise<number> {
   return axios.get<Count>(`/api/teams/count?query=${query}`).then((res) => {
-    console.log(`/api/teams/count?query=${query}`, res.data);
+    if (LOG_ENABLED) console.log(`/api/teams/count?query=${query}`, res.data);
     return res.data.count;
   });
 }
 
 export async function fetchTeamUsers(id: string): Promise<TeamUser[]> {
   return axios.get<TeamUser[]>(`/api/teams/${id}/users`).then((res) => {
-    console.log(`/api/teams/${id}/users`, res.data);
+    if (LOG_ENABLED) console.log(`/api/teams/${id}/users`, res.data);
     return res.data;
   });
 }
 
 export async function fetchTeamUsersCount(id: string): Promise<number> {
   return axios.get<Count>(`/api/teams/${id}/users/count`).then((res) => {
-    console.log(`/api/teams/${id}/users/count`, res.data);
+    if (LOG_ENABLED) console.log(`/api/teams/${id}/users/count`, res.data);
     return res.data.count;
   });
 }
 
 export async function fetchTeamTournaments(id: string): Promise<Tournament[]> {
   return axios.get<Tournament[]>(`/api/teams/${id}/tournaments`).then((res) => {
-    console.log(`/api/teams/${id}/tournaments`, res.data);
+    if (LOG_ENABLED) console.log(`/api/teams/${id}/tournaments`, res.data);
     return res.data;
   });
 }
 
 export async function fetchTeamTournamentsCount(id: string): Promise<number> {
   return axios.get<Count>(`/api/teams/${id}/tournaments/count`).then((res) => {
-    console.log(`/api/teams/${id}/tournaments/count`, res.data);
+    if (LOG_ENABLED)
+      console.log(`/api/teams/${id}/tournaments/count`, res.data);
     return res.data.count;
   });
 }
@@ -131,10 +133,11 @@ export async function fetchTeamTournamentUsers(
   return axios
     .get<TournamentUser[]>(`/api/teams/${id}/tournaments/${tournamentId}/users`)
     .then((res) => {
-      console.log(
-        `/api/teams/${id}/tournaments/${tournamentId}/users`,
-        res.data,
-      );
+      if (LOG_ENABLED)
+        console.log(
+          `/api/teams/${id}/tournaments/${tournamentId}/users`,
+          res.data,
+        );
       return res.data;
     });
 }

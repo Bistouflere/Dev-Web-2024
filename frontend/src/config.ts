@@ -1,3 +1,5 @@
+export const LOG_ENABLED = false;
+
 interface NavigationConfig {
   main: {
     title: string;
